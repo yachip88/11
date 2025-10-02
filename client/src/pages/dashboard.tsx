@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowDown, ArrowUp, TriangleAlert, Eye } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { RTSWithStats } from "@shared/schema";
 
 interface DashboardSummary {
@@ -18,6 +19,14 @@ interface DashboardSummary {
 export default function Dashboard() {
   const { data: summary, isLoading } = useQuery<DashboardSummary>({
     queryKey: ['/api/dashboard/summary'],
+  });
+
+  const { data: yearlyChange } = useQuery<{ change: number }>({
+    queryKey: ['/api/trends/overall-change/year'],
+  });
+
+  const { data: weeklyChange } = useQuery<{ change: number }>({
+    queryKey: ['/api/trends/overall-change/week'],
   });
 
   if (isLoading) {
@@ -56,10 +65,16 @@ export default function Dashboard() {
               {summary.currentMakeupWater.toLocaleString()}
             </div>
             <div className="metric-label">Подпитка т/ч (текущая)</div>
-            <div className="metric-change positive">
-              <ArrowDown className="w-3 h-3 mr-1" />
-              -71 т/ч к прошлому году
-            </div>
+            {yearlyChange && (
+              <div className={cn(
+                "metric-change",
+                yearlyChange.change < 0 ? "positive" : yearlyChange.change > 0 ? "negative" : ""
+              )}>
+                {yearlyChange.change < 0 && <ArrowDown className="w-3 h-3 mr-1" />}
+                {yearlyChange.change > 0 && <ArrowUp className="w-3 h-3 mr-1" />}
+                {yearlyChange.change.toFixed(1)} т/ч к прошлому году
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -82,10 +97,16 @@ export default function Dashboard() {
               {summary.ctpInNormal}%
             </div>
             <div className="metric-label">ЦТП в норме</div>
-            <div className="metric-change positive">
-              <ArrowUp className="w-3 h-3 mr-1" />
-              +5% за неделю
-            </div>
+            {weeklyChange && (
+              <div className={cn(
+                "metric-change",
+                weeklyChange.change < 0 ? "positive" : weeklyChange.change > 0 ? "negative" : ""
+              )}>
+                {weeklyChange.change < 0 && <ArrowDown className="w-3 h-3 mr-1" />}
+                {weeklyChange.change > 0 && <ArrowUp className="w-3 h-3 mr-1" />}
+                {Math.abs(weeklyChange.change).toFixed(1)} т/ч за неделю
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -172,35 +193,15 @@ export default function Dashboard() {
               <tbody>
                 {summary.rtsStats.map((rts) => {
                   const percentage = ((rts.totalMakeupWater / summary.currentMakeupWater) * 100).toFixed(1);
-                  const weeklyChange = -12.5; // TODO: Calculate from actual data
-                  const yearlyChange = 45.8; // TODO: Calculate from actual data
                   const status = rts.criticalCount > 0 ? 'warning' : 'normal';
                   
                   return (
-                    <tr key={rts.id} data-testid={`row-rts-${rts.id}`}>
-                      <td className="font-semibold">{rts.code} ({rts.name})</td>
-                      <td className="font-mono">{rts.totalMakeupWater.toFixed(1)}</td>
-                      <td className="text-green-600">
-                        <ArrowDown className="w-4 h-4 inline mr-1" />
-                        {Math.abs(weeklyChange)}
-                      </td>
-                      <td className="text-red-600">
-                        <ArrowUp className="w-4 h-4 inline mr-1" />
-                        +{yearlyChange}
-                      </td>
-                      <td>{percentage}%</td>
-                      <td>
-                        <StatusBadge status={status}>
-                          {status === 'warning' ? 'Внимание' : 'Норма'}
-                        </StatusBadge>
-                      </td>
-                      <td>
-                        <Button variant="outline" size="sm" data-testid={`button-details-${rts.id}`}>
-                          <Eye className="w-4 h-4 mr-1" />
-                          Детали
-                        </Button>
-                      </td>
-                    </tr>
+                    <RTSRow 
+                      key={rts.id} 
+                      rts={rts} 
+                      percentage={percentage} 
+                      status={status} 
+                    />
                   );
                 })}
               </tbody>
@@ -209,5 +210,44 @@ export default function Dashboard() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function RTSRow({ rts, percentage, status }: { 
+  rts: RTSWithStats; 
+  percentage: string; 
+  status: 'normal' | 'warning' | 'critical'; 
+}) {
+  const { data: weeklyChangeData } = useQuery<{ change: number }>({
+    queryKey: [`/api/rts/${rts.id}/weekly-change`],
+  });
+
+  const weeklyChange = weeklyChangeData?.change || 0;
+
+  return (
+    <tr data-testid={`row-rts-${rts.id}`}>
+      <td className="font-semibold">{rts.code} ({rts.name})</td>
+      <td className="font-mono">{rts.totalMakeupWater.toFixed(1)}</td>
+      <td className={cn(
+        weeklyChange < 0 ? "text-green-600" : weeklyChange > 0 ? "text-red-600" : "text-muted-foreground"
+      )}>
+        {weeklyChange < 0 && <ArrowDown className="w-4 h-4 inline mr-1" />}
+        {weeklyChange > 0 && <ArrowUp className="w-4 h-4 inline mr-1" />}
+        {weeklyChange.toFixed(1)}
+      </td>
+      <td className="text-muted-foreground">-</td>
+      <td>{percentage}%</td>
+      <td>
+        <StatusBadge status={status}>
+          {status === 'warning' ? 'Внимание' : 'Норма'}
+        </StatusBadge>
+      </td>
+      <td>
+        <Button variant="outline" size="sm" data-testid={`button-details-${rts.id}`}>
+          <Eye className="w-4 h-4 mr-1" />
+          Детали
+        </Button>
+      </td>
+    </tr>
   );
 }

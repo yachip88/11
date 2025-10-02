@@ -21,6 +21,10 @@ export default function Tree() {
     queryKey: ['/api/ctp'],
   });
 
+  const { data: weeklyChange } = useQuery<{ change: number }>({
+    queryKey: ['/api/trends/overall-change/week'],
+  });
+
   if (loadingRTS || loadingCTP) {
     return (
       <div className="space-y-6">
@@ -39,7 +43,7 @@ export default function Tree() {
   }
 
   const totalMakeupWater = rtsStats.reduce((sum, rts) => sum + rts.totalMakeupWater, 0);
-  const totalWeeklyChange = -48.9; // This would come from trend data in real implementation
+  const totalWeeklyChange = weeklyChange?.change || 0;
 
   // Group CTP by RTS
   const ctpByRTS = ctpList.reduce((acc, ctp) => {
@@ -103,88 +107,116 @@ export default function Tree() {
             {/* RTS Level */}
             {rtsStats.map((rts) => {
               const rtsCTPs = ctpByRTS[rts.id] || [];
-              const rtsWeeklyChange = -12.5; // This would be calculated from actual trend data
               const rtsStatus = rts.criticalCount > 0 ? 'warning' : 'normal';
               const districts = ctpByDistrict(rts.id);
 
               return (
-                <TreeNode
+                <RTSTreeNode
                   key={rts.id}
-                  id={rts.id}
-                  icon="building"
-                  name={`${rts.code} (${rts.name})`}
-                  makeupWater={rts.totalMakeupWater}
-                  weeklyChange={rtsWeeklyChange}
-                  status={rtsStatus}
-                  data-testid={`tree-rts-${rts.id}`}
-                >
-                  {/* District Level */}
-                  {Object.entries(districts).map(([districtId, districtCTPs]) => {
-                    if (districtCTPs.length === 0) return null;
-                    
-                    const district = districtCTPs[0].district;
-                    const districtMakeupWater = districtCTPs.reduce(
-                      (sum, ctp) => sum + (ctp.latestMeasurement?.makeupWater || 0), 0
-                    );
-                    const districtWeeklyChange = -4.2; // Would be calculated from trend data
-                    const hasWarning = districtCTPs.some(ctp => 
-                      ctp.recommendations.some(r => r.priority === 'warning' || r.priority === 'critical')
-                    );
-
-                    return (
-                      <TreeNode
-                        key={districtId}
-                        id={districtId}
-                        icon="map"
-                        name={`${district.name} микрорайон`}
-                        makeupWater={districtMakeupWater}
-                        weeklyChange={districtWeeklyChange}
-                        status={hasWarning ? 'warning' : 'normal'}
-                        data-testid={`tree-district-${districtId}`}
-                      >
-                        {/* CTP Level */}
-                        {districtCTPs.map((ctp) => {
-                          const measurement = ctp.latestMeasurement;
-                          const weeklyChange = Math.random() * 10 - 5; // Mock weekly change
-                          
-                          let status: 'normal' | 'warning' | 'critical' = 'normal';
-                          let actionType: string | undefined;
-
-                          const criticalRec = ctp.recommendations.find(r => r.priority === 'critical');
-                          const warningRec = ctp.recommendations.find(r => r.priority === 'warning');
-
-                          if (criticalRec) {
-                            status = 'critical';
-                            actionType = criticalRec.type === 'inspection' ? 'Инспекция утечек' : 'Проверка приборов';
-                          } else if (warningRec) {
-                            status = 'warning';
-                            actionType = 'Мониторинг';
-                          }
-
-                          return (
-                            <TreeNode
-                              key={ctp.id}
-                              id={ctp.id}
-                              icon="thermometer"
-                              name={ctp.name}
-                              makeupWater={measurement?.makeupWater || 0}
-                              weeklyChange={weeklyChange}
-                              status={status}
-                              actionType={actionType}
-                              isLeaf
-                              data-testid={`tree-ctp-${ctp.id}`}
-                            />
-                          );
-                        })}
-                      </TreeNode>
-                    );
-                  })}
-                </TreeNode>
+                  rts={rts}
+                  rtsCTPs={rtsCTPs}
+                  rtsStatus={rtsStatus}
+                  districts={districts}
+                />
               );
             })}
           </TreeNode>
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function RTSTreeNode({ 
+  rts, 
+  rtsCTPs, 
+  rtsStatus, 
+  districts 
+}: { 
+  rts: RTSWithStats; 
+  rtsCTPs: CTPWithDetails[]; 
+  rtsStatus: 'normal' | 'warning' | 'critical'; 
+  districts: Record<string, CTPWithDetails[]>;
+}) {
+  const { data: rtsChange } = useQuery<{ change: number }>({
+    queryKey: [`/api/rts/${rts.id}/weekly-change`],
+  });
+
+  return (
+    <TreeNode
+      id={rts.id}
+      icon="building"
+      name={`${rts.code} (${rts.name})`}
+      makeupWater={rts.totalMakeupWater}
+      weeklyChange={rtsChange?.change}
+      status={rtsStatus}
+      data-testid={`tree-rts-${rts.id}`}
+    >
+      {/* District Level */}
+      {Object.entries(districts).map(([districtId, districtCTPs]) => {
+        if (districtCTPs.length === 0) return null;
+        
+        const district = districtCTPs[0].district;
+        const districtMakeupWater = districtCTPs.reduce(
+          (sum, ctp) => sum + (ctp.latestMeasurement?.makeupWater || 0), 0
+        );
+        const hasWarning = districtCTPs.some(ctp => 
+          ctp.recommendations.some(r => r.priority === 'warning' || r.priority === 'critical')
+        );
+
+        return (
+          <TreeNode
+            key={districtId}
+            id={districtId}
+            icon="map"
+            name={`${district.name} микрорайон`}
+            makeupWater={districtMakeupWater}
+            status={hasWarning ? 'warning' : 'normal'}
+            data-testid={`tree-district-${districtId}`}
+          >
+            {/* CTP Level */}
+            {districtCTPs.map((ctp) => (
+              <CTPTreeNode key={ctp.id} ctp={ctp} />
+            ))}
+          </TreeNode>
+        );
+      })}
+    </TreeNode>
+  );
+}
+
+function CTPTreeNode({ ctp }: { ctp: CTPWithDetails }) {
+  const { data: ctpChange } = useQuery<{ change: number }>({
+    queryKey: [`/api/ctp/${ctp.id}/weekly-change`],
+  });
+
+  const measurement = ctp.latestMeasurement;
+  
+  let status: 'normal' | 'warning' | 'critical' = 'normal';
+  let actionType: string | undefined;
+
+  const criticalRec = ctp.recommendations.find(r => r.priority === 'critical');
+  const warningRec = ctp.recommendations.find(r => r.priority === 'warning');
+
+  if (criticalRec) {
+    status = 'critical';
+    actionType = criticalRec.type === 'inspection' ? 'Инспекция утечек' : 'Проверка приборов';
+  } else if (warningRec) {
+    status = 'warning';
+    actionType = 'Мониторинг';
+  }
+
+  return (
+    <TreeNode
+      id={ctp.id}
+      icon="thermometer"
+      name={ctp.name}
+      makeupWater={measurement?.makeupWater || 0}
+      weeklyChange={ctpChange?.change}
+      status={status}
+      actionType={actionType}
+      isLeaf
+      data-testid={`tree-ctp-${ctp.id}`}
+    />
   );
 }

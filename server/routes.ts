@@ -268,6 +268,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/trends/overall-change/:period", async (req, res) => {
+    try {
+      const { period } = req.params;
+      
+      if (!['week', 'month', 'year'].includes(period)) {
+        return res.status(400).json({ message: "Неверный период" });
+      }
+      
+      const change = await trendsCalculator.calculateOverallChange(period as any);
+      res.json({ change });
+    } catch (error) {
+      res.status(500).json({ message: "Ошибка расчета общего изменения", error });
+    }
+  });
+
   // File upload routes
   app.post("/api/upload", upload.array('files'), async (req, res) => {
     try {

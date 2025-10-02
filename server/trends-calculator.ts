@@ -50,6 +50,66 @@ export class TrendsCalculator {
     return totalChange;
   }
 
+  async calculateOverallChange(period: 'week' | 'month' | 'year'): Promise<number> {
+    const ctpList = await this.storage.getCTPList();
+    let currentTotal = 0;
+    let previousTotal = 0;
+    let currentCount = 0;
+    let previousCount = 0;
+
+    const endDate = new Date();
+    const startDate = new Date();
+    
+    switch (period) {
+      case 'week':
+        startDate.setDate(endDate.getDate() - 7);
+        break;
+      case 'month':
+        startDate.setMonth(endDate.getMonth() - 1);
+        break;
+      case 'year':
+        startDate.setFullYear(endDate.getFullYear() - 1);
+        break;
+    }
+
+    const previousStart = new Date(startDate);
+    switch (period) {
+      case 'week':
+        previousStart.setDate(previousStart.getDate() - 7);
+        break;
+      case 'month':
+        previousStart.setMonth(previousStart.getMonth() - 1);
+        break;
+      case 'year':
+        previousStart.setFullYear(previousStart.getFullYear() - 1);
+        break;
+    }
+
+    for (const ctp of ctpList) {
+      const currentPeriod = await this.storage.getMeasurements(ctp.id, startDate, endDate);
+      const previousPeriod = await this.storage.getMeasurements(ctp.id, previousStart, startDate);
+
+      if (currentPeriod.length > 0) {
+        currentTotal += currentPeriod.reduce((sum, m) => sum + m.makeupWater, 0);
+        currentCount += currentPeriod.length;
+      }
+
+      if (previousPeriod.length > 0) {
+        previousTotal += previousPeriod.reduce((sum, m) => sum + m.makeupWater, 0);
+        previousCount += previousPeriod.length;
+      }
+    }
+
+    if (currentCount === 0 || previousCount === 0) {
+      return 0;
+    }
+
+    const currentAvg = currentTotal / currentCount;
+    const previousAvg = previousTotal / previousCount;
+
+    return currentAvg - previousAvg;
+  }
+
   async getTopChanges(period: 'week' | 'month' | 'year', limit: number = 3): Promise<{
     increases: TrendChange[];
     decreases: TrendChange[];

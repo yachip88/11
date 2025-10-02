@@ -1,90 +1,52 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendChart } from "@/components/charts/trend-chart";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const trendTabs = [
-  { key: 'short', label: 'Сутки к неделе' },
-  { key: 'medium', label: 'Неделя к месяцу' },
-  { key: 'long', label: 'Месяц к году' },
-  { key: 'yearly', label: 'Сутки к году' },
+  { key: 'week', label: 'Неделя' },
+  { key: 'month', label: 'Месяц' },
+  { key: 'year', label: 'Год' },
 ];
 
-const mockTopChanges = {
-  short: {
-    increase: [
-      { name: 'ЦТП-125', value: '+8.5 т/ч' },
-      { name: 'ЦТП-156', value: '+7.2 т/ч' },
-      { name: 'ЦТП-234', value: '+6.1 т/ч' },
-    ],
-    decrease: [
-      { name: 'ЦТП-089', value: '-5.3 т/ч' },
-      { name: 'ЦТП-421', value: '-4.8 т/ч' },
-      { name: 'ЦТП-317', value: '-3.9 т/ч' },
-    ],
-    rtsStats: [
-      { name: 'РТС-1', value: '-12.5 т/ч' },
-      { name: 'РТС-4', value: '-15.8 т/ч' },
-      { name: 'РТС-2', value: '-8.3 т/ч' },
-    ],
-  },
-  medium: {
-    increase: [
-      { name: 'ЦТП-198', value: '+12.3 т/ч' },
-      { name: 'ЦТП-045', value: '+9.8 т/ч' },
-      { name: 'ЦТП-267', value: '+8.4 т/ч' },
-    ],
-    decrease: [
-      { name: 'ЦТП-125', value: '-8.9 т/ч' },
-      { name: 'ЦТП-304', value: '-7.1 т/ч' },
-      { name: 'ЦТП-156', value: '-6.5 т/ч' },
-    ],
-    rtsStats: [
-      { name: 'РТС-1', value: '-28.4 т/ч' },
-      { name: 'РТС-2', value: '-19.7 т/ч' },
-      { name: 'РТС-3', value: '-15.2 т/ч' },
-    ],
-  },
-  long: {
-    increase: [
-      { name: 'ЦТП-089', value: '+24.8 т/ч' },
-      { name: 'ЦТП-421', value: '+18.9 т/ч' },
-      { name: 'ЦТП-267', value: '+15.3 т/ч' },
-    ],
-    decrease: [
-      { name: 'ЦТП-125', value: '-18.4 т/ч' },
-      { name: 'ЦТП-156', value: '-15.7 т/ч' },
-      { name: 'ЦТП-304', value: '-12.9 т/ч' },
-    ],
-    rtsStats: [
-      { name: 'РТС-1', value: '-45.8 т/ч' },
-      { name: 'РТС-4', value: '-38.2 т/ч' },
-      { name: 'РТС-2', value: '-32.1 т/ч' },
-    ],
-  },
-  yearly: {
-    increase: [
-      { name: 'ЦТП-234', value: '+32.1 т/ч' },
-      { name: 'ЦТП-198', value: '+28.7 т/ч' },
-      { name: 'ЦТП-345', value: '+22.4 т/ч' },
-    ],
-    decrease: [
-      { name: 'ЦТП-125', value: '-28.9 т/ч' },
-      { name: 'ЦТП-089', value: '-24.3 т/ч' },
-      { name: 'ЦТП-421', value: '-19.8 т/ч' },
-    ],
-    rtsStats: [
-      { name: 'РТС-1', value: '-71.0 т/ч' },
-      { name: 'РТС-4', value: '-58.7 т/ч' },
-      { name: 'РТС-2', value: '-45.3 т/ч' },
-    ],
-  },
-};
+interface TrendChange {
+  ctpId: string;
+  ctpName: string;
+  change: number;
+  changePercent: number;
+}
+
+interface RTSTrendChange {
+  rtsId: string;
+  rtsName: string;
+  change: number;
+  changePercent: number;
+}
 
 export default function Trends() {
-  const [activeTab, setActiveTab] = useState<string>('short');
+  const [activeTab, setActiveTab] = useState<string>('week');
 
-  const currentData = mockTopChanges[activeTab as keyof typeof mockTopChanges];
+  const { data: changes, isLoading: changesLoading } = useQuery<{
+    increases: TrendChange[];
+    decreases: TrendChange[];
+  }>({
+    queryKey: [`/api/trends/${activeTab}/changes`],
+    enabled: !!activeTab,
+  });
+
+  const { data: rtsStats, isLoading: rtsLoading } = useQuery<RTSTrendChange[]>({
+    queryKey: [`/api/trends/${activeTab}/rts-stats`],
+    enabled: !!activeTab,
+  });
+
+  const formatValue = (change: number) => {
+    const sign = change >= 0 ? '+' : '';
+    return `${sign}${change.toFixed(1)} т/ч`;
+  };
+
+  const isLoading = changesLoading || rtsLoading;
 
   return (
     <div className="space-y-6">
@@ -111,10 +73,7 @@ export default function Trends() {
         </CardHeader>
         <CardContent>
           <div className="h-[450px]" data-testid="trends-chart">
-            <TrendChart 
-              period={activeTab === 'short' ? 'week' : 
-                     activeTab === 'medium' ? 'month' : 'year'} 
-            />
+            <TrendChart period={activeTab as 'week' | 'month' | 'year'} />
           </div>
         </CardContent>
       </Card>
@@ -127,16 +86,26 @@ export default function Trends() {
             <CardTitle className="text-base font-semibold">Топ рост подпитки</CardTitle>
           </CardHeader>
           <CardContent className="text-sm">
-            {currentData.increase.map((item, index) => (
-              <div 
-                key={index}
-                className="flex justify-between py-2 border-b border-border last:border-0"
-                data-testid={`increase-${index}`}
-              >
-                <span>{item.name}</span>
-                <span className="font-semibold text-red-600">{item.value}</span>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
               </div>
-            ))}
+            ) : changes?.increases && changes.increases.length > 0 ? (
+              changes.increases.map((item, index) => (
+                <div 
+                  key={item.ctpId}
+                  className="flex justify-between py-2 border-b border-border last:border-0"
+                  data-testid={`increase-${index}`}
+                >
+                  <span>{item.ctpName}</span>
+                  <span className="font-semibold text-red-600">{formatValue(item.change)}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground">Нет данных</p>
+            )}
           </CardContent>
         </Card>
 
@@ -146,16 +115,26 @@ export default function Trends() {
             <CardTitle className="text-base font-semibold">Топ снижение подпитки</CardTitle>
           </CardHeader>
           <CardContent className="text-sm">
-            {currentData.decrease.map((item, index) => (
-              <div 
-                key={index}
-                className="flex justify-between py-2 border-b border-border last:border-0"
-                data-testid={`decrease-${index}`}
-              >
-                <span>{item.name}</span>
-                <span className="font-semibold text-green-600">{item.value}</span>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
               </div>
-            ))}
+            ) : changes?.decreases && changes.decreases.length > 0 ? (
+              changes.decreases.map((item, index) => (
+                <div 
+                  key={item.ctpId}
+                  className="flex justify-between py-2 border-b border-border last:border-0"
+                  data-testid={`decrease-${index}`}
+                >
+                  <span>{item.ctpName}</span>
+                  <span className="font-semibold text-green-600">{formatValue(item.change)}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground">Нет данных</p>
+            )}
           </CardContent>
         </Card>
 
@@ -165,16 +144,29 @@ export default function Trends() {
             <CardTitle className="text-base font-semibold">Статистика по РТС</CardTitle>
           </CardHeader>
           <CardContent className="text-sm">
-            {currentData.rtsStats.map((item, index) => (
-              <div 
-                key={index}
-                className="flex justify-between py-2 border-b border-border last:border-0"
-                data-testid={`rts-stat-${index}`}
-              >
-                <span>{item.name}</span>
-                <span className="font-semibold text-green-600">{item.value}</span>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
               </div>
-            ))}
+            ) : rtsStats && rtsStats.length > 0 ? (
+              rtsStats.map((item, index) => (
+                <div 
+                  key={item.rtsId}
+                  className="flex justify-between py-2 border-b border-border last:border-0"
+                  data-testid={`rts-stat-${index}`}
+                >
+                  <span>{item.rtsName}</span>
+                  <span className={cn(
+                    "font-semibold",
+                    item.change >= 0 ? "text-red-600" : "text-green-600"
+                  )}>{formatValue(item.change)}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground">Нет данных</p>
+            )}
           </CardContent>
         </Card>
       </div>
