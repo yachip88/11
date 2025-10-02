@@ -1,9 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
-import { storage } from "./storage";
+import { DbStorage } from "./db-storage";
+import { ExcelParser } from "./excel-parser";
+import { TrendsCalculator } from "./trends-calculator";
 import { insertMeasurementSchema, insertRecommendationSchema, insertUploadedFileSchema } from "@shared/schema";
 import { z } from "zod";
+
+const storage = new DbStorage();
+const trendsCalculator = new TrendsCalculator(storage);
 
 const upload = multer({ 
   storage: multer.memoryStorage(),
@@ -215,6 +220,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/trends/:period/changes", async (req, res) => {
+    try {
+      const { period } = req.params;
+      
+      if (!['week', 'month', 'year'].includes(period)) {
+        return res.status(400).json({ message: "Неверный период" });
+      }
+      
+      const changes = await trendsCalculator.getTopChanges(period as any);
+      res.json(changes);
+    } catch (error) {
+      res.status(500).json({ message: "Ошибка получения изменений трендов", error });
+    }
+  });
+
+  app.get("/api/trends/:period/rts-stats", async (req, res) => {
+    try {
+      const { period } = req.params;
+      
+      if (!['week', 'month', 'year'].includes(period)) {
+        return res.status(400).json({ message: "Неверный период" });
+      }
+      
+      const stats = await trendsCalculator.getRTSStats(period as any);
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Ошибка получения статистики РТС", error });
+    }
+  });
+
+  app.get("/api/ctp/:id/weekly-change", async (req, res) => {
+    try {
+      const change = await trendsCalculator.calculateCTPWeeklyChange(req.params.id);
+      res.json({ change });
+    } catch (error) {
+      res.status(500).json({ message: "Ошибка расчета недельного изменения", error });
+    }
+  });
+
+  app.get("/api/rts/:id/weekly-change", async (req, res) => {
+    try {
+      const change = await trendsCalculator.calculateRTSWeeklyChange(req.params.id);
+      res.json({ change });
+    } catch (error) {
+      res.status(500).json({ message: "Ошибка расчета недельного изменения РТС", error });
+    }
+  });
+
   // File upload routes
   app.post("/api/upload", upload.array('files'), async (req, res) => {
     try {
@@ -236,11 +289,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const uploadedFile = await storage.createUploadedFile(fileData);
         uploadResults.push(uploadedFile);
 
-        // In a real implementation, you would process the Excel file here
-        // For now, we'll just mark it as completed
-        setTimeout(async () => {
-          await storage.updateFileStatus(uploadedFile.id, 'completed', 100);
-        }, 2000);
+        // Process Excel file asynchronously
+        processExcelFile(file.buffer, file.originalname, uploadedFile.id).catch(error => {
+          console.error('Error processing file:', error);
+          storage.updateFileStatus(uploadedFile.id, 'error', 0, [String(error)]);
+        });
       }
 
       res.json({ 
@@ -254,6 +307,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Ошибка загрузки файла", error });
     }
   });
+
+  async function processExcelFile(buffer: Buffer, filename: string, uploadId: string) {
+    try {
+      const parsedSheets = await ExcelParser.parseFile(buffer, filename);
+      let totalRecords = 0;
+      const errors: string[] = [];
+
+      for (const sheet of parsedSheets) {
+        try {
+          const measurements = ExcelParser.parseMeasurements(sheet);
+          const { valid, errors: validationErrors } = ExcelParser.validateMeasurementData(measurements);
+          
+          errors.push(...validationErrors);
+
+          // Save measurements to database
+          for (const measurement of valid) {
+            try {
+              // Find or create CTP by name or code
+              const ctpList = await storage.getCTPList();
+              let ctp = ctpList.find(c => 
+                c.name === measurement.ctpName || 
+                c.code === measurement.ctpCode
+              );
+
+              if (!ctp) {
+                // Extract code from name if possible (e.g., "ЦТП-125" -> "125")
+                const codeMatch = measurement.ctpName.match(/\d+/);
+                const code = measurement.ctpCode || codeMatch?.[0] || measurement.ctpName;
+                
+                // Use default RTS and district for now
+                const rtsList = await storage.getRTSList();
+                const defaultRTS = rtsList[0];
+                const districts = await storage.getDistrictsByRTS(defaultRTS.id);
+                const defaultDistrict = districts[0];
+
+                const newCtp = await storage.createCTP({
+                  name: measurement.ctpName,
+                  code: code,
+                  rtsId: defaultRTS.id,
+                  districtId: defaultDistrict.id,
+                  hasMeter: true,
+                  meterStatus: 'working',
+                });
+                
+                // Refetch with details
+                ctp = await storage.getCTPById(newCtp.id);
+              }
+
+              if (!ctp) {
+                throw new Error(`Не удалось создать или найти ЦТП ${measurement.ctpName}`);
+              }
+
+              // Save measurement
+              await storage.createMeasurement({
+                ctpId: ctp.id,
+                date: measurement.date,
+                makeupWater: measurement.makeupWater,
+                undermix: measurement.undermix,
+                flowG1: measurement.flowG1,
+                temperature: measurement.temperature,
+                pressure: measurement.pressure,
+              });
+
+              totalRecords++;
+            } catch (error) {
+              errors.push(`Ошибка сохранения данных для ${measurement.ctpName}: ${error}`);
+            }
+          }
+        } catch (error) {
+          errors.push(`Ошибка обработки листа ${sheet.sheetName}: ${error}`);
+        }
+      }
+
+      // Update file status
+      if (errors.length > 0 && totalRecords === 0) {
+        await storage.updateFileStatus(uploadId, 'error', totalRecords, errors);
+      } else {
+        await storage.updateFileStatus(uploadId, 'completed', totalRecords, errors.length > 0 ? errors : undefined);
+      }
+
+      // Calculate control boundaries for affected CTPs
+      const ctpList = await storage.getCTPList();
+      for (const ctp of ctpList) {
+        const measurements = await storage.getMeasurements(ctp.id);
+        if (measurements.length >= 10) {
+          const boundaries = await storage.calculateControlBoundaries(ctp.id);
+          await storage.updateCTPBoundaries(ctp.id, boundaries);
+          await storage.updateStatisticalParams({
+            ctpId: ctp.id,
+            mean: boundaries.cl,
+            stdDev: (boundaries.ucl - boundaries.cl) / 3,
+            ucl: boundaries.ucl,
+            cl: boundaries.cl,
+            lcl: boundaries.lcl,
+            sampleSize: measurements.length,
+          });
+        }
+      }
+    } catch (error) {
+      await storage.updateFileStatus(uploadId, 'error', 0, [String(error)]);
+    }
+  }
 
   app.get("/api/upload/history", async (req, res) => {
     try {
