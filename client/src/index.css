@@ -117,7 +117,8 @@
   }
 
   .nav-item.active {
-    @apply bg-primary text-primary border-l-primary font-semibold opacity-10;
+    @apply text-primary border-l-primary font-semibold;
+    background-color: hsl(var(--primary) / 0.1);
   }
 
   .nav-item i {
@@ -149,7 +150,11 @@
   }
 
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:opacity-90;
+    @apply bg-primary text-primary-foreground;
+  }
+  
+  .btn-primary:hover {
+    background-color: hsl(var(--primary) / 0.9);
   }
 
   .btn-secondary {
@@ -225,7 +230,8 @@
   }
 
   .modal {
-    @apply hidden fixed inset-0 bg-black z-100 items-center justify-center opacity-50;
+    @apply hidden fixed inset-0 z-100 items-center justify-center;
+    background-color: rgba(0, 0, 0, 0.5);
   }
 
   .modal.active {
