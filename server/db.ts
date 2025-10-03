@@ -1,13 +1,15 @@
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
-import * as schema from '@shared/schema';
+import { PrismaClient } from '@prisma/client';
 
-neonConfig.webSocketConstructor = ws;
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  });
+};
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL must be set");
+declare global {
+  var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+export const db = globalThis.prisma ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV !== 'production') globalThis.prisma = db;

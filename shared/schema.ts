@@ -1,124 +1,156 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, real, integer, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import type { Prisma } from '@prisma/client';
 
-// RTS (Regional Thermal Stations)
-export const rts = pgTable("rts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  code: text("code").notNull().unique(),
-  location: text("location").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+// Re-export Prisma types for convenience
+export type RTS = {
+  id: string;
+  name: string;
+  code: string;
+  location: string;
+  createdAt: Date;
+};
+
+export type District = {
+  id: string;
+  name: string;
+  rtsId: string | null;
+  createdAt: Date;
+};
+
+export type CTP = {
+  id: string;
+  name: string;
+  code: string;
+  rtsId: string | null;
+  districtId: string | null;
+  ucl: number | null;
+  cl: number | null;
+  lcl: number | null;
+  hasMeter: boolean;
+  meterStatus: string;
+  createdAt: Date;
+};
+
+export type Measurement = {
+  id: string;
+  ctpId: string;
+  date: Date;
+  makeupWater: number;
+  undermix: number;
+  flowG1: number | null;
+  temperature: number | null;
+  pressure: number | null;
+  createdAt: Date;
+};
+
+export type StatisticalParams = {
+  id: string;
+  ctpId: string;
+  mean: number;
+  stdDev: number;
+  ucl: number;
+  cl: number;
+  lcl: number;
+  sampleSize: number;
+  calculatedAt: Date;
+};
+
+export type Recommendation = {
+  id: string;
+  ctpId: string;
+  type: string;
+  priority: string;
+  title: string;
+  description: string;
+  actions: string | null;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type UploadedFile = {
+  id: string;
+  filename: string;
+  originalName: string;
+  fileType: string;
+  size: number;
+  status: string;
+  recordsProcessed: number;
+  errors: string | null;
+  uploadedAt: Date;
+};
+
+// Zod schemas for validation
+export const insertRtsSchema = z.object({
+  name: z.string(),
+  code: z.string(),
+  location: z.string(),
 });
 
-// Districts/Microdistricts
-export const districts = pgTable("districts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  rtsId: varchar("rts_id").references(() => rts.id),
-  createdAt: timestamp("created_at").defaultNow(),
+export const insertDistrictSchema = z.object({
+  name: z.string(),
+  rtsId: z.string().optional().nullable(),
 });
 
-// CTP (Central Thermal Points)
-export const ctp = pgTable("ctp", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  code: text("code").notNull().unique(),
-  rtsId: varchar("rts_id").references(() => rts.id),
-  districtId: varchar("district_id").references(() => districts.id),
-  // Control boundaries
-  ucl: real("ucl"), // Upper Control Limit
-  cl: real("cl"),   // Central Line
-  lcl: real("lcl"), // Lower Control Limit
-  // Meter information
-  hasMeter: boolean("has_meter").default(true),
-  meterStatus: text("meter_status").default("working"), // working, broken, needs_check
-  createdAt: timestamp("created_at").defaultNow(),
+export const insertCtpSchema = z.object({
+  name: z.string(),
+  code: z.string(),
+  rtsId: z.string().optional().nullable(),
+  districtId: z.string().optional().nullable(),
+  ucl: z.number().optional().nullable(),
+  cl: z.number().optional().nullable(),
+  lcl: z.number().optional().nullable(),
+  hasMeter: z.boolean().optional(),
+  meterStatus: z.string().optional(),
 });
 
-// Daily measurements
-export const measurements = pgTable("measurements", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  ctpId: varchar("ctp_id").references(() => ctp.id).notNull(),
-  date: timestamp("date").notNull(),
-  makeupWater: real("makeup_water").notNull(), // подпитка т/ч
-  undermix: real("undermix").default(0), // подмес т/ч
-  flowG1: real("flow_g1"), // расход G1
-  temperature: real("temperature"),
-  pressure: real("pressure"),
-  createdAt: timestamp("created_at").defaultNow(),
+export const insertMeasurementSchema = z.object({
+  ctpId: z.string(),
+  date: z.coerce.date(),
+  makeupWater: z.number(),
+  undermix: z.number().optional(),
+  flowG1: z.number().optional().nullable(),
+  temperature: z.number().optional().nullable(),
+  pressure: z.number().optional().nullable(),
 });
 
-// Statistical parameters calculated for each CTP
-export const statisticalParams = pgTable("statistical_params", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  ctpId: varchar("ctp_id").references(() => ctp.id).notNull(),
-  mean: real("mean").notNull(),
-  stdDev: real("std_dev").notNull(),
-  ucl: real("ucl").notNull(),
-  cl: real("cl").notNull(),
-  lcl: real("lcl").notNull(),
-  sampleSize: integer("sample_size").notNull(),
-  calculatedAt: timestamp("calculated_at").defaultNow(),
+export const insertStatisticalParamsSchema = z.object({
+  ctpId: z.string(),
+  mean: z.number(),
+  stdDev: z.number(),
+  ucl: z.number(),
+  cl: z.number(),
+  lcl: z.number(),
+  sampleSize: z.number(),
 });
 
-// Recommendations generated by the system
-export const recommendations = pgTable("recommendations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  ctpId: varchar("ctp_id").references(() => ctp.id).notNull(),
-  type: text("type").notNull(), // inspection, meter_check, monitoring
-  priority: text("priority").notNull(), // critical, warning, normal
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  actions: jsonb("actions"), // Array of recommended actions
-  status: text("status").default("open"), // open, in_progress, completed
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const insertRecommendationSchema = z.object({
+  ctpId: z.string(),
+  type: z.string(),
+  priority: z.string(),
+  title: z.string(),
+  description: z.string(),
+  actions: z.string().optional().nullable(),
+  status: z.string().optional(),
 });
 
-// Uploaded files tracking
-export const uploadedFiles = pgTable("uploaded_files", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  filename: text("filename").notNull(),
-  originalName: text("original_name").notNull(),
-  fileType: text("file_type").notNull(), // xlsm, xlsx, xlsb
-  size: integer("size").notNull(),
-  status: text("status").default("processing"), // processing, completed, error
-  recordsProcessed: integer("records_processed").default(0),
-  errors: jsonb("errors"),
-  uploadedAt: timestamp("uploaded_at").defaultNow(),
+export const insertUploadedFileSchema = z.object({
+  filename: z.string(),
+  originalName: z.string(),
+  fileType: z.string(),
+  size: z.number(),
+  status: z.string().optional(),
+  recordsProcessed: z.number().optional(),
+  errors: z.string().optional().nullable(),
 });
 
-// Zod schemas
-export const insertRtsSchema = createInsertSchema(rts).omit({ id: true, createdAt: true });
-export const insertDistrictSchema = createInsertSchema(districts).omit({ id: true, createdAt: true });
-export const insertCtpSchema = createInsertSchema(ctp).omit({ id: true, createdAt: true });
-export const insertMeasurementSchema = createInsertSchema(measurements).omit({ id: true, createdAt: true });
-export const insertStatisticalParamsSchema = createInsertSchema(statisticalParams).omit({ id: true, calculatedAt: true });
-export const insertRecommendationSchema = createInsertSchema(recommendations).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertUploadedFileSchema = createInsertSchema(uploadedFiles).omit({ id: true, uploadedAt: true });
-
-// Types
-export type RTS = typeof rts.$inferSelect;
+// Insert types
 export type InsertRTS = z.infer<typeof insertRtsSchema>;
-
-export type District = typeof districts.$inferSelect;
 export type InsertDistrict = z.infer<typeof insertDistrictSchema>;
-
-export type CTP = typeof ctp.$inferSelect;
 export type InsertCTP = z.infer<typeof insertCtpSchema>;
-
-export type Measurement = typeof measurements.$inferSelect;
 export type InsertMeasurement = z.infer<typeof insertMeasurementSchema>;
-
-export type StatisticalParams = typeof statisticalParams.$inferSelect;
 export type InsertStatisticalParams = z.infer<typeof insertStatisticalParamsSchema>;
-
-export type Recommendation = typeof recommendations.$inferSelect;
 export type InsertRecommendation = z.infer<typeof insertRecommendationSchema>;
-
-export type UploadedFile = typeof uploadedFiles.$inferSelect;
 export type InsertUploadedFile = z.infer<typeof insertUploadedFileSchema>;
 
 // Extended types for API responses

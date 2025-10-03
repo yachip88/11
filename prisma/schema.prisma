@@ -10,7 +10,7 @@ datasource db {
 model RTS {
   id        String   @id @default(uuid()) @db.VarChar(255)
   name      String   @db.Text
-  code      String   @unique @db.Text
+  code      String   @unique @db.VarChar(255)
   location  String   @db.Text
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -26,7 +26,7 @@ model Districts {
   rtsId     String?  @map("rts_id") @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
 
-  rts  RTS?  @relation(fields: [rtsId], references: [id])
+  rts  RTS?  @relation(fields: [rtsId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ctps CTP[]
 
   @@map("districts")
@@ -35,7 +35,7 @@ model Districts {
 model CTP {
   id           String   @id @default(uuid()) @db.VarChar(255)
   name         String   @db.Text
-  code         String   @unique @db.Text
+  code         String   @unique @db.VarChar(255)
   rtsId        String?  @map("rts_id") @db.VarChar(255)
   districtId   String?  @map("district_id") @db.VarChar(255)
   ucl          Float?   @db.Real
@@ -45,8 +45,8 @@ model CTP {
   meterStatus  String   @default("working") @map("meter_status") @db.Text
   createdAt    DateTime @default(now()) @map("created_at")
 
-  rts                 RTS?                  @relation(fields: [rtsId], references: [id])
-  district            Districts?            @relation(fields: [districtId], references: [id])
+  rts                 RTS?                  @relation(fields: [rtsId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  district            Districts?            @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   measurements        Measurements[]
   statisticalParams   StatisticalParams[]
   recommendations     Recommendations[]
@@ -65,7 +65,7 @@ model Measurements {
   pressure    Float?   @db.Real
   createdAt   DateTime @default(now()) @map("created_at")
 
-  ctp CTP @relation(fields: [ctpId], references: [id])
+  ctp CTP @relation(fields: [ctpId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("measurements")
 }
@@ -81,7 +81,7 @@ model StatisticalParams {
   sampleSize   Int      @map("sample_size")
   calculatedAt DateTime @default(now()) @map("calculated_at")
 
-  ctp CTP @relation(fields: [ctpId], references: [id])
+  ctp CTP @relation(fields: [ctpId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("statistical_params")
 }
@@ -98,7 +98,7 @@ model Recommendations {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
-  ctp CTP @relation(fields: [ctpId], references: [id])
+  ctp CTP @relation(fields: [ctpId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("recommendations")
 }
