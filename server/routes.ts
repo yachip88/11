@@ -286,11 +286,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // File upload routes
   app.post("/api/upload", upload.array('files'), async (req, res) => {
     try {
-      console.log('Upload request received');
-      console.log('req.files:', req.files);
-      console.log('req.body:', req.body);
-      console.log('Content-Type:', req.headers['content-type']);
-      
       if (!req.files || !Array.isArray(req.files)) {
         return res.status(400).json({ message: "Файлы не были загружены" });
       }
@@ -462,6 +457,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(summary);
     } catch (error) {
       res.status(500).json({ message: "Ошибка получения сводки дашборда", error });
+    }
+  });
+
+  // Seed database with test data
+  app.post("/api/seed", async (req, res) => {
+    try {
+      const crypto = await import('crypto');
+      
+      // Create RTS
+      const rts1 = await storage.createRTS({
+        name: "РТС-1 Центральная",
+        code: "RTS-1",
+        location: "ул. Ленина, 50"
+      });
+      
+      const rts2 = await storage.createRTS({
+        name: "РТС-2 Северная",
+        code: "RTS-2",
+        location: "пр. Карла Маркса, 20"
+      });
+
+      // Create Districts
+      const district1 = await storage.createDistrict({
+        rtsId: rts1.id,
+        name: "Центральный район"
+      });
+
+      const district2 = await storage.createDistrict({
+        rtsId: rts2.id,
+        name: "Северный район"
+      });
+
+      // Create CTPs
+      const ctps = [];
+      for (let i = 1; i <= 10; i++) {
+        const rts = i <= 5 ? rts1 : rts2;
+        const district = i <= 5 ? district1 : district2;
+        
+        const ctp = await storage.createCTP({
+          name: `ЦТП-${100 + i}`,
+          code: `${100 + i}`,
+          rtsId: rts.id,
+          districtId: district.id,
+          hasMeter: true,
+          meterStatus: i % 3 === 0 ? 'not_working' : 'working'
+        });
+        ctps.push(ctp);
+      }
+
+      // Create measurements for last 30 days
+      const now = new Date();
+      for (const ctp of ctps) {
+        for (let day = 30; day >= 0; day--) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - day);
+          
+          const baseValue = 50 + Math.random() * 30;
+          const variation = (Math.random() - 0.5) * 10;
+          
+          await storage.createMeasurement({
+            ctpId: ctp.id,
+            date: date,
+            makeupWater: baseValue + variation,
+            undermix: Math.random() * 5,
+            flowG1: 100 + Math.random() * 50,
+            temperature: 70 + Math.random() * 20,
+            pressure: 4 + Math.random() * 2
+          });
+        }
+      }
+
+      // Calculate control boundaries
+      for (const ctp of ctps) {
+        const boundaries = await storage.calculateControlBoundaries(ctp.id);
+        await storage.updateCTPBoundaries(ctp.id, boundaries);
+        
+        const measurements = await storage.getMeasurements(ctp.id);
+        await storage.updateStatisticalParams({
+          ctpId: ctp.id,
+          mean: boundaries.cl,
+          stdDev: (boundaries.ucl - boundaries.cl) / 3,
+          ucl: boundaries.ucl,
+          cl: boundaries.cl,
+          lcl: boundaries.lcl,
+          sampleSize: measurements.length,
+        });
+      }
+
+      // Create some recommendations
+      await storage.createRecommendation({
+        ctpId: ctps[0].id,
+        type: 'high_consumption',
+        priority: 'critical',
+        title: 'Высокий расход подпиточной воды',
+        description: 'Обнаружен повышенный расход воды, превышающий верхнюю контрольную границу',
+        actions: 'Проверить систему на утечки, провести диагностику оборудования',
+        status: 'open'
+      });
+
+      await storage.createRecommendation({
+        ctpId: ctps[1].id,
+        type: 'meter_failure',
+        priority: 'warning',
+        title: 'Неисправность прибора учета',
+        description: 'Прибор учета не передает данные более 24 часов',
+        actions: 'Проверить связь с прибором учета, при необходимости заменить',
+        status: 'open'
+      });
+
+      res.json({ 
+        message: 'База данных успешно заполнена тестовыми данными',
+        created: {
+          rts: 2,
+          districts: 2,
+          ctps: ctps.length,
+          measurements: ctps.length * 31,
+          recommendations: 2
+        }
+      });
+    } catch (error) {
+      console.error('Seed error:', error);
+      res.status(500).json({ message: "Ошибка заполнения базы данных", error: String(error) });
     }
   });
 
