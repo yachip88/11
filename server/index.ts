@@ -49,12 +49,19 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+    const status = err?.status ?? err?.statusCode ?? 500;
+    const message = err?.message ?? "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
+
+    const context = `${req.method} ${req.originalUrl}`;
+    log(`error handling ${context}: ${status} ${message}`);
+    if (status >= 500) {
+      console.error(err);
+    }
   });
 
   // importantly only setup vite in development and after

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,7 +19,7 @@ export default function CTPTable() {
   const itemsPerPage = 8;
 
   const { data: ctpList, isLoading } = useQuery<CTPWithDetails[]>({
-    queryKey: ['/api/ctp', selectedRTS !== "all" ? selectedRTS : undefined],
+    queryKey: ['/api/ctp', { rtsId: selectedRTS !== "all" ? selectedRTS : undefined }],
   });
 
   const filteredCTP = ctpList?.filter(ctp => {
@@ -39,23 +39,23 @@ export default function CTPTable() {
 
   const getStatusInfo = (ctp: CTPWithDetails) => {
     const measurement = ctp.latestMeasurement;
-    if (!measurement) return { status: 'normal', label: 'Нет данных' };
+    if (!measurement) return { status: 'normal', label: 'РќРµС‚ РґР°РЅРЅС‹С…' };
 
     const criticalRec = ctp.recommendations.find(r => r.priority === 'critical');
     const warningRec = ctp.recommendations.find(r => r.priority === 'warning');
 
     if (criticalRec) {
-      return { status: 'critical', label: 'Критично' };
+      return { status: 'critical', label: 'РљСЂРёС‚РёС‡РЅРѕ' };
     } else if (warningRec) {
-      return { status: 'warning', label: 'Внимание' };
+      return { status: 'warning', label: 'Р’РЅРёРјР°РЅРёРµ' };
     } else {
-      return { status: 'normal', label: 'Норма' };
+      return { status: 'normal', label: 'РќРѕСЂРјР°' };
     }
   };
 
   const getDeviation = (ctp: CTPWithDetails) => {
     const measurement = ctp.latestMeasurement;
-    if (!measurement || !ctp.cl) return '—';
+    if (!measurement || !ctp.cl) return 'вЂ”';
 
     const deviation = measurement.makeupWater - ctp.cl;
     const sign = deviation > 0 ? '+' : '';
@@ -90,43 +90,43 @@ export default function CTPTable() {
       <Card>
         <CardContent className="p-6">
           <div className="flex gap-4 flex-wrap items-center">
-            <label className="font-semibold text-sm">Фильтры:</label>
+            <label className="font-semibold text-sm">Р¤РёР»СЊС‚СЂС‹:</label>
             
             <Select value={selectedRTS} onValueChange={setSelectedRTS}>
               <SelectTrigger className="w-[200px]" data-testid="select-rts-filter">
-                <SelectValue placeholder="Все РТС" />
+                <SelectValue placeholder="Р’СЃРµ Р РўРЎ" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Все РТС</SelectItem>
-                <SelectItem value="rts-1">РТС-1 (ТЭЦ-5)</SelectItem>
-                <SelectItem value="rts-2">РТС-2 (ТЭЦ-3)</SelectItem>
-                <SelectItem value="rts-3">РТС-3 (ТЭЦ-2)</SelectItem>
-                <SelectItem value="rts-4">РТС-4 (ТЭЦ-4)</SelectItem>
-                <SelectItem value="rts-5">РТС-5 (КРК)</SelectItem>
+                <SelectItem value="all">Р’СЃРµ Р РўРЎ</SelectItem>
+                <SelectItem value="rts-1">Р РўРЎ-1 (РўР­Р¦-5)</SelectItem>
+                <SelectItem value="rts-2">Р РўРЎ-2 (РўР­Р¦-3)</SelectItem>
+                <SelectItem value="rts-3">Р РўРЎ-3 (РўР­Р¦-2)</SelectItem>
+                <SelectItem value="rts-4">Р РўРЎ-4 (РўР­Р¦-4)</SelectItem>
+                <SelectItem value="rts-5">Р РўРЎ-5 (РљР Рљ)</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger className="w-[150px]" data-testid="select-status-filter">
-                <SelectValue placeholder="Все статусы" />
+                <SelectValue placeholder="Р’СЃРµ СЃС‚Р°С‚СѓСЃС‹" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Все статусы</SelectItem>
-                <SelectItem value="critical">Критические</SelectItem>
-                <SelectItem value="warning">Требуют внимания</SelectItem>
-                <SelectItem value="normal">В норме</SelectItem>
+                <SelectItem value="all">Р’СЃРµ СЃС‚Р°С‚СѓСЃС‹</SelectItem>
+                <SelectItem value="critical">РљСЂРёС‚РёС‡РµСЃРєРёРµ</SelectItem>
+                <SelectItem value="warning">РўСЂРµР±СѓСЋС‚ РІРЅРёРјР°РЅРёСЏ</SelectItem>
+                <SelectItem value="normal">Р’ РЅРѕСЂРјРµ</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
               <SelectTrigger className="w-[150px]" data-testid="select-district-filter">
-                <SelectValue placeholder="Все микрорайоны" />
+                <SelectValue placeholder="Р’СЃРµ РјРёРєСЂРѕСЂР°Р№РѕРЅС‹" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Все микрорайоны</SelectItem>
-                <SelectItem value="district-1">Ленинский</SelectItem>
-                <SelectItem value="district-2">Советский</SelectItem>
-                <SelectItem value="district-3">Кировский</SelectItem>
+                <SelectItem value="all">Р’СЃРµ РјРёРєСЂРѕСЂР°Р№РѕРЅС‹</SelectItem>
+                <SelectItem value="district-1">Р›РµРЅРёРЅСЃРєРёР№</SelectItem>
+                <SelectItem value="district-2">РЎРѕРІРµС‚СЃРєРёР№</SelectItem>
+                <SelectItem value="district-3">РљРёСЂРѕРІСЃРєРёР№</SelectItem>
               </SelectContent>
             </Select>
 
@@ -138,7 +138,7 @@ export default function CTPTable() {
               data-testid="input-date"
             />
 
-            <Button data-testid="button-apply-filters">Применить</Button>
+            <Button data-testid="button-apply-filters">РџСЂРёРјРµРЅРёС‚СЊ</Button>
           </div>
         </CardContent>
       </Card>
@@ -148,16 +148,16 @@ export default function CTPTable() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>
-              Посуточные параметры ЦТП - {new Date(selectedDate).toLocaleDateString('ru-RU')}
+              РџРѕСЃСѓС‚РѕС‡РЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ Р¦РўРџ - {new Date(selectedDate).toLocaleDateString('ru-RU')}
             </CardTitle>
             <div className="flex gap-4 text-xs">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-100 border border-red-300 rounded" />
-                <span>Выход подпитки</span>
+                <span>Р’С‹С…РѕРґ РїРѕРґРїРёС‚РєРё</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded" />
-                <span>Выход подмеса</span>
+                <span>Р’С‹С…РѕРґ РїРѕРґРјРµСЃР°</span>
               </div>
             </div>
           </div>
@@ -167,17 +167,17 @@ export default function CTPTable() {
             <table className="data-table" data-testid="table-ctp-data">
               <thead>
                 <tr>
-                  <th>ЦТП</th>
-                  <th>РТС</th>
-                  <th>Микрорайон</th>
-                  <th>Подпитка т/ч</th>
-                  <th>Подмес т/ч</th>
+                  <th>Р¦РўРџ</th>
+                  <th>Р РўРЎ</th>
+                  <th>РњРёРєСЂРѕСЂР°Р№РѕРЅ</th>
+                  <th>РџРѕРґРїРёС‚РєР° С‚/С‡</th>
+                  <th>РџРѕРґРјРµСЃ С‚/С‡</th>
                   <th>UCL</th>
                   <th>CL</th>
                   <th>LCL</th>
-                  <th>Отклонение</th>
-                  <th>Статус</th>
-                  <th>Рекомендация</th>
+                  <th>РћС‚РєР»РѕРЅРµРЅРёРµ</th>
+                  <th>РЎС‚Р°С‚СѓСЃ</th>
+                  <th>Р РµРєРѕРјРµРЅРґР°С†РёСЏ</th>
                 </tr>
               </thead>
               <tbody>
@@ -196,16 +196,16 @@ export default function CTPTable() {
                         statusInfo.status === 'critical' ? 'font-bold text-red-600' :
                         statusInfo.status === 'warning' ? 'font-semibold text-yellow-600' : ''
                       }`}>
-                        {measurement?.makeupWater.toFixed(1) || '—'}
+                        {measurement?.makeupWater.toFixed(1) || 'вЂ”'}
                       </td>
                       <td className={`font-mono ${
                         measurement && measurement.undermix !== null && measurement.undermix < -2 ? 'font-bold text-blue-600' : ''
                       }`}>
-                        {measurement?.undermix?.toFixed(1) || '—'}
+                        {measurement?.undermix?.toFixed(1) || 'вЂ”'}
                       </td>
-                      <td className="font-mono">{ctp.ucl?.toFixed(1) || '—'}</td>
-                      <td className="font-mono">{ctp.cl?.toFixed(1) || '—'}</td>
-                      <td className="font-mono">{ctp.lcl?.toFixed(1) || '—'}</td>
+                      <td className="font-mono">{ctp.ucl?.toFixed(1) || 'вЂ”'}</td>
+                      <td className="font-mono">{ctp.cl?.toFixed(1) || 'вЂ”'}</td>
+                      <td className="font-mono">{ctp.lcl?.toFixed(1) || 'вЂ”'}</td>
                       <td className={`font-semibold ${
                         statusInfo.status === 'critical' ? 'text-red-600' :
                         statusInfo.status === 'warning' ? 'text-yellow-600' : 'text-green-600'
@@ -227,10 +227,10 @@ export default function CTPTable() {
                             data-testid={`button-recommendation-${ctp.id}`}
                           >
                             <Eye className="w-3 h-3 mr-1" />
-                            {ctp.recommendations[0].type === 'inspection' ? 'Инспекция' :
-                             ctp.recommendations[0].type === 'meter_check' ? 'Проверка' : 'Мониторинг'}
+                            {ctp.recommendations[0].type === 'inspection' ? 'РРЅСЃРїРµРєС†РёСЏ' :
+                             ctp.recommendations[0].type === 'meter_check' ? 'РџСЂРѕРІРµСЂРєР°' : 'РњРѕРЅРёС‚РѕСЂРёРЅРі'}
                           </Button>
-                        ) : '—'}
+                        ) : 'вЂ”'}
                       </td>
                     </tr>
                   );
@@ -242,7 +242,7 @@ export default function CTPTable() {
           {/* Pagination */}
           <div className="px-6 py-4 border-t border-border flex justify-between items-center">
             <div className="text-sm text-muted-foreground">
-              Показано {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredCTP.length)} из {filteredCTP.length} ЦТП
+              РџРѕРєР°Р·Р°РЅРѕ {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredCTP.length)} РёР· {filteredCTP.length} Р¦РўРџ
             </div>
             <div className="flex gap-2">
               <Button
@@ -253,7 +253,7 @@ export default function CTPTable() {
                 data-testid="button-prev-page"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Назад
+                РќР°Р·Р°Рґ
               </Button>
               
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -287,7 +287,7 @@ export default function CTPTable() {
                 disabled={currentPage === totalPages}
                 data-testid="button-next-page"
               >
-                Вперед
+                Р’РїРµСЂРµРґ
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -297,3 +297,4 @@ export default function CTPTable() {
     </div>
   );
 }
+

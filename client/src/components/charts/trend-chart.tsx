@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TrendData } from "@shared/schema";
@@ -11,7 +11,7 @@ interface TrendChartProps {
 
 export function TrendChart({ period, rtsFilter, ctpId }: TrendChartProps) {
   const { data: trendData, isLoading } = useQuery<TrendData[]>({
-    queryKey: ['/api/trends', period, rtsFilter, ctpId],
+    queryKey: ['/api/trends', period, { rtsId: rtsFilter && rtsFilter !== 'all' ? rtsFilter : undefined, ctpId }],
   });
 
   if (isLoading) {
@@ -21,7 +21,7 @@ export function TrendChart({ period, rtsFilter, ctpId }: TrendChartProps) {
   if (!trendData || trendData.length === 0) {
     return (
       <div className="h-full flex items-center justify-center text-muted-foreground">
-        Данные не найдены
+        Р”Р°РЅРЅС‹Рµ РЅРµ РЅР°Р№РґРµРЅС‹
       </div>
     );
   }
@@ -66,3 +66,4 @@ export function TrendChart({ period, rtsFilter, ctpId }: TrendChartProps) {
     </ResponsiveContainer>
   );
 }
+
