@@ -286,6 +286,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // File upload routes
   app.post("/api/upload", upload.array('files'), async (req, res) => {
     try {
+      console.log('Upload request received');
+      console.log('req.files:', req.files);
+      console.log('req.body:', req.body);
+      console.log('Content-Type:', req.headers['content-type']);
+      
       if (!req.files || !Array.isArray(req.files)) {
         return res.status(400).json({ message: "Файлы не были загружены" });
       }
