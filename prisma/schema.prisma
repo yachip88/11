@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model RTS {
+  id        String   @id @default(uuid()) @db.VarChar(255)
+  name      String   @db.Text
+  code      String   @unique @db.Text
+  location  String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  districts Districts[]
+  ctps      CTP[]
+
+  @@map("rts")
+}
+
+model Districts {
+  id        String   @id @default(uuid()) @db.VarChar(255)
+  name      String   @db.Text
+  rtsId     String?  @map("rts_id") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  rts  RTS?  @relation(fields: [rtsId], references: [id])
+  ctps CTP[]
+
+  @@map("districts")
+}
+
+model CTP {
+  id           String   @id @default(uuid()) @db.VarChar(255)
+  name         String   @db.Text
+  code         String   @unique @db.Text
+  rtsId        String?  @map("rts_id") @db.VarChar(255)
+  districtId   String?  @map("district_id") @db.VarChar(255)
+  ucl          Float?   @db.Real
+  cl           Float?   @db.Real
+  lcl          Float?   @db.Real
+  hasMeter     Boolean  @default(true) @map("has_meter")
+  meterStatus  String   @default("working") @map("meter_status") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  rts                 RTS?                  @relation(fields: [rtsId], references: [id])
+  district            Districts?            @relation(fields: [districtId], references: [id])
+  measurements        Measurements[]
+  statisticalParams   StatisticalParams[]
+  recommendations     Recommendations[]
+
+  @@map("ctp")
+}
+
+model Measurements {
+  id          String   @id @default(uuid()) @db.VarChar(255)
+  ctpId       String   @map("ctp_id") @db.VarChar(255)
+  date        DateTime
+  makeupWater Float    @map("makeup_water") @db.Real
+  undermix    Float    @default(0) @db.Real
+  flowG1      Float?   @map("flow_g1") @db.Real
+  temperature Float?   @db.Real
+  pressure    Float?   @db.Real
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  ctp CTP @relation(fields: [ctpId], references: [id])
+
+  @@map("measurements")
+}
+
+model StatisticalParams {
+  id           String   @id @default(uuid()) @db.VarChar(255)
+  ctpId        String   @map("ctp_id") @db.VarChar(255)
+  mean         Float    @db.Real
+  stdDev       Float    @map("std_dev") @db.Real
+  ucl          Float    @db.Real
+  cl           Float    @db.Real
+  lcl          Float    @db.Real
+  sampleSize   Int      @map("sample_size")
+  calculatedAt DateTime @default(now()) @map("calculated_at")
+
+  ctp CTP @relation(fields: [ctpId], references: [id])
+
+  @@map("statistical_params")
+}
+
+model Recommendations {
+  id          String   @id @default(uuid()) @db.VarChar(255)
+  ctpId       String   @map("ctp_id") @db.VarChar(255)
+  type        String   @db.Text
+  priority    String   @db.Text
+  title       String   @db.Text
+  description String   @db.Text
+  actions     String?  @db.Text
+  status      String   @default("open") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  ctp CTP @relation(fields: [ctpId], references: [id])
+
+  @@map("recommendations")
+}
+
+model UploadedFiles {
+  id               String   @id @default(uuid()) @db.VarChar(255)
+  filename         String   @db.Text
+  originalName     String   @map("original_name") @db.Text
+  fileType         String   @map("file_type") @db.Text
+  size             Int
+  status           String   @default("processing") @db.Text
+  recordsProcessed Int      @default(0) @map("records_processed")
+  errors           String?  @db.Text
+  uploadedAt       DateTime @default(now()) @map("uploaded_at")
+
+  @@map("uploaded_files")
+}
