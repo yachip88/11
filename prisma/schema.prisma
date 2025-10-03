@@ -42,7 +42,7 @@ model CTP {
   cl           Float?   @db.Real
   lcl          Float?   @db.Real
   hasMeter     Boolean  @default(true) @map("has_meter")
-  meterStatus  String   @default("working") @map("meter_status") @db.Text
+  meterStatus  String   @default("working") @map("meter_status") @db.NVarChar(100)
   createdAt    DateTime @default(now()) @map("created_at")
 
   rts                 RTS?                  @relation(fields: [rtsId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -89,12 +89,12 @@ model StatisticalParams {
 model Recommendations {
   id          String   @id @default(uuid()) @db.VarChar(255)
   ctpId       String   @map("ctp_id") @db.VarChar(255)
-  type        String   @db.Text
-  priority    String   @db.Text
+  type        String   @db.NVarChar(100)
+  priority    String   @db.NVarChar(50)
   title       String   @db.Text
   description String   @db.Text
   actions     String?  @db.Text
-  status      String   @default("open") @db.Text
+  status      String   @default("open") @db.NVarChar(50)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -107,9 +107,9 @@ model UploadedFiles {
   id               String   @id @default(uuid()) @db.VarChar(255)
   filename         String   @db.Text
   originalName     String   @map("original_name") @db.Text
-  fileType         String   @map("file_type") @db.Text
+  fileType         String   @map("file_type") @db.NVarChar(50)
   size             Int
-  status           String   @default("processing") @db.Text
+  status           String   @default("processing") @db.NVarChar(50)
   recordsProcessed Int      @default(0) @map("records_processed")
   errors           String?  @db.Text
   uploadedAt       DateTime @default(now()) @map("uploaded_at")

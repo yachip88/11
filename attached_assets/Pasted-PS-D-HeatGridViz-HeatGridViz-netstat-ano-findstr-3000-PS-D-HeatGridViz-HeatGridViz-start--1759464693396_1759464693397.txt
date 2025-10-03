@@ -1,0 +1,41 @@
+PS D:\HeatGridViz\HeatGridViz> netstat -ano | findstr :3000
+PS D:\HeatGridViz\HeatGridViz> .\start-windows-alt.bat
+11:09:04 AM [express] serving on port 3000
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+prisma:warn Trusting the server certificate without validation.
+prisma:warn Trusting the server certificate without validation.
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[creat
+ed_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[distric
+t_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo
+].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:09:18 AM [express] GET /api/trends/overall-change/year 200 in 672ms :: {"change":0}
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[distric
+t_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo
+].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:09:18 AM [express] GET /api/trends/overall-change/week 200 in 675ms :: {"change":0}
+prisma:error The data types text and nvarchar are incompatible in the equal to operator.
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo
+].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommend
+ations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[upda
+ted_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[crea
+ted_at] DESC OFFSET @P2 ROWS
+prisma:error
+Invalid `db.recommendations.findMany()` invocation in
+D:\HeatGridViz\HeatGridViz\server\db-storage.ts:263:37
+
+  260 if (filters?.priority) where.priority = filters.priority;
+  261 if (filters?.status) where.status = filters.status;
+  262
+> 263 return await db.recommendations.findMany(
+Error occurred during query execution:
+ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(MssqlError { code: 402, message: "The data typ
+es text and nvarchar are incompatible in the equal to operator." }), transient: false })
+11:09:19 AM [express] GET /api/dashboard/summary 500 in 799ms :: {"message":"                         
+
+
+
+
