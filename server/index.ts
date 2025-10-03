@@ -73,11 +73,17 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || '5000', 10);
   const isWindows = process.platform === 'win32';
   
-  server.listen({
+  // On Windows, reusePort is not supported, so we omit it
+  const listenOptions: any = {
     port,
-    host: isWindows ? "localhost" : "0.0.0.0",
-    ...(isWindows ? {} : { reusePort: true }),
-  }, () => {
+    host: "0.0.0.0",
+  };
+  
+  if (!isWindows) {
+    listenOptions.reusePort = true;
+  }
+  
+  server.listen(listenOptions, () => {
     log(`serving on port ${port}`);
   });
 })();
