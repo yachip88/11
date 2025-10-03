@@ -6,7 +6,17 @@ The application serves Novosibirsk Heat Supply Company (НТСК) to optimize he
 
 # User Preferences
 
-Preferred communication style: Simple, everyday language.
+Preferred communication style: Simple, everyday language (Russian).
+
+# Recent Changes (October 2025)
+
+**Migration to MSSQL with Prisma ORM**
+- Migrated from Drizzle ORM + PostgreSQL to Prisma ORM + MSSQL
+- All database code updated to work with Microsoft SQL Server
+- Prisma schema created in `prisma/schema.prisma`
+- Database connection configured for `sqlserver://` protocol
+- Storage layer (`server/db-storage.ts`) rewritten for Prisma Client API
+- Type definitions updated in `shared/schema.ts` for Prisma compatibility
 
 # System Architecture
 
@@ -30,19 +40,22 @@ Preferred communication style: Simple, everyday language.
 
 **Framework**: Express.js server with TypeScript
 
-**Database ORM**: Drizzle ORM configured for PostgreSQL
+**Database ORM**: Prisma ORM configured for Microsoft SQL Server
 
 **File Storage**: Multer for handling Excel file uploads (.xlsx, .xlsm, .xlsb formats)
 
 **API Design**: RESTful API endpoints organized in `server/routes.ts`
 
 **Key Design Decisions**:
-- In-memory storage implementation (`MemStorage`) as an abstraction layer over database operations
+- Database storage implementation (`DbStorage`) implementing `IStorage` interface
 - Separation of concerns with `IStorage` interface defining all data operations
 - Middleware for request logging and JSON parsing with raw body capture
 - Vite integration for development server with HMR support
+- Prisma Client singleton pattern in `server/db.ts` for connection management
 
 ## Database Schema
+
+**Database**: Microsoft SQL Server (MSSQL)
 
 **Core Tables**:
 - `rts` - Regional Thermal Stations with location and identification
@@ -54,10 +67,11 @@ Preferred communication style: Simple, everyday language.
 - `uploaded_files` - File upload history and processing status
 
 **Design Rationale**: 
-- UUID primary keys for scalability and distributed systems compatibility
+- UUID (VarChar) primary keys for scalability and distributed systems compatibility
 - Denormalized control boundaries stored directly in CTP table for query performance
 - Timestamp tracking on all entities for audit trails
-- JSONB fields for flexible error storage in file uploads
+- TEXT fields for flexible error storage in file uploads
+- Referential integrity with cascade/no-action policies for complex relationships
 
 ## Statistical Analysis System
 
@@ -73,11 +87,13 @@ Preferred communication style: Simple, everyday language.
 
 ## External Dependencies
 
-**Database**: PostgreSQL via Neon serverless driver (`@neondatabase/serverless`)
+**Database**: Microsoft SQL Server via Prisma Client
 
-**Session Management**: PostgreSQL-based sessions using `connect-pg-simple`
+**Session Management**: Memory-based sessions (configured for production use with database-backed sessions if needed)
 
-**Excel Processing**: Multer for file uploads with planned integration for Excel parsing libraries (xlsx/exceljs)
+**Excel Processing**: 
+- Multer for file uploads
+- xlsx library for parsing Excel files (.xlsx, .xlsm, .xlsb formats)
 
 **UI Components**: 
 - Radix UI primitives for accessible component foundation
@@ -90,5 +106,20 @@ Preferred communication style: Simple, everyday language.
 - Replit-specific plugins for development environment integration
 - TypeScript for type safety across the stack
 - ESBuild for production bundling
+- Prisma CLI for schema management and migrations
 
-**Design Rationale**: The application uses established, well-maintained libraries to ensure reliability and minimize custom code maintenance. The Radix UI + Tailwind combination provides accessible, customizable components with a consistent design system.
+**Design Rationale**: The application uses established, well-maintained libraries to ensure reliability and minimize custom code maintenance. Prisma provides type-safe database access with excellent TypeScript integration.
+
+## Database Setup
+
+**Connection String Format (MSSQL)**:
+```
+sqlserver://host:port;database=dbname;user=username;password=password;encrypt=true;trustServerCertificate=true
+```
+
+**Commands**:
+- `npx prisma generate` - Generate Prisma Client after schema changes
+- `npx prisma db push` - Sync Prisma schema with database (development)
+- `npx prisma studio` - Open Prisma Studio for database GUI
+
+**Schema Location**: `prisma/schema.prisma`
