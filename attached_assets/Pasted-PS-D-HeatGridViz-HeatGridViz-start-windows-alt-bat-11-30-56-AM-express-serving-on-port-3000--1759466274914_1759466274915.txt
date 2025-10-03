@@ -1,0 +1,133 @@
+PS D:\HeatGridViz\HeatGridViz> .\start-windows-alt.bat
+11:30:56 AM [express] serving on port 3000
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:warn Trusting the server certificate without validation.
+prisma:warn Trusting the server certificate without validation.
+prisma:error The data types text and nvarchar are incompatible in the equal to operator.
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:error
+Invalid `db.recommendations.findMany()` invocation in
+D:\HeatGridViz\HeatGridViz\server\db-storage.ts:263:37
+
+  260 if (filters?.priority) where.priority = filters.priority;
+  261 if (filters?.status) where.status = filters.status;
+  262
+> 263 return await db.recommendations.findMany(
+Error occurred during query execution:
+ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(MssqlError { code: 402, message: "The data types text and nvarchar are incompatible in the equal to operator." }), transient: false })
+11:31:02 AM [express] GET /api/dashboard/summary 500 in 177ms :: {"message":"                         
+11:31:02 AM [express] GET /api/trends/overall-change/year 304 in 181ms :: {"change":0}
+11:31:02 AM [express] GET /api/trends/overall-change/week 304 in 180ms :: {"change":0}
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:31:50 AM [express] GET /api/trends/overall-change/week 304 in 161ms :: {"change":0}
+11:31:50 AM [express] GET /api/trends/overall-change/year 304 in 219ms :: {"change":0}
+prisma:error The data types text and nvarchar are incompatible in the equal to operator.
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+prisma:error
+Invalid `db.recommendations.findMany()` invocation in
+D:\HeatGridViz\HeatGridViz\server\db-storage.ts:263:37
+
+  260 if (filters?.priority) where.priority = filters.priority;
+  261 if (filters?.status) where.status = filters.status;
+  262
+> 263 return await db.recommendations.findMany(
+Error occurred during query execution:
+ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(MssqlError { code: 402, message: "The data types text and nvarchar are incompatible in the equal to operator." }), transient: false })
+11:31:50 AM [express] GET /api/dashboard/summary 500 in 260ms :: {"message":"                         
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+11:31:56 AM [express] GET /api/upload/history 304 in 13ms :: []
+11:32:07 AM [express] POST /api/upload 400 in 2ms :: {"message":"                       "}
+                                     [Y(  )/N(   )]? y
+PS D:\HeatGridViz\HeatGridViz> .\start-windows-alt.bat
+11:33:16 AM [express] serving on port 3000
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+11:33:23 AM [express] GET /api/upload/history 304 in 62ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:warn Trusting the server certificate without validation.
+prisma:warn Trusting the server certificate without validation.
+prisma:error The data types text and nvarchar are incompatible in the equal to operator.
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+prisma:error
+Invalid `db.recommendations.findMany()` invocation in
+D:\HeatGridViz\HeatGridViz\server\db-storage.ts:263:37
+
+  260 if (filters?.priority) where.priority = filters.priority;
+  261 if (filters?.status) where.status = filters.status;
+  262
+> 263 return await db.recommendations.findMany(
+Error occurred during query execution:
+ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(MssqlError { code: 402, message: "The data types text and nvarchar are incompatible in the equal to operator." }), transient: false })
+11:33:26 AM [express] GET /api/dashboard/summary 500 in 75ms :: {"message":"                         
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:33:26 AM [express] GET /api/trends/overall-change/year 304 in 79ms :: {"change":0}
+11:33:26 AM [express] GET /api/trends/overall-change/week 304 in 79ms :: {"change":0}
+11:33:38 AM [express] POST /api/upload 400 in 1ms :: {"message":"                       "}
+11:33:43 AM [express] POST /api/upload 400 in 1ms :: {"message":"                       "}
+11:33:51 AM [express] POST /api/upload 400 in 1ms :: {"message":"                       "}
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+11:34:01 AM [express] GET /api/upload/history 304 in 19ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:34:14 AM [express] GET /api/trends/overall-change/year 304 in 8ms :: {"change":0}
+11:34:14 AM [express] GET /api/trends/overall-change/week 304 in 11ms :: {"change":0}
+prisma:error The data types text and nvarchar are incompatible in the equal to operator.
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+prisma:error
+Invalid `db.recommendations.findMany()` invocation in
+D:\HeatGridViz\HeatGridViz\server\db-storage.ts:263:37
+
+  260 if (filters?.priority) where.priority = filters.priority;
+  261 if (filters?.status) where.status = filters.status;
+  262
+> 263 return await db.recommendations.findMany(
+Error occurred during query execution:
+ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(MssqlError { code: 402, message: "The data types text and nvarchar are incompatible in the equal to operator." }), transient: false })
+11:34:14 AM [express] GET /api/dashboard/summary 500 in 18ms :: {"message":"                         
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[measurements].[id], [dbo].[measurements].[ctp_id], [dbo].[measurements].[date], [dbo].[measurements].[makeup_water], [dbo].[measurements].[undermix], [dbo].[measurements].[flow_g1], [dbo].[measurements].[temperature], [dbo].[measurements].[pressure], [dbo].[measurements].[created_at] FROM [dbo].[measurements] WHERE ([dbo].[measurement
+s].[ctp_id] = CAST(@P1 AS VARCHAR(255)) AND [dbo].[measurements].[date] >= @P2 AND [dbo].[measurements].[date] <= @P3) ORDER BY [dbo].[measurements].[date] ASC OFFSET @P4 ROWS
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:34:17 AM [express] GET /api/ctp/ 304 in 101ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+11:34:17 AM [express] GET /api/ctp/ctp-125/control-chart 304 in 183ms :: []
+11:34:37 AM [express] GET /api/trends/week// 200 in 9ms
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+11:34:37 AM [express] GET /api/trends/week/changes 200 in 25ms :: {"increases":[],"decreases":[]}
+11:34:37 AM [express] GET /api/trends/week/rts-stats 200 in 33ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:34:38 AM [express] GET /api/rts/stats 200 in 17ms :: []
+11:34:38 AM [express] GET /api/ctp 200 in 22ms :: []
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE 1=1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P1 ROWS
+11:34:39 AM [express] GET /api/recommendations 200 in 24ms :: []
