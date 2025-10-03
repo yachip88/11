@@ -1,0 +1,182 @@
+PS D:\HeatGridViz\HeatGridViz> $env:NODE_ENV="development"
+PS D:\HeatGridViz\HeatGridViz> npx tsc server/index.ts
+node_modules/@prisma/client/runtime/library.d.ts:73:5 - error TS1
+ting ECMAScript 2015 and higher.
+
+73     #private;
+       ~~~~~~~~
+
+node_modules/@prisma/client/runtime/library.d.ts:396:5 - error TS
+eting ECMAScript 2015 and higher.
+
+396     #private;
+        ~~~~~~~~
+
+node_modules/@prisma/client/runtime/library.d.ts:2032:5 - error T
+geting ECMAScript 2015 and higher.
+
+2032     #private;
+         ~~~~~~~~
+
+node_modules/@replit/vite-plugin-cartographer/dist/index.d.mts:98
+s must start with either a 'declare' or 'export' modifier.
+
+98 var version = "0.3.1";
+   ~~~
+
+node_modules/@replit/vite-plugin-cartographer/dist/index.d.mts:98
+ient contexts.
+
+98 var version = "0.3.1";
+                 ~~~~~~~
+
+node_modules/@replit/vite-plugin-dev-banner/dist/index.d.mts:5:1
+ust start with either a 'declare' or 'export' modifier.
+
+5 var version = "0.1.0";
+  ~~~
+
+node_modules/@replit/vite-plugin-dev-banner/dist/index.d.mts:5:15
+t contexts.
+
+5 var version = "0.1.0";
+                ~~~~~~~
+
+node_modules/vite/dist/node/index.d.ts:5:41 - error TS2307: Canno
+pe declarations.
+  There are types at 'D:/HeatGridViz/HeatGridViz/node_modules/rol
+esolved under your current 'moduleResolution' setting. Consider u
+
+5 export { parseAst, parseAstAsync } from 'rollup/parseAst';
+                                          ~~~~~~~~~~~~~~~~~
+
+node_modules/zod/lib/types.d.ts:772:5 - error TS18028: Private id
+2015 and higher.
+
+772     #private;
+        ~~~~~~~~
+
+node_modules/zod/lib/types.d.ts:791:5 - error TS18028: Private id
+2015 and higher.
+
+791     #private;
+        ~~~~~~~~
+
+server/db-storage.ts:9:8 - error TS2307: Cannot find module '@sha
+
+9 } from '@shared/schema';
+         ~~~~~~~~~~~~~~~~
+
+server/index.ts:1:8 - error TS1259: Module '"D:/HeatGridViz/HeatG
+default-imported using the 'esModuleInterop' flag
+
+1 import express, { type Request, Response, NextFunction } from "
+         ~~~~~~~
+
+  node_modules/@types/express/index.d.ts:128:1
+    128 export = e;
+        ~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used
+ flag.
+
+server/routes.ts:3:8 - error TS1259: Module '"D:/HeatGridViz/Heat
+default-imported using the 'esModuleInterop' flag
+
+3 import multer from "multer";
+         ~~~~~~
+
+  node_modules/@types/multer/index.d.ts:317:1
+    317 export = multer;
+        ~~~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used
+ flag.
+
+server/routes.ts:7:95 - error TS2307: Cannot find module '@shared
+
+7 import { insertMeasurementSchema, insertRecommendationSchema, i
+
+
+server/storage.ts:4:95 - error TS2307: Cannot find module '@share
+
+4          type CTPWithDetails, type RTSWithStats, type TrendData
+
+
+server/vite.ts:1:8 - error TS1259: Module '"D:/HeatGridViz/HeatGr
+efault-imported using the 'esModuleInterop' flag
+
+1 import express, { type Express } from "express";
+         ~~~~~~~
+
+  node_modules/@types/express/index.d.ts:128:1
+    128 export = e;
+        ~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used
+ flag.
+
+server/vite.ts:2:8 - error TS1192: Module '"fs"' has no default e
+
+2 import fs from "fs";
+         ~~
+
+server/vite.ts:3:8 - error TS1259: Module '"path"' can only be de
+
+3 import path from "path";
+         ~~~~
+
+  node_modules/@types/node/path.d.ts:178:5
+    178     export = path;
+            ~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used
+ flag.
+
+server/vite.ts:49:9 - error TS1343: The 'import.meta' meta-proper
+0', 'es2022', 'esnext', 'system', 'node16', or 'nodenext'.
+
+49         import.meta.dirname,
+           ~~~~~~~~~~~
+
+server/vite.ts:71:33 - error TS1343: The 'import.meta' meta-prope
+20', 'es2022', 'esnext', 'system', 'node16', or 'nodenext'.
+
+71   const distPath = path.resolve(import.meta.dirname, "public")
+                                   ~~~~~~~~~~~
+
+vite.config.ts:3:8 - error TS1259: Module '"path"' can only be de
+
+3 import path from "path";
+         ~~~~
+
+  node_modules/@types/node/path.d.ts:178:5
+    178     export = path;
+            ~~~~~~~~~~~~~~
+    This module is declared with 'export =', and can only be used
+ flag.
+
+vite.config.ts:24:25 - error TS1343: The 'import.meta' meta-prope
+20', 'es2022', 'esnext', 'system', 'node16', or 'nodenext'.
+
+24       "@": path.resolve(import.meta.dirname, "client", "src"),
+                           ~~~~~~~~~~~
+
+vite.config.ts:25:31 - error TS1343: The 'import.meta' meta-prope
+20', 'es2022', 'esnext', 'system', 'node16', or 'nodenext'.
+
+25       "@shared": path.resolve(import.meta.dirname, "shared"),
+                                 ~~~~~~~~~~~
+
+vite.config.ts:26:31 - error TS1343: The 'import.meta' meta-prope
+20', 'es2022', 'esnext', 'system', 'node16', or 'nodenext'.
+
+26       "@assets": path.resolve(import.meta.dirname, "attached_a
+                                 ~~~~~~~~~~~
+
+vite.config.ts:29:22 - error TS1343: The 'import.meta' meta-prope
+20', 'es2022', 'esnext', 'system', 'node16', or 'nodenext'.
+
+29   root: path.resolve(import.meta.dirname, "client"),
+                        ~~~~~~~~~~~
+
+vite.config.ts:31:26 - error TS1343: The 'import.meta' meta-prope
+20', 'es2022', 'esnext', 'system', 'node16', or 'nodenext'.
+
+31     outDir: path.resolve(import.meta.dirname, "dist/public"),
