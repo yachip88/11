@@ -1,0 +1,485 @@
+PS C:\Users\ZolotukhinAO> Invoke-WebRequest -Uri http://10.16.0.72:3000/api/seed -Method Post
+
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : <!DOCTYPE html>
+                    <html lang="en">
+                      <head>
+                        <script type="module">
+                    import { createHotContext } from "/@vite/client";
+                    const hot = createHotContext("/__dummy__runtime-error-plugin");
+                    
+                    function sendErr...
+RawContent        : HTTP/1.1 200 OK
+                    Vary: Origin
+                    Connection: keep-alive
+                    Keep-Alive: timeout=5
+                    Content-Length: 2698
+                    Content-Type: text/html; charset=utf-8
+                    Date: Fri, 03 Oct 2025 06:03:36 GMT
+                    X-Powered-By: Express
+                    ...
+Forms             : {}
+Headers           : {[Vary, Origin], [Connection, keep-alive], [Keep-Alive, timeout=5], [Content-Length, 2698]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 2698
+
+
+
+PS D:\HeatGridViz\HeatGridViz> npx prisma db push --force-reset
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": SQL Server database
+
+The SQL Server database was successfully reset.
+
+Your database is now in sync with your Prisma schema. Done in 62ms
+
+? Generated Prisma Client (v6.16.3) to .\node_modules\@prisma\client in 246ms
+
+PS D:\HeatGridViz\HeatGridViz> .\start-windows-alt.bat
+11:49:09 AM [express] serving on port 3000
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[measurements].[id], [dbo].[measurements].[ctp_id], [dbo].[measurements].[date], [dbo].[measurements].[makeup_water], [dbo].[measurements].[undermix], [dbo].[measurements].[flow_g1], [dbo].[measurements].[temperature], [dbo].[measurements].[pressure], [dbo].[measurements].[created_at] FROM [dbo].[measurements] WHERE ([dbo].[measurement
+s].[ctp_id] = CAST(@P1 AS VARCHAR(255)) AND [dbo].[measurements].[date] >= @P2 AND [dbo].[measurements].[date] <= @P3) ORDER BY [dbo].[measurements].[date] ASC OFFSET @P4 ROWS
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:49:15 AM [express] GET /api/ctp/ 304 in 100ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+11:49:15 AM [express] GET /api/ctp/ctp-125/control-chart 304 in 97ms :: []
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+11:49:20 AM [express] GET /api/upload/history 304 in 11ms :: []
+11:49:29 AM [express] POST /api/upload 400 in 2ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+11:49:43 AM [express] POST /api/upload 400 in 1ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+11:50:18 AM [express] POST /api/upload 400 in 1ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+11:50:22 AM [express] POST /api/upload 400 in 1ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+11:50:24 AM [express] POST /api/upload 400 in 2ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+11:50:37 AM [express] GET /api/dashboard/summary 200 in 50ms :: {"currentMakeupWater":0,"ctpRequiring…
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:50:37 AM [express] GET /api/trends/overall-change/year 304 in 16ms :: {"change":0}
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:50:37 AM [express] GET /api/trends/overall-change/week 304 in 6ms :: {"change":0}
+11:50:37 AM [express] GET /api/trends/week/right/ 200 in 22ms
+11:50:37 AM [express] GET /api/trends/week/left/ 200 in 17ms
+11:50:37 AM [express] GET /api/trends/week// 200 in 21ms
+prisma:query SELECT 1
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:50:53 AM [express] GET /api/trends/week/changes 304 in 12ms :: {"increases":[],"decreases":[]}
+11:50:53 AM [express] GET /api/trends/week// 200 in 17ms
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+11:50:53 AM [express] GET /api/trends/week/rts-stats 304 in 19ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+11:50:54 AM [express] GET /api/rts/stats 304 in 3ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:50:54 AM [express] GET /api/ctp 304 in 14ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+11:51:02 AM [express] GET /api/ctp/ 304 in 12ms :: []
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+11:51:23 AM [express] GET /api/upload/history 304 in 4ms :: []
+11:51:42 AM [express] POST /api/upload 400 in 1ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+11:52:06 AM [express] POST /api/upload 400 in 1ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+12:42:52 PM [express] GET /api/upload/history 304 in 53ms :: []
+12:45:23 [vite] page reload D:/HeatGridViz/HeatGridViz/tailwind.config.ts
+12:45:23 [vite] changed tsconfig file detected: D:\HeatGridViz\HeatGridViz\tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+12:45:26 PM [express] GET /api/upload/history 304 in 79ms :: []
+12:45:26 [vite] page reload index.html
+12:45:27 [vite] hmr update /src/App.tsx?v=lkt69SuNp8oCsKDdks9LM, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] hmr update /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] page reload src/main.tsx
+12:45:27 [vite] hmr update /src/components/header.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] hmr update /src/components/sidebar.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] hmr update /src/components/charts/control-chart.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] hmr update /src/components/charts/factors-chart.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] hmr update /src/components/charts/trend-chart.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] hmr update /src/components/recommendations/recommendation-card.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] page reload src/components/tables/ctp-table.tsx
+12:45:27 [vite] hmr update /src/components/tree/tree-node.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] page reload src/components/ui/accordion.tsx
+12:45:27 [vite] page reload src/components/ui/alert-dialog.tsx
+12:45:27 [vite] page reload src/components/ui/alert.tsx
+12:45:27 [vite] page reload src/components/ui/aspect-ratio.tsx
+12:45:27 [vite] page reload src/components/ui/avatar.tsx
+12:45:27 [vite] page reload src/components/ui/badge.tsx
+12:45:27 [vite] page reload src/components/ui/breadcrumb.tsx
+12:45:27 [vite] hmr update /src/components/ui/button.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] page reload src/components/ui/calendar.tsx
+12:45:27 [vite] hmr update /src/components/ui/card.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] page reload src/components/ui/carousel.tsx
+12:45:27 [vite] page reload src/components/ui/chart.tsx
+12:45:27 [vite] page reload src/components/ui/checkbox.tsx
+12:45:27 [vite] page reload src/components/ui/collapsible.tsx
+12:45:27 [vite] page reload src/components/ui/command.tsx
+12:45:27 [vite] page reload src/components/ui/context-menu.tsx
+12:45:27 [vite] page reload src/components/ui/dialog.tsx
+12:45:27 [vite] page reload src/components/ui/drawer.tsx
+12:45:27 [vite] hmr update /src/components/ui/dropdown-menu.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:27 [vite] page reload src/components/ui/form.tsx
+12:45:27 [vite] page reload src/components/ui/hover-card.tsx
+12:45:27 [vite] page reload src/components/ui/input-otp.tsx
+12:45:27 [vite] hmr update /src/components/ui/input.tsx, /src/index.css?v=lkt69SuNp8oCsKDdks9LM
+12:45:28 [vite] Internal server error: [postcss] EBUSY: resource busy or locked, open 'D:\HeatGridViz\HeatGridViz\client\src\components\ui\switch.tsx'
+  Plugin: vite:css
+  File: D:/HeatGridViz/HeatGridViz/client/src/index.css:undefined:NaN
+      at async open (node:internal/fs/promises:641:25)
+      at async Object.readFile (node:internal/fs/promises:1245:14)
+      at async D:\HeatGridViz\HeatGridViz\node_modules\tailwindcss\lib\lib\expandTailwindAtRules.js:173:34
+      at async Promise.all (index 0)
+      at async D:\HeatGridViz\HeatGridViz\node_modules\tailwindcss\lib\lib\expandTailwindAtRules.js:172:13
+      at async D:\HeatGridViz\HeatGridViz\node_modules\tailwindcss\lib\processTailwindFeatures.js:51:9
+      at async plugins (D:\HeatGridViz\HeatGridViz\node_modules\tailwindcss\lib\plugin.js:38:17)
+      at async LazyResult.runAsync (D:\HeatGridViz\HeatGridViz\node_modules\postcss\lib\lazy-result.js:261:11)
+      at async compileCSS (D:\HeatGridViz\HeatGridViz\node_modules\vite\dist\node\chunks\dep-D_zLpgQd.js:36898:21)
+      at async TransformPluginContext.transform (D:\HeatGridViz\HeatGridViz\node_modules\vite\dist\node\chunks\dep-D_zLpgQd.js:36171:11)
+      at async PluginContainer.transform (D:\HeatGridViz\HeatGridViz\node_modules\vite\dist\node\chunks\dep-D_zLpgQd.js:49099:18)
+      at async loadAndTransform (D:\HeatGridViz\HeatGridViz\node_modules\vite\dist\node\chunks\dep-D_zLpgQd.js:51977:27)
+      at async viteTransformMiddleware (D:\HeatGridViz\HeatGridViz\node_modules\vite\dist\node\chunks\dep-D_zLpgQd.js:62105:24)
+PS D:\HeatGridViz\HeatGridViz> .\start-windows-alt.bat
+12:45:56 PM [express] serving on port 3000
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:warn Trusting the server certificate without validation.
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:46:15 PM [express] GET /api/dashboard/summary 304 in 194ms :: {"currentMakeupWater":0,"ctpRequirin…
+12:46:15 PM [express] GET /api/trends/overall-change/year 304 in 197ms :: {"change":0}
+12:46:15 PM [express] GET /api/trends/overall-change/week 304 in 197ms :: {"change":0}
+12:46:15 PM [express] GET /api/trends/week// 200 in 22ms
+12:46:15 PM [express] GET /api/trends/week/left/ 200 in 59ms
+12:46:15 PM [express] GET /api/trends/week/right/ 200 in 74ms
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+12:46:19 PM [express] GET /api/upload/history 304 in 20ms :: []
+12:46:30 PM [express] POST /api/upload 400 in 3ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+12:46:45 PM [express] POST /api/upload 400 in 2ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+12:46:58 PM [express] GET /api/upload/history 304 in 56ms :: []
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:47:08 PM [express] GET /api/trends/overall-change/year 304 in 10ms :: {"change":0}
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+12:47:08 PM [express] GET /api/trends/overall-change/week 304 in 12ms :: {"change":0}
+12:47:08 PM [express] GET /api/dashboard/summary 304 in 16ms :: {"currentMakeupWater":0,"ctpRequiring…
+12:47:08 PM [express] GET /api/trends/week/left/ 200 in 28ms
+12:47:08 PM [express] GET /api/trends/week/right/ 200 in 41ms
+12:47:08 PM [express] GET /api/trends/week// 200 in 44ms
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:47:10 PM [express] GET /api/ctp/ 304 in 19ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+12:47:12 PM [express] GET /api/trends/week/changes 304 in 12ms :: {"increases":[],"decreases":[]}
+12:47:12 PM [express] GET /api/trends/week/rts-stats 304 in 13ms :: []
+12:47:12 PM [express] GET /api/trends/week// 200 in 19ms
+12:47:50 PM [express] POST /api/upload 400 in 1ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+12:48:46 PM [express] GET /api/seed 200 in 17ms
+Çàâåðøèòü âûïîëíåíèå ïàêåòíîãî ôàéëà [Y(äà)/N(íåò)]? y
+PS D:\HeatGridViz\HeatGridViz> .\start-windows-alt.bat
+12:49:16 PM [express] serving on port 3000
+12:49:17 PM [express] GET /api/seed 200 in 1093ms
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+12:49:27 PM [express] GET /api/upload/history 304 in 70ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+12:49:31 PM [express] GET /api/dashboard/summary 304 in 36ms :: {"currentMakeupWater":0,"ctpRequiring…
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:49:31 PM [express] GET /api/trends/overall-change/year 304 in 9ms :: {"change":0}
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:49:31 PM [express] GET /api/trends/overall-change/week 304 in 7ms :: {"change":0}
+12:49:31 PM [express] GET /api/trends/week// 200 in 16ms
+12:49:31 PM [express] GET /api/trends/week/right/ 200 in 6ms
+12:49:31 PM [express] GET /api/trends/week/left/ 200 in 8ms
+prisma:query SELECT [dbo].[measurements].[id], [dbo].[measurements].[ctp_id], [dbo].[measurements].[date], [dbo].[measurements].[makeup_water], [dbo].[measurements].[undermix], [dbo].[measurements].[flow_g1], [dbo].[measurements].[temperature], [dbo].[measurements].[pressure], [dbo].[measurements].[created_at] FROM [dbo].[measurements] WHERE ([dbo].[measurement
+s].[ctp_id] = CAST(@P1 AS VARCHAR(255)) AND [dbo].[measurements].[date] >= @P2 AND [dbo].[measurements].[date] <= @P3) ORDER BY [dbo].[measurements].[date] ASC OFFSET @P4 ROWS
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:49:34 PM [express] GET /api/ctp/ 304 in 69ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+12:49:34 PM [express] GET /api/ctp/ctp-125/control-chart 304 in 82ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:49:39 PM [express] GET /api/trends/week/rts-stats 304 in 33ms :: []
+12:49:39 PM [express] GET /api/trends/week/changes 304 in 37ms :: {"increases":[],"decreases":[]}
+12:49:39 PM [express] GET /api/trends/week// 200 in 47ms
+12:49:48 PM [express] GET /api/seed 200 in 82ms
+12:49:52 PM [express] GET /api/seed 200 in 7ms
+prisma:query SELECT 1
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:49:55 PM [express] GET /api/trends/overall-change/week 304 in 15ms :: {"change":0}
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+12:49:55 PM [express] GET /api/dashboard/summary 304 in 20ms :: {"currentMakeupWater":0,"ctpRequiring…
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:49:55 PM [express] GET /api/trends/overall-change/year 304 in 28ms :: {"change":0}
+12:49:55 PM [express] GET /api/trends/week// 200 in 14ms
+12:49:55 PM [express] GET /api/trends/week/left/ 200 in 32ms
+12:49:55 PM [express] GET /api/trends/week/right/ 200 in 65ms
+prisma:query SELECT [dbo].[measurements].[id], [dbo].[measurements].[ctp_id], [dbo].[measurements].[date], [dbo].[measurements].[makeup_water], [dbo].[measurements].[undermix], [dbo].[measurements].[flow_g1], [dbo].[measurements].[temperature], [dbo].[measurements].[pressure], [dbo].[measurements].[created_at] FROM [dbo].[measurements] WHERE ([dbo].[measurement
+s].[ctp_id] = CAST(@P1 AS VARCHAR(255)) AND [dbo].[measurements].[date] >= @P2 AND [dbo].[measurements].[date] <= @P3) ORDER BY [dbo].[measurements].[date] ASC OFFSET @P4 ROWS
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:49:56 PM [express] GET /api/ctp/ 304 in 19ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+12:49:56 PM [express] GET /api/ctp/ctp-125/control-chart 304 in 26ms :: []
+12:49:58 PM [express] GET /api/trends/week// 200 in 11ms
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+12:49:58 PM [express] GET /api/trends/week/changes 304 in 20ms :: {"increases":[],"decreases":[]}
+12:49:58 PM [express] GET /api/trends/week/rts-stats 304 in 22ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:50:00 PM [express] GET /api/rts/stats 304 in 14ms :: []
+12:50:00 PM [express] GET /api/ctp 304 in 15ms :: []
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE 1=1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P1 ROWS
+12:50:01 PM [express] GET /api/recommendations 304 in 9ms :: []
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+12:50:20 PM [express] GET /api/upload/history 304 in 8ms :: []
+12:50:35 PM [express] POST /api/upload 400 in 3ms :: {"message":"Ôàéëû íå áûëè çàãðóæåíû"}
+Çàâåðøèòü âûïîëíåíèå ïàêåòíîãî ôàéëà [Y(äà)/N(íåò)]? y
+PS D:\HeatGridViz\HeatGridViz> npx prisma db push
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": SQL Server database
+
+The database is already in sync with the Prisma schema.
+
+? Generated Prisma Client (v6.16.3) to .\node_modules\@prisma\client in 214ms
+
+PS D:\HeatGridViz\HeatGridViz> .\start-windows-alt.bat
+12:52:32 PM [express] serving on port 3000
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+12:52:53 PM [express] GET /api/upload/history 304 in 90ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+12:53:05 PM [express] GET /api/rts/stats 304 in 5ms :: []
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:53:08 PM [express] GET /api/ctp/ 304 in 26ms :: []
+12:53:19 PM [express] GET /api/seed 200 in 14ms
+12:57:08 PM [express] POST /api/seed 200 in 13ms
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+12:57:22 PM [express] GET /api/dashboard/summary 304 in 20ms :: {"currentMakeupWater":0,"ctpRequiring…
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:57:22 PM [express] GET /api/trends/overall-change/year 304 in 42ms :: {"change":0}
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:57:22 PM [express] GET /api/trends/overall-change/week 304 in 18ms :: {"change":0}
+12:57:22 PM [express] GET /api/trends/week// 200 in 29ms
+12:57:22 PM [express] GET /api/trends/week/left/ 200 in 32ms
+12:57:22 PM [express] GET /api/trends/week/right/ 200 in 38ms
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[measurements].[id], [dbo].[measurements].[ctp_id], [dbo].[measurements].[date], [dbo].[measurements].[makeup_water], [dbo].[measurements].[undermix], [dbo].[measurements].[flow_g1], [dbo].[measurements].[temperature], [dbo].[measurements].[pressure], [dbo].[measurements].[created_at] FROM [dbo].[measurements] WHERE ([dbo].[measurement
+s].[ctp_id] = CAST(@P1 AS VARCHAR(255)) AND [dbo].[measurements].[date] >= @P2 AND [dbo].[measurements].[date] <= @P3) ORDER BY [dbo].[measurements].[date] ASC OFFSET @P4 ROWS
+12:57:24 PM [express] GET /api/ctp/ 304 in 65ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+12:57:24 PM [express] GET /api/ctp/ctp-125/control-chart 304 in 71ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:57:28 PM [express] GET /api/trends/week/changes 304 in 12ms :: {"increases":[],"decreases":[]}
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+12:57:28 PM [express] GET /api/trends/week/rts-stats 304 in 22ms :: []
+12:57:28 PM [express] GET /api/trends/week// 200 in 47ms
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:57:29 PM [express] GET /api/rts/stats 304 in 21ms :: []
+12:57:29 PM [express] GET /api/ctp 304 in 27ms :: []
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE 1=1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P1 ROWS
+12:57:30 PM [express] GET /api/recommendations 304 in 6ms :: []
+12:57:34 PM [express] GET /api/trends/week// 200 in 24ms
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+12:57:35 PM [express] GET /api/trends/month/changes 200 in 16ms :: {"increases":[],"decreases":[]}
+12:57:35 PM [express] GET /api/trends/month/rts-stats 200 in 15ms :: []
+12:57:35 PM [express] GET /api/trends/month// 200 in 26ms
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:57:36 PM [express] GET /api/trends/year/rts-stats 200 in 6ms :: []
+12:57:36 PM [express] GET /api/trends/year/changes 200 in 10ms :: {"increases":[],"decreases":[]}
+12:57:36 PM [express] GET /api/trends/year// 200 in 19ms
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:58:13 PM [express] GET /api/ctp/ 304 in 18ms :: []
+12:58:27 PM [express] GET /api/trends/week// 200 in 25ms
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:58:27 PM [express] GET /api/trends/week/changes 304 in 28ms :: {"increases":[],"decreases":[]}
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+12:58:27 PM [express] GET /api/trends/week/rts-stats 304 in 4ms :: []
+prisma:query SELECT 1
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:58:30 PM [express] GET /api/rts/stats 304 in 57ms :: []
+12:58:30 PM [express] GET /api/ctp 304 in 69ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:58:30 PM [express] GET /api/trends/overall-change/week 304 in 21ms :: {"change":0}
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE 1=1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P1 ROWS
+12:58:34 PM [express] GET /api/recommendations 304 in 4ms :: []
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE 1=1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P1 ROWS
+12:58:42 PM [express] GET /api/recommendations 304 in 8ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:58:44 PM [express] GET /api/trends/overall-change/year 304 in 91ms :: {"change":0}
+12:58:44 PM [express] GET /api/trends/overall-change/week 304 in 102ms :: {"change":0}
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+12:58:44 PM [express] GET /api/dashboard/summary 304 in 115ms :: {"currentMakeupWater":0,"ctpRequirin…
+12:58:44 PM [express] GET /api/trends/week// 200 in 19ms
+12:58:44 PM [express] GET /api/trends/week/right/ 200 in 24ms
+12:58:44 PM [express] GET /api/trends/week/left/ 200 in 27ms
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:58:52 PM [express] GET /api/ctp/ 304 in 9ms :: []
+prisma:query SELECT [dbo].[measurements].[id], [dbo].[measurements].[ctp_id], [dbo].[measurements].[date], [dbo].[measurements].[makeup_water], [dbo].[measurements].[undermix], [dbo].[measurements].[flow_g1], [dbo].[measurements].[temperature], [dbo].[measurements].[pressure], [dbo].[measurements].[created_at] FROM [dbo].[measurements] WHERE ([dbo].[measurement
+s].[ctp_id] = CAST(@P1 AS VARCHAR(255)) AND [dbo].[measurements].[date] >= @P2 AND [dbo].[measurements].[date] <= @P3) ORDER BY [dbo].[measurements].[date] ASC OFFSET @P4 ROWS
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+12:58:52 PM [express] GET /api/ctp/ctp-125/control-chart 304 in 12ms :: []
+12:59:13 PM [express] GET /api/trends/week// 200 in 16ms
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:59:13 PM [express] GET /api/trends/week/changes 304 in 31ms :: {"increases":[],"decreases":[]}
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+12:59:13 PM [express] GET /api/trends/week/rts-stats 304 in 35ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+12:59:14 PM [express] GET /api/rts/stats 304 in 22ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+12:59:14 PM [express] GET /api/ctp 304 in 4ms :: []
+12:59:28 PM [express] GET /api/trends/week// 200 in 22ms
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+12:59:52 PM [express] GET /api/upload/history 304 in 7ms :: []
+prisma:query SELECT [dbo].[uploaded_files].[id], [dbo].[uploaded_files].[filename], [dbo].[uploaded_files].[original_name], [dbo].[uploaded_files].[file_type], [dbo].[uploaded_files].[size], [dbo].[uploaded_files].[status], [dbo].[uploaded_files].[records_processed], [dbo].[uploaded_files].[errors], [dbo].[uploaded_files].[uploaded_at] FROM [dbo].[uploaded_file
+s] WHERE 1=1 ORDER BY [dbo].[uploaded_files].[uploaded_at] DESC OFFSET @P1 ROWS
+1:00:03 PM [express] GET /api/upload/history 304 in 9ms :: []
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+1:00:13 PM [express] GET /api/rts/stats 304 in 29ms :: []
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE 1=1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P1 ROWS
+1:00:15 PM [express] GET /api/recommendations 304 in 26ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+1:00:17 PM [express] GET /api/ctp 304 in 108ms :: []
+1:00:17 PM [express] GET /api/trends/overall-change/week 304 in 100ms :: {"change":0}
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+1:00:18 PM [express] GET /api/trends/week/changes 304 in 9ms :: {"increases":[],"decreases":[]}
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+1:00:18 PM [express] GET /api/trends/week/rts-stats 304 in 4ms :: []
+1:00:18 PM [express] GET /api/trends/week// 200 in 43ms
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+1:00:18 PM [express] GET /api/ctp/ 304 in 4ms :: []
+prisma:query SELECT [dbo].[measurements].[id], [dbo].[measurements].[ctp_id], [dbo].[measurements].[date], [dbo].[measurements].[makeup_water], [dbo].[measurements].[undermix], [dbo].[measurements].[flow_g1], [dbo].[measurements].[temperature], [dbo].[measurements].[pressure], [dbo].[measurements].[created_at] FROM [dbo].[measurements] WHERE ([dbo].[measurement
+s].[ctp_id] = CAST(@P1 AS VARCHAR(255)) AND [dbo].[measurements].[date] >= @P2 AND [dbo].[measurements].[date] <= @P3) ORDER BY [dbo].[measurements].[date] ASC OFFSET @P4 ROWS
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+1:00:19 PM [express] GET /api/ctp/ctp-125/control-chart 304 in 27ms :: []
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+1:00:20 PM [express] GET /api/trends/overall-change/year 304 in 10ms :: {"change":0}
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE [dbo].[recommendations].[status] = @P1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P2 ROWS
+1:00:20 PM [express] GET /api/dashboard/summary 304 in 19ms :: {"currentMakeupWater":0,"ctpRequiring…
+1:00:20 PM [express] GET /api/trends/week// 200 in 12ms
+1:00:20 PM [express] GET /api/trends/week/left/ 200 in 38ms
+1:00:20 PM [express] GET /api/trends/week/right/ 200 in 91ms
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+1:02:36 PM [express] GET /api/ctp/rts-1 404 in 24ms :: {"message":"ÖÒÏ íå íàéäåí"}
+Çàâåðøèòü âûïîëíåíèå ïàêåòíîãî ôàéëà [Y(äà)/N(íåò)]? y
+PS D:\HeatGridViz\HeatGridViz> .\start-windows-alt.bat
+1:03:26 PM [express] serving on port 3000
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+prisma:query SELECT [dbo].[measurements].[id], [dbo].[measurements].[ctp_id], [dbo].[measurements].[date], [dbo].[measurements].[makeup_water], [dbo].[measurements].[undermix], [dbo].[measurements].[flow_g1], [dbo].[measurements].[temperature], [dbo].[measurements].[pressure], [dbo].[measurements].[created_at] FROM [dbo].[measurements] WHERE ([dbo].[measurement
+s].[ctp_id] = CAST(@P1 AS VARCHAR(255)) AND [dbo].[measurements].[date] >= @P2 AND [dbo].[measurements].[date] <= @P3) ORDER BY [dbo].[measurements].[date] ASC OFFSET @P4 ROWS
+1:03:33 PM [express] GET /api/ctp/ 304 in 143ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+1:03:33 PM [express] GET /api/ctp/ctp-125/control-chart 304 in 158ms :: []
+1:03:36 PM [express] POST /api/seed 200 in 12ms
+prisma:warn Trusting the server certificate without validation.
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[measurements].[id], [dbo].[measurements].[ctp_id], [dbo].[measurements].[date], [dbo].[measurements].[makeup_water], [dbo].[measurements].[undermix], [dbo].[measurements].[flow_g1], [dbo].[measurements].[temperature], [dbo].[measurements].[pressure], [dbo].[measurements].[created_at] FROM [dbo].[measurements] WHERE ([dbo].[measurement
+s].[ctp_id] = CAST(@P1 AS VARCHAR(255)) AND [dbo].[measurements].[date] >= @P2 AND [dbo].[measurements].[date] <= @P3) ORDER BY [dbo].[measurements].[date] ASC OFFSET @P4 ROWS
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+1:04:27 PM [express] GET /api/ctp/ 304 in 35ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE ([dbo].[ctp].[id] = CAST(@P1 AS VARCHAR(255)) AND 1=1) ORDER BY 1 OFFSET @P2 RO
+WS FETCH NEXT @P3 ROWS ONLY
+1:04:27 PM [express] GET /api/ctp/ctp-125/control-chart 304 in 76ms :: []
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[rts].[id], [dbo].[rts].[name], [dbo].[rts].[code], [dbo].[rts].[location], [dbo].[rts].[created_at] FROM [dbo].[rts] WHERE 1=1
+1:04:42 PM [express] GET /api/rts/stats 304 in 17ms :: []
+prisma:query SELECT [dbo].[recommendations].[id], [dbo].[recommendations].[ctp_id], [dbo].[recommendations].[type], [dbo].[recommendations].[priority], [dbo].[recommendations].[title], [dbo].[recommendations].[description], [dbo].[recommendations].[actions], [dbo].[recommendations].[status], [dbo].[recommendations].[created_at], [dbo].[recommendations].[updated
+_at] FROM [dbo].[recommendations] WHERE 1=1 ORDER BY [dbo].[recommendations].[created_at] DESC OFFSET @P1 ROWS
+1:04:47 PM [express] GET /api/recommendations 304 in 5ms :: []
+prisma:query SELECT 1
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+1:05:05 PM [express] GET /api/ctp 304 in 31ms :: []
+prisma:query SELECT [dbo].[ctp].[id], [dbo].[ctp].[name], [dbo].[ctp].[code], [dbo].[ctp].[rts_id], [dbo].[ctp].[district_id], [dbo].[ctp].[ucl], [dbo].[ctp].[cl], [dbo].[ctp].[lcl], [dbo].[ctp].[has_meter], [dbo].[ctp].[meter_status], [dbo].[ctp].[created_at] FROM [dbo].[ctp] WHERE 1=1
+1:05:05 PM [express] GET /api/trends/overall-change/week 304 in 6ms :: {"change":0}
+
+
+
+
+
