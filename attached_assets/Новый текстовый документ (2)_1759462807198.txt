@@ -1,0 +1,19 @@
+PS D:\HeatGridViz\
+node:events:497
+      throw er; //
+      ^
+
+Error: listen ENOT
+    at Server.setu
+    at listenInClu
+    at node:net:22
+    at process.pro
+Emitted 'error' ev
+    at emitErrorNT
+    at process.pro
+  code: 'ENOTSUP',
+  errno: -4049,
+  syscall: 'listen
+  address: '0.0.0.
+  port: 5000
+}
