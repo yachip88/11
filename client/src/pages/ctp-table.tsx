@@ -196,7 +196,7 @@ export default function CTPTable() {
                         statusInfo.status === 'critical' ? 'font-bold text-red-600' :
                         statusInfo.status === 'warning' ? 'font-semibold text-yellow-600' : ''
                       }`}>
-                        {measurement?.makeupWater.toFixed(1) || '—'}
+                        {measurement ? measurement.makeupWater.toFixed(1) : '—'}
                       </td>
                       <td className={`font-mono ${
                         measurement && measurement.undermix !== null && measurement.undermix < -2 ? 'font-bold text-blue-600' : ''
