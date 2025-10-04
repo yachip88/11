@@ -43,7 +43,8 @@ export function ControlChart({ data }: ControlChartProps) {
         <YAxis 
           stroke="hsl(var(--muted-foreground))"
           fontSize={12}
-          domain={['dataMin - 5', 'dataMax + 5']}
+          domain={['auto', 'auto']}
+          tickFormatter={(value) => typeof value === 'number' ? value.toFixed(1) : value}
         />
         <Tooltip 
           formatter={formatTooltip}
@@ -88,10 +89,12 @@ export function ControlChart({ data }: ControlChartProps) {
           dot={(props: any) => {
             const isOutOfControl = data[props.index]?.isOutOfControl;
             const controlType = data[props.index]?.controlType;
+            const key = `dot-${props.index}`;
             
             if (isOutOfControl) {
               return (
                 <circle 
+                  key={key}
                   cx={props.cx} 
                   cy={props.cy} 
                   r={5}
@@ -101,7 +104,7 @@ export function ControlChart({ data }: ControlChartProps) {
                 />
               );
             }
-            return <circle cx={props.cx} cy={props.cy} r={3} fill="hsl(var(--primary))" />;
+            return <circle key={key} cx={props.cx} cy={props.cy} r={3} fill="hsl(var(--primary))" />;
           }}
           activeDot={{ r: 6, stroke: "hsl(var(--primary))", strokeWidth: 2, fill: "#fff" }}
           name="Подпитка"
