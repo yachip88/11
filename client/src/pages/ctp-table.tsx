@@ -18,8 +18,21 @@ export default function CTPTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  // Load RTS list
+  const { data: rtsList } = useQuery<{ id: string; name: string; code: string }[]>({
+    queryKey: ['/api/rts'],
+  });
+
   const { data: ctpList, isLoading } = useQuery<CTPWithDetails[]>({
-    queryKey: ['/api/ctp', selectedRTS !== "all" ? selectedRTS : undefined],
+    queryKey: ['/api/ctp', selectedRTS],
+    queryFn: async () => {
+      const url = selectedRTS === "all" 
+        ? '/api/ctp'
+        : `/api/ctp?rtsId=${selectedRTS}`;
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error('Failed to fetch CTP list');
+      return res.json();
+    },
   });
 
   const filteredCTP = ctpList?.filter(ctp => {
@@ -98,11 +111,11 @@ export default function CTPTable() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Все РТС</SelectItem>
-                <SelectItem value="rts-1">РТС-1 (ТЭЦ-5)</SelectItem>
-                <SelectItem value="rts-2">РТС-2 (ТЭЦ-3)</SelectItem>
-                <SelectItem value="rts-3">РТС-3 (ТЭЦ-2)</SelectItem>
-                <SelectItem value="rts-4">РТС-4 (ТЭЦ-4)</SelectItem>
-                <SelectItem value="rts-5">РТС-5 (КРК)</SelectItem>
+                {rtsList?.map((rts) => (
+                  <SelectItem key={rts.id} value={rts.id}>
+                    {rts.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
