@@ -191,19 +191,28 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {summary.rtsStats.map((rts) => {
-                  const percentage = ((rts.totalMakeupWater / summary.currentMakeupWater) * 100).toFixed(1);
-                  const status = rts.criticalCount > 0 ? 'warning' : 'normal';
-                  
-                  return (
-                    <RTSRow 
-                      key={rts.id} 
-                      rts={rts} 
-                      percentage={percentage} 
-                      status={status} 
-                    />
+                {(() => {
+                  const totalAbsolute = summary.rtsStats.reduce(
+                    (sum, rts) => sum + Math.abs(rts.totalMakeupWater), 
+                    0
                   );
-                })}
+                  
+                  return summary.rtsStats.map((rts) => {
+                    const percentage = totalAbsolute > 0 
+                      ? ((Math.abs(rts.totalMakeupWater) / totalAbsolute) * 100).toFixed(1)
+                      : '0.0';
+                    const status = rts.criticalCount > 0 ? 'warning' : 'normal';
+                    
+                    return (
+                      <RTSRow 
+                        key={rts.id} 
+                        rts={rts} 
+                        percentage={percentage} 
+                        status={status} 
+                      />
+                    );
+                  });
+                })()}
               </tbody>
             </table>
           </div>
