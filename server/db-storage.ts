@@ -280,7 +280,7 @@ export class DbStorage implements IStorage {
   }
 
   // Trends and Analytics
-  async getTrendData(period: 'day' | 'week' | 'month' | 'year', rtsId?: string): Promise<TrendData[]> {
+  async getTrendData(period: 'day' | 'week' | 'month' | 'year', rtsId?: string, rtsFilter?: string): Promise<TrendData[]> {
     const now = new Date();
     let startDate = new Date();
     
@@ -301,7 +301,31 @@ export class DbStorage implements IStorage {
 
     let ctpIds: string[] | undefined;
     
-    if (rtsId) {
+    if (rtsFilter) {
+      const locationMap: Record<string, string> = {
+        'right': 'Правый берег',
+        'left': 'Левый берег'
+      };
+      
+      const location = locationMap[rtsFilter];
+      
+      if (location) {
+        const rtsList = await db.rTS.findMany({
+          where: { location },
+          select: { id: true }
+        });
+        
+        const rtsIds = rtsList.map((r: { id: string }) => r.id);
+        
+        if (rtsIds.length > 0) {
+          const ctps = await db.cTP.findMany({
+            where: { rtsId: { in: rtsIds } },
+            select: { id: true }
+          });
+          ctpIds = ctps.map((c: { id: string }) => c.id);
+        }
+      }
+    } else if (rtsId) {
       const ctps = await db.cTP.findMany({
         where: { rtsId },
         select: { id: true }

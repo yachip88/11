@@ -211,13 +211,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/trends/:period", async (req, res) => {
     try {
       const { period } = req.params;
-      const { rtsId } = req.query;
+      const { rtsId, rtsFilter } = req.query;
       
       if (!['day', 'week', 'month', 'year'].includes(period)) {
         return res.status(400).json({ message: "Неверный период" });
       }
       
-      const trends = await storage.getTrendData(period as any, rtsId as string);
+      const trends = await storage.getTrendData(
+        period as any, 
+        rtsId as string, 
+        rtsFilter as string
+      );
       res.json(trends);
     } catch (error) {
       res.status(500).json({ message: "Ошибка получения трендов", error });

@@ -12,6 +12,18 @@ interface TrendChartProps {
 export function TrendChart({ period, rtsFilter, ctpId }: TrendChartProps) {
   const { data: trendData, isLoading } = useQuery<TrendData[]>({
     queryKey: ['/api/trends', period, rtsFilter, ctpId],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (rtsFilter) params.set('rtsFilter', rtsFilter);
+      if (ctpId) params.set('ctpId', ctpId);
+      
+      const queryString = params.toString();
+      const url = `/api/trends/${period}${queryString ? `?${queryString}` : ''}`;
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch trend data');
+      return response.json();
+    },
   });
 
   if (isLoading) {
