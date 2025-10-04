@@ -10,6 +10,20 @@ Preferred communication style: Simple, everyday language (Russian).
 
 # Recent Changes (October 2025)
 
+**Trend Chart Visibility Fix (October 4, 2025)**
+- Fixed TrendChart component to display visible lines connecting data points
+- Issue: Charts showed axes and numbers but lines were invisible in the plot area
+- Changes to TrendChart component:
+  - Added automatic YAxis domain calculation with min/max values and 10% padding
+  - Changed line color from CSS variable to explicit blue (#2563eb) for visibility
+  - Increased line thickness from 2 to 3 pixels
+  - Increased dot size from r:4 to r:5
+  - Added legend showing "Подпитка (т/ч)"
+  - Added margins for proper chart display
+  - Improved tooltip formatting to show "XX.X т/ч"
+- E2e tests confirm: visible blue lines, connected points, correct display of negative values
+- Fixed on all pages: Dashboard (3 charts), Trends page
+
 **Dashboard RTS Percentage Fix (October 4, 2025)**
 - Fixed RTS distribution percentage calculation to handle negative makeup water values correctly
 - Changed algorithm from dividing by signed total to using absolute values for denominator:
@@ -17,7 +31,6 @@ Preferred communication style: Simple, everyday language (Russian).
   - New: `percentage = (|rts.total| / Σ|all rts.total|) * 100` → always sums to ~100%
 - Example: РТС-2 = 140.08, total = 61 → old = 229.6%, new = 47.0%
 - E2e test confirms percentages now sum to 100.1% (within acceptable ±5% rounding tolerance)
-- Trend charts verified displaying correctly with both positive and negative values
 
 **Trend Chart Bank Filtering (October 4, 2025)**
 - Extended TrendChart component to support bank-based RTS filtering for trend visualization
