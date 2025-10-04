@@ -10,6 +10,15 @@ Preferred communication style: Simple, everyday language (Russian).
 
 # Recent Changes (October 2025)
 
+**Dashboard RTS Percentage Fix (October 4, 2025)**
+- Fixed RTS distribution percentage calculation to handle negative makeup water values correctly
+- Changed algorithm from dividing by signed total to using absolute values for denominator:
+  - Old: `percentage = (rts.total / currentMakeupWater) * 100` → could yield >100% when negatives present
+  - New: `percentage = (|rts.total| / Σ|all rts.total|) * 100` → always sums to ~100%
+- Example: РТС-2 = 140.08, total = 61 → old = 229.6%, new = 47.0%
+- E2e test confirms percentages now sum to 100.1% (within acceptable ±5% rounding tolerance)
+- Trend charts verified displaying correctly with both positive and negative values
+
 **Trend Chart Bank Filtering (October 4, 2025)**
 - Extended TrendChart component to support bank-based RTS filtering for trend visualization
 - Added custom queryFn to properly construct URLs with `rtsFilter` query parameters (`?rtsFilter=right` or `?rtsFilter=left`)
