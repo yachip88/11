@@ -10,16 +10,28 @@ Preferred communication style: Simple, everyday language (Russian).
 
 # Recent Changes (October 2025)
 
-**Bug Fixes and UI Improvements (October 4, 2025)**
-- Fixed upload history bug: `/api/import-model` now creates records in `uploaded_files` table
+**Upload History Bug Fix (October 4, 2025)**
+- Fixed `/api/import-model` to correctly create `uploaded_files` records with all required fields:
+  - `originalName`: Original filename from uploaded file
+  - `fileType`: MIME type from multer
+  - `size`: File size in bytes
+  - `status`: Tracking progression (processing → completed/error)
+- Fixed `records_processed` calculation to use actual database counts instead of parser results:
+  - Changed from `result.ctpCount + result.measurementCount + result.vyvodCount` (inflated by duplicates)
+  - To `db.cTP.count() + db.measurements.count() + db.vyvod.count()` (actual inserted records)
+  - Example: Parser reports 15 vyvods but database stores 10 unique (after deduplication) → recordsProcessed = 183,343 (not 183,348)
+- Added `/api/clear-database` endpoint for safe database cleanup in correct dependency order
+- Added import `db` from `./db` to routes.ts for database count queries
+- E2e tests passing: Upload history shows accurate record counts, CTP table displays correctly
+- Created `design_guidelines.md` with Carbon Design System guidelines for industrial dashboard
+
+**Previous Bug Fixes and UI Improvements (October 4, 2025)**
 - Fixed nullable handling in CTP table:
   - `ctp.rts?.code || '—'` for nullable RTS relations
   - `ctp.district?.name || '—'` for nullable district relations
   - `measurement ? measurement.makeupWater.toFixed(1) : '—'` for nullable measurements
 - Updated CTP table to display fullName (or name fallback) for all CTPs
 - All LSP diagnostics resolved
-- E2e tests passing: CTP table displays correctly, upload history working, 631+ CTPs in database
-- Created `design_guidelines.md` with Carbon Design System guidelines for industrial dashboard
 
 **Model_2.5.20.xlsm Parser and Import System (October 4, 2025)**
 - Added `Vyvod` (heat sources) table to database schema with one-to-many relationship to CTPs

@@ -6,6 +6,7 @@ import { ExcelParser } from "./excel-parser";
 import { TrendsCalculator } from "./trends-calculator";
 import { insertMeasurementSchema, insertRecommendationSchema, insertUploadedFileSchema } from "@shared/schema";
 import { z } from "zod";
+import { db } from "./db";
 
 const storage = new DbStorage();
 const trendsCalculator = new TrendsCalculator(storage);
@@ -530,6 +531,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Создаем запись в истории загрузок
       const uploadedFile = await storage.createUploadedFile({
         filename: req.file.originalname,
+        originalName: req.file.originalname,
+        fileType: req.file.mimetype,
+        size: req.file.size,
         status: 'processing'
       });
       uploadId = uploadedFile.id;
@@ -542,8 +546,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`✅ Импорт модели завершен:`, result);
 
+      // Подсчитываем реально созданные записи в базе данных
+      const actualCTPCount = await db.cTP.count();
+      const actualMeasurementCount = await db.measurements.count();
+      const actualVyvodCount = await db.vyvod.count();
+      const totalRecords = actualCTPCount + actualMeasurementCount + actualVyvodCount;
+
+      console.log(`📊 Реально создано записей: ${actualCTPCount} ЦТП + ${actualMeasurementCount} измерений + ${actualVyvodCount} выводов = ${totalRecords}`);
+
       // Обновляем статус загрузки
-      const totalRecords = result.ctpCount + result.measurementCount;
       await storage.updateFileStatus(
         uploadId, 
         'completed', 
@@ -599,6 +610,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(summary);
     } catch (error) {
       res.status(500).json({ message: "Ошибка получения сводки дашборда", error });
+    }
+  });
+
+  // Clear database
+  app.post("/api/clear-database", async (req, res) => {
+    try {
+      console.log('🗑️  Начало очистки базы данных...');
+      
+      // Удаляем в правильном порядке (с учетом внешних ключей)
+      await db.measurements.deleteMany({});
+      await db.statisticalParams.deleteMany({});
+      await db.recommendations.deleteMany({});
+      await db.uploadedFiles.deleteMany({});
+      await db.cTP.deleteMany({});
+      await db.vyvod.deleteMany({});
+      await db.districts.deleteMany({});
+      await db.rTS.deleteMany({});
+      
+      console.log('✅ База данных полностью очищена');
+      
+      res.json({ 
+        message: 'База данных успешно очищена',
+        cleared: {
+          measurements: true,
+          statisticalParams: true,
+          recommendations: true,
+          uploadedFiles: true,
+          ctp: true,
+          vyvod: true,
+          districts: true,
+          rts: true
+        }
+      });
+    } catch (error) {
+      console.error('Clear database error:', error);
+      res.status(500).json({ message: "Ошибка очистки базы данных", error: String(error) });
     }
   });
 
