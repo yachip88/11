@@ -329,6 +329,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let totalRecords = 0;
       const errors: string[] = [];
 
+      // Pre-load reference data once
+      let ctpList = await storage.getCTPList();
+      let rtsList = await storage.getRTSList();
+      const ctpCache = new Map(ctpList.map(c => [c.name, c]));
+      const defaultRTS = rtsList[0];
+      const districts = await storage.getDistrictsByRTS(defaultRTS.id);
+      const defaultDistrict = districts[0];
+
       for (const sheet of parsedSheets) {
         try {
           const measurements = ExcelParser.parseMeasurements(sheet);
@@ -336,26 +344,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           errors.push(...validationErrors);
 
-          // Save measurements to database
+          // Batch process measurements
+          const measurementBatch: any[] = [];
+          const affectedCtpIds = new Set<string>();
+
           for (const measurement of valid) {
             try {
-              // Find or create CTP by name or code
-              const ctpList = await storage.getCTPList();
-              let ctp = ctpList.find(c => 
-                c.name === measurement.ctpName || 
-                c.code === measurement.ctpCode
-              );
+              // Find or create CTP using cache
+              let ctp = ctpCache.get(measurement.ctpName);
 
               if (!ctp) {
                 // Extract code from name if possible (e.g., "ЦТП-125" -> "125")
                 const codeMatch = measurement.ctpName.match(/\d+/);
                 const code = measurement.ctpCode || codeMatch?.[0] || measurement.ctpName;
-                
-                // Use default RTS and district for now
-                const rtsList = await storage.getRTSList();
-                const defaultRTS = rtsList[0];
-                const districts = await storage.getDistrictsByRTS(defaultRTS.id);
-                const defaultDistrict = districts[0];
 
                 const newCtp = await storage.createCTP({
                   name: measurement.ctpName,
@@ -366,16 +367,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   meterStatus: 'working',
                 });
                 
-                // Refetch with details
+                // Get full CTP with relations
                 ctp = await storage.getCTPById(newCtp.id);
+                if (ctp) {
+                  ctpCache.set(measurement.ctpName, ctp);
+                }
               }
 
               if (!ctp) {
                 throw new Error(`Не удалось создать или найти ЦТП ${measurement.ctpName}`);
               }
 
-              // Save measurement
-              await storage.createMeasurement({
+              measurementBatch.push({
                 ctpId: ctp.id,
                 date: measurement.date,
                 makeupWater: measurement.makeupWater,
@@ -385,9 +388,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 pressure: measurement.pressure,
               });
 
-              totalRecords++;
+              affectedCtpIds.add(ctp.id);
             } catch (error) {
-              errors.push(`Ошибка сохранения данных для ${measurement.ctpName}: ${error}`);
+              errors.push(`Ошибка подготовки данных для ${measurement.ctpName}: ${error}`);
+            }
+          }
+
+          // Batch insert measurements (insert in chunks of 100)
+          const BATCH_SIZE = 100;
+          for (let i = 0; i < measurementBatch.length; i += BATCH_SIZE) {
+            const chunk = measurementBatch.slice(i, i + BATCH_SIZE);
+            for (const meas of chunk) {
+              await storage.createMeasurement(meas);
+              totalRecords++;
+            }
+            
+            // Log progress every batch
+            if (i % 500 === 0 && i > 0) {
+              console.log(`📊 Обработано ${i} из ${measurementBatch.length} записей...`);
+            }
+          }
+
+          console.log(`✅ Обработано ${measurementBatch.length} записей из листа ${sheet.sheetName}`);
+
+          // Update control boundaries only for affected CTPs
+          for (const ctpId of affectedCtpIds) {
+            const measurements = await storage.getMeasurements(ctpId);
+            if (measurements.length >= 10) {
+              const boundaries = await storage.calculateControlBoundaries(ctpId);
+              await storage.updateCTPBoundaries(ctpId, boundaries);
+              await storage.updateStatisticalParams({
+                ctpId: ctpId,
+                mean: boundaries.cl,
+                stdDev: (boundaries.ucl - boundaries.cl) / 3,
+                ucl: boundaries.ucl,
+                cl: boundaries.cl,
+                lcl: boundaries.lcl,
+                sampleSize: measurements.length,
+              });
             }
           }
         } catch (error) {
@@ -402,24 +440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateFileStatus(uploadId, 'completed', totalRecords, errors.length > 0 ? errors : undefined);
       }
 
-      // Calculate control boundaries for affected CTPs
-      const ctpList = await storage.getCTPList();
-      for (const ctp of ctpList) {
-        const measurements = await storage.getMeasurements(ctp.id);
-        if (measurements.length >= 10) {
-          const boundaries = await storage.calculateControlBoundaries(ctp.id);
-          await storage.updateCTPBoundaries(ctp.id, boundaries);
-          await storage.updateStatisticalParams({
-            ctpId: ctp.id,
-            mean: boundaries.cl,
-            stdDev: (boundaries.ucl - boundaries.cl) / 3,
-            ucl: boundaries.ucl,
-            cl: boundaries.cl,
-            lcl: boundaries.lcl,
-            sampleSize: measurements.length,
-          });
-        }
-      }
+      console.log(`🎉 Загрузка завершена! Обработано ${totalRecords} записей`);
     } catch (error) {
       await storage.updateFileStatus(uploadId, 'error', 0, [String(error)]);
     }
