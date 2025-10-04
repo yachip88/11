@@ -10,6 +10,15 @@ Preferred communication style: Simple, everyday language (Russian).
 
 # Recent Changes (October 2025)
 
+**Recommendations Page Fix (October 4, 2025)**
+- Fixed recommendations page to use real CTP data instead of hardcoded mock data
+- Changed CTP query type from `CTP[]` to `CTPWithDetails[]` to include related RTS and district information
+- Mock recommendations now dynamically generated from first 3 CTPs with UCL/LCL boundaries
+- Mock CTP names now show real data: `fullName (rts.code, district.name)` format
+- Updated `actions` field handling: converted to JSON string to match schema type (`string | null`)
+- Enhanced RecommendationCard to parse JSON action strings with safe fallback
+- Mock data now calculates UCL/excess values based on actual CTP boundaries
+
 **Upload History Bug Fix (October 4, 2025)**
 - Fixed `/api/import-model` to correctly create `uploaded_files` records with all required fields:
   - `originalName`: Original filename from uploaded file
