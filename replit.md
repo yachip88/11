@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language (Russian).
 
 # Recent Changes (October 2025)
 
+**Auto-creation of RTS and Districts from Excel Filename (October 4, 2025)**
+- Excel parser now extracts district name from filename format: "ЦТП name, address, code, 3-РТС, Кировский, ..."
+- File upload system automatically creates RTS if not found (e.g., "РТС-3" from "3-РТС" in filename)
+- File upload system automatically creates district if not found (e.g., "Кировский" after РТС in filename)
+- All CTPs created during upload are now properly linked to the correct RTS and district
+- Database completely cleared for fresh production data import
+
 **Migration to Prisma ORM with PostgreSQL (October 4, 2025)**
 - Migrated from MSSQL to PostgreSQL for development and testing
 - Created virtual PostgreSQL database in Replit environment

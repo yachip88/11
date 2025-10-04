@@ -9,6 +9,7 @@ export interface ParsedExcelData {
     lastModified?: Date;
     source?: string;
     rtsNumber?: string;
+    districtName?: string;
   };
 }
 
@@ -31,11 +32,21 @@ export class ExcelParser {
     return match ? match[1] : undefined;
   }
 
+  static extractDistrictFromFilename(filename: string): string | undefined {
+    // Формат: "..., 3-РТС, Кировский, ..."
+    // Ищем паттерн: число-РТС, затем название района после запятой
+    const match = filename.match(/\d+-РТС,\s*([^,]+)/i);
+    return match ? match[1].trim() : undefined;
+  }
+
   static async parseFile(buffer: Buffer, filename: string): Promise<ParsedExcelData[]> {
     try {
       const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
       const parsedSheets: ParsedExcelData[] = [];
       const rtsNumber = this.extractRTSNumber(filename);
+      const districtName = this.extractDistrictFromFilename(filename);
+
+      console.log(`📄 Извлечено из имени файла: РТС="${rtsNumber}", Район="${districtName}"`);
 
       for (const sheetName of workbook.SheetNames) {
         const worksheet = workbook.Sheets[sheetName];
@@ -79,6 +90,7 @@ export class ExcelParser {
             fileType: filename.split('.').pop() || 'unknown',
             source: filename,
             rtsNumber: rtsNumber,
+            districtName: districtName,
           }
         });
       }
@@ -150,8 +162,9 @@ export class ExcelParser {
     // Извлекаем имя ЦТП из метаданных (из названия файла)
     const fileCtpName = data.metadata?.source ? this.extractCTPFromFilename(data.metadata.source) : undefined;
     const fileRtsNumber = data.metadata?.rtsNumber;
+    const fileDistrictName = data.metadata?.districtName;
 
-    console.log(`📄 Из имени файла: ЦТП="${fileCtpName}", РТС="${fileRtsNumber}"`);
+    console.log(`📄 Из имени файла: ЦТП="${fileCtpName}", РТС="${fileRtsNumber}", Район="${fileDistrictName}"`);
 
     let processedCount = 0;
     let skippedCount = 0;
@@ -225,12 +238,13 @@ export class ExcelParser {
         // Используем имя ЦТП из файла, если не найдено в таблице
         const finalCtpName = ctpName || fileCtpName || `ЦТП-${ctpCode || 'Unknown'}`;
         const finalRtsName = fileRtsNumber ? `РТС-${fileRtsNumber}` : (rtsIndex !== -1 ? String(row[rtsIndex] || '').trim() : undefined);
+        const finalDistrictName = fileDistrictName || (districtIndex !== -1 ? String(row[districtIndex] || '').trim() : undefined);
 
         const measurement: CTEMeasurementData = {
           ctpName: finalCtpName,
           ctpCode: ctpCode || undefined,
           rtsName: finalRtsName,
-          districtName: districtIndex !== -1 ? String(row[districtIndex] || '').trim() : undefined,
+          districtName: finalDistrictName,
           date: parsedDate,
           makeupWater: Math.abs(makeupWater),
           undermix: undermixIndex !== -1 ? parseFloat(String(row[undermixIndex] || '0').replace(',', '.')) : undefined,

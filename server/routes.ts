@@ -336,9 +336,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let ctpList = await storage.getCTPList();
       let rtsList = await storage.getRTSList();
       const ctpCache = new Map(ctpList.map(c => [c.name, c]));
-      const defaultRTS = rtsList[0];
-      const districts = await storage.getDistrictsByRTS(defaultRTS.id);
-      const defaultDistrict = districts[0];
+      const rtsCache = new Map(rtsList.map(r => [r.name, r]));
+      const districtCache = new Map<string, any>();
+
+      // Load all districts into cache
+      for (const rts of rtsList) {
+        const districts = await storage.getDistrictsByRTS(rts.id);
+        for (const district of districts) {
+          districtCache.set(`${rts.id}:${district.name}`, district);
+        }
+      }
+      
+      // Extract RTS and District from file metadata
+      const fileRtsNumber = parsedSheets[0]?.metadata?.rtsNumber;
+      const fileDistrictName = parsedSheets[0]?.metadata?.districtName;
+      
+      console.log(`📦 Метаданные файла: РТС="${fileRtsNumber}", Район="${fileDistrictName}"`);
+      
+      // Auto-create RTS if not found
+      let targetRTS = rtsList[0] || null; // Default fallback
+      if (fileRtsNumber) {
+        const rtsName = `РТС-${fileRtsNumber}`;
+        let foundRTS = rtsCache.get(rtsName) || rtsList.find(r => r.name === rtsName);
+        
+        if (!foundRTS) {
+          console.log(`🆕 Создание нового РТС: ${rtsName}`);
+          foundRTS = await storage.createRTS({
+            name: rtsName,
+            code: `RTS-${fileRtsNumber}`,
+            location: 'Новосибирск'
+          });
+          rtsCache.set(rtsName, foundRTS);
+          rtsList.push(foundRTS);
+        }
+        targetRTS = foundRTS;
+      }
+      
+      // Auto-create District if not found
+      let targetDistrict: any;
+      if (fileDistrictName && targetRTS) {
+        const districtKey = `${targetRTS.id}:${fileDistrictName}`;
+        targetDistrict = districtCache.get(districtKey);
+        
+        if (!targetDistrict) {
+          console.log(`🆕 Создание нового района: ${fileDistrictName} для ${targetRTS.name}`);
+          targetDistrict = await storage.createDistrict({
+            name: fileDistrictName,
+            rtsId: targetRTS.id
+          });
+          districtCache.set(districtKey, targetDistrict);
+        }
+      } else {
+        // Fallback to existing district
+        const districts = await storage.getDistrictsByRTS(targetRTS.id);
+        targetDistrict = districts[0];
+      }
+      
+      if (!targetRTS || !targetDistrict) {
+        throw new Error('Не удалось определить РТС или район для загрузки данных');
+      }
+      
+      console.log(`✅ Используется РТС: ${targetRTS.name}, Район: ${targetDistrict.name}`);
 
       for (const sheet of parsedSheets) {
         try {
@@ -364,8 +422,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const newCtp = await storage.createCTP({
                   name: measurement.ctpName,
                   code: code,
-                  rtsId: defaultRTS.id,
-                  districtId: defaultDistrict.id,
+                  rtsId: targetRTS.id,
+                  districtId: targetDistrict.id,
                   hasMeter: true,
                   meterStatus: 'working',
                 });
