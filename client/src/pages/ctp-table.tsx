@@ -189,9 +189,9 @@ export default function CTPTable() {
 
                   return (
                     <tr key={ctp.id} className={rowClass} data-testid={`row-ctp-${ctp.id}`}>
-                      <td className="font-semibold">{ctp.name}</td>
-                      <td>{ctp.rts.code}</td>
-                      <td>{ctp.district.name}</td>
+                      <td className="font-semibold">{ctp.fullName || ctp.name}</td>
+                      <td>{ctp.rts?.code || '—'}</td>
+                      <td>{ctp.district?.name || '—'}</td>
                       <td className={`font-mono ${
                         statusInfo.status === 'critical' ? 'font-bold text-red-600' :
                         statusInfo.status === 'warning' ? 'font-semibold text-yellow-600' : ''

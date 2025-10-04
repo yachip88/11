@@ -518,12 +518,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Import Model_2.5.20.xlsm route
   app.post("/api/import-model", upload.single('file'), async (req, res) => {
+    let uploadId: string | null = null;
+    
     try {
       if (!req.file) {
         return res.status(400).json({ message: "Файл не был загружен" });
       }
 
       console.log(`📥 Начало импорта модели из файла: ${req.file.originalname}`);
+
+      // Создаем запись в истории загрузок
+      const uploadedFile = await storage.createUploadedFile({
+        filename: req.file.originalname,
+        status: 'processing'
+      });
+      uploadId = uploadedFile.id;
 
       // Динамический импорт ModelParser
       const { ModelParser } = await import('./model-parser.js');
@@ -533,6 +542,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`✅ Импорт модели завершен:`, result);
 
+      // Обновляем статус загрузки
+      const totalRecords = result.ctpCount + result.measurementCount;
+      await storage.updateFileStatus(
+        uploadId, 
+        'completed', 
+        totalRecords,
+        result.errors.length > 0 ? result.errors : undefined
+      );
+
       res.json({
         message: 'Импорт модели успешно завершен',
         ...result
@@ -540,6 +558,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error('❌ Ошибка импорта модели:', error);
+      
+      // Обновляем статус загрузки как ошибку
+      if (uploadId) {
+        await storage.updateFileStatus(
+          uploadId, 
+          'error', 
+          0, 
+          [error instanceof Error ? error.message : String(error)]
+        );
+      }
+      
       res.status(500).json({ 
         message: "Ошибка импорта модели", 
         error: error instanceof Error ? error.message : String(error)
