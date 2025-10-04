@@ -1,16 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RecommendationCard } from "@/components/recommendations/recommendation-card";
+import { Card, CardContent } from "@/components/ui/card";
 import { TriangleAlert, Settings, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Recommendation, CTPWithDetails } from "@shared/schema";
+import type { CTPWithDetails } from "@shared/schema";
 
 export default function Recommendations() {
-  const { data: recommendations, isLoading } = useQuery<Recommendation[]>({
-    queryKey: ['/api/recommendations'],
-  });
-
-  const { data: ctps, isLoading: ctpsLoading } = useQuery<CTPWithDetails[]>({
+  const { data: ctps, isLoading } = useQuery<CTPWithDetails[]>({
     queryKey: ['/api/ctp'],
   });
 
@@ -24,7 +19,7 @@ export default function Recommendations() {
     queryKey: ['/api/dashboard/summary'],
   });
 
-  if (isLoading || ctpsLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -42,12 +37,30 @@ export default function Recommendations() {
     );
   }
 
-  const ctpsWithBounds = ctps?.filter(c => c.ucl != null && c.lcl != null) || [];
-  const sampleCTPs = ctpsWithBounds.slice(0, 3);
+  const getCtpStatus = (ctp: CTPWithDetails): string => {
+    const measurement = ctp.latestMeasurement;
+    const now = new Date();
+    const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
+    
+    if (!measurement || new Date(measurement.date) < threeDaysAgo) {
+      return 'critical';
+    }
 
-  const criticalRecommendations = recommendations?.filter(r => r.priority === 'critical') || [];
-  const warningRecommendations = recommendations?.filter(r => r.priority === 'warning') || [];
-  const normalRecommendations = recommendations?.filter(r => r.priority === 'normal') || [];
+    if (ctp.ucl != null && ctp.cl != null && ctp.ucl > 0) {
+      const excessMultiplier = measurement.makeupWater / ctp.ucl;
+      
+      if (excessMultiplier >= 5) {
+        return 'critical';
+      } else if (measurement.makeupWater > ctp.ucl) {
+        return 'warning';
+      }
+    }
+    
+    return 'normal';
+  };
+
+  const criticalCTPs = ctps?.filter(ctp => getCtpStatus(ctp) === 'critical') || [];
+  const warningCTPs = ctps?.filter(ctp => getCtpStatus(ctp) === 'warning') || [];
 
   const criticalCount = summary?.outOfControlCount || 0;
   const warningCount = (summary?.ctpRequiringAttention || 0) - criticalCount;
@@ -102,40 +115,93 @@ export default function Recommendations() {
         </Card>
       </div>
 
-      {/* Critical Recommendations */}
-      {criticalRecommendations.length > 0 && (
+      {/* Critical CTPs */}
+      {criticalCTPs.length > 0 && (
         <div>
           <h4 className="font-semibold mb-4 text-red-600 flex items-center">
             <TriangleAlert className="w-5 h-5 mr-2" />
             Критические - требуют немедленного внимания
           </h4>
-          <div className="space-y-4">
-            {criticalRecommendations.map((rec) => (
-              <RecommendationCard 
-                key={rec.id} 
-                recommendation={rec} 
-                data-testid={`critical-rec-${rec.id}`}
-              />
-            ))}
+          <div className="space-y-3">
+            {criticalCTPs.map((ctp) => {
+              const measurement = ctp.latestMeasurement;
+              const isStale = !measurement || new Date(measurement.date) < new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+              
+              return (
+                <Card key={ctp.id} className="border-l-4 border-l-red-500" data-testid={`critical-ctp-${ctp.id}`}>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h5 className="font-semibold">{ctp.fullName || ctp.name}</h5>
+                        <p className="text-sm text-muted-foreground">
+                          {ctp.rts?.code || '—'} • {ctp.district?.name || '—'}
+                        </p>
+                        {isStale ? (
+                          <p className="text-sm text-red-600 mt-2">
+                            ⚠ Нет свежих данных (старше 3 суток)
+                          </p>
+                        ) : measurement && ctp.ucl && measurement.makeupWater >= 5 * ctp.ucl ? (
+                          <p className="text-sm text-red-600 mt-2">
+                            ⚠ Критичное превышение UCL ({(measurement.makeupWater / ctp.ucl).toFixed(1)}x)
+                          </p>
+                        ) : null}
+                      </div>
+                      <div className="text-right">
+                        {measurement && (
+                          <>
+                            <div className="font-semibold text-red-600">{measurement.makeupWater.toFixed(1)} т/ч</div>
+                            {ctp.ucl && <div className="text-sm text-muted-foreground">UCL: {ctp.ucl.toFixed(1)}</div>}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Warning Recommendations */}
-      {warningRecommendations.length > 0 && (
+      {/* Warning CTPs */}
+      {warningCTPs.length > 0 && (
         <div>
           <h4 className="font-semibold mb-4 text-yellow-600 flex items-center">
-            <TriangleAlert className="w-5 h-5 mr-2" />
+            <Settings className="w-5 h-5 mr-2" />
             Требуют внимания
           </h4>
-          <div className="space-y-4">
-            {warningRecommendations.map((rec) => (
-              <RecommendationCard 
-                key={rec.id} 
-                recommendation={rec}
-                data-testid={`warning-rec-${rec.id}`}
-              />
-            ))}
+          <div className="space-y-3">
+            {warningCTPs.map((ctp) => {
+              const measurement = ctp.latestMeasurement;
+              
+              return (
+                <Card key={ctp.id} className="border-l-4 border-l-yellow-500" data-testid={`warning-ctp-${ctp.id}`}>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h5 className="font-semibold">{ctp.fullName || ctp.name}</h5>
+                        <p className="text-sm text-muted-foreground">
+                          {ctp.rts?.code || '—'} • {ctp.district?.name || '—'}
+                        </p>
+                        {measurement && ctp.ucl && (
+                          <p className="text-sm text-yellow-600 mt-2">
+                            ⚠ Превышение UCL на {((measurement.makeupWater - ctp.ucl) / ctp.ucl * 100).toFixed(1)}%
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        {measurement && (
+                          <>
+                            <div className="font-semibold text-yellow-600">{measurement.makeupWater.toFixed(1)} т/ч</div>
+                            {ctp.ucl && <div className="text-sm text-muted-foreground">UCL: {ctp.ucl.toFixed(1)}</div>}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}
@@ -163,106 +229,6 @@ export default function Recommendations() {
         </Card>
       </div>
 
-      {/* Mock Critical Recommendations when no data */}
-      {(!recommendations || recommendations.length === 0) && sampleCTPs.length >= 3 && (
-        <>
-          <div>
-            <h4 className="font-semibold mb-4 text-red-600 flex items-center">
-              <TriangleAlert className="w-5 h-5 mr-2" />
-              Критические - требуют немедленного внимания
-            </h4>
-            <div className="space-y-4">
-              <RecommendationCard 
-                recommendation={{
-                  id: 'mock-1',
-                  ctpId: sampleCTPs[0].id,
-                  type: 'meter_check',
-                  priority: 'critical',
-                  title: `${sampleCTPs[0].fullName || sampleCTPs[0].name} (${sampleCTPs[0].rts?.code || 'РТС'}, ${sampleCTPs[0].district?.name || 'район'})`,
-                  description: 'Выход подпитки за верхнюю контрольную границу',
-                  actions: JSON.stringify([
-                    'Провести инспекцию на предмет утечек теплоносителя',
-                    'Проверить работоспособность приборов учета',
-                    'Проверить параметры работы подпиточных насосов',
-                    'При выявлении утечек - организовать устранение'
-                  ]),
-                  status: 'open',
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                }}
-                mockData={{
-                  currentMakeupWater: sampleCTPs[0].ucl ? Number((sampleCTPs[0].ucl * 1.15).toFixed(1)) : 40.3,
-                  ucl: sampleCTPs[0].ucl || 36.1,
-                  excess: sampleCTPs[0].ucl ? Number((sampleCTPs[0].ucl * 0.15).toFixed(1)) : 4.2,
-                  duration: '3 суток'
-                }}
-                data-testid="mock-critical-1"
-              />
-              
-              <RecommendationCard 
-                recommendation={{
-                  id: 'mock-2',
-                  ctpId: sampleCTPs[1].id,
-                  type: 'meter_check',
-                  priority: 'critical',
-                  title: `${sampleCTPs[1].fullName || sampleCTPs[1].name} (${sampleCTPs[1].rts?.code || 'РТС'}, ${sampleCTPs[1].district?.name || 'район'})`,
-                  description: 'Превышение подпитки сопоставимое с расходом G1',
-                  actions: JSON.stringify([
-                    'ПРИОРИТЕТ: Проверить приборы учета расхода теплоносителя',
-                    'Провести поверку счетчиков',
-                    'Проверить корректность передачи данных в АСКУЭ',
-                    'При необходимости - восстановить работоспособность приборов учета'
-                  ]),
-                  status: 'open',
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                }}
-                mockData={{
-                  currentMakeupWater: sampleCTPs[1].ucl ? Number((sampleCTPs[1].ucl * 1.10).toFixed(1)) : 45.8,
-                  ucl: sampleCTPs[1].ucl || 42.5,
-                  flowG1: sampleCTPs[1].ucl ? Number((sampleCTPs[1].ucl * 1.15).toFixed(1)) : 48.2,
-                  duration: '5 суток'
-                }}
-                data-testid="mock-critical-2"
-              />
-            </div>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4 text-yellow-600 flex items-center">
-              <TriangleAlert className="w-5 h-5 mr-2" />
-              Требуют внимания
-            </h4>
-            <div className="space-y-4">
-              <RecommendationCard 
-                recommendation={{
-                  id: 'mock-3',
-                  ctpId: sampleCTPs[2].id,
-                  type: 'inspection',
-                  priority: 'warning',
-                  title: `${sampleCTPs[2].fullName || sampleCTPs[2].name} (${sampleCTPs[2].rts?.code || 'РТС'}, ${sampleCTPs[2].district?.name || 'район'})`,
-                  description: 'Подпитка приближается к UCL',
-                  actions: JSON.stringify([
-                    'Усилить мониторинг параметров работы ЦТП',
-                    'Запланировать визуальную инспекцию на ближайшее время',
-                    'Проверить состояние запорной арматуры'
-                  ]),
-                  status: 'open',
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                }}
-                mockData={{
-                  currentMakeupWater: sampleCTPs[2].ucl ? Number((sampleCTPs[2].ucl * 0.95).toFixed(1)) : 35.2,
-                  ucl: sampleCTPs[2].ucl || 33.8,
-                  distanceToLimit: sampleCTPs[2].ucl ? Number((sampleCTPs[2].ucl * 0.05).toFixed(1)) : 2.3,
-                  trend: 'Растет'
-                }}
-                data-testid="mock-warning-1"
-              />
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }

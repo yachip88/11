@@ -37,8 +37,10 @@ export default function CTPTable() {
 
   const getCtpStatus = (ctp: CTPWithDetails): string => {
     const measurement = ctp.latestMeasurement;
+    const now = new Date();
+    const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
     
-    if (!measurement) {
+    if (!measurement || new Date(measurement.date) < threeDaysAgo) {
       return 'critical';
     }
 
@@ -69,8 +71,10 @@ export default function CTPTable() {
 
   const getStatusInfo = (ctp: CTPWithDetails) => {
     const measurement = ctp.latestMeasurement;
+    const now = new Date();
+    const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
     
-    if (!measurement) {
+    if (!measurement || new Date(measurement.date) < threeDaysAgo) {
       return { status: 'critical', label: 'Нет данных' };
     }
 
