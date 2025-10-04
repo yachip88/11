@@ -63,12 +63,15 @@ export class ExcelParser {
     
     const headers = data.headers.map(h => h.toLowerCase().trim());
     
+    console.log('📋 Заголовки в Excel файле:', headers);
+    
     // Try to find column indices with various possible names
     const ctpIndex = headers.findIndex(h => 
-      h.includes('цтп') || h.includes('наименование') || h.includes('объект')
+      h.includes('цтп') || h.includes('наименование') || h.includes('объект') || 
+      h.includes('название') || h.includes('name') || h.includes('точка')
     );
     const ctpCodeIndex = headers.findIndex(h => 
-      h.includes('код цтп') || h.includes('номер')
+      h.includes('код цтп') || h.includes('номер') || h.includes('код')
     );
     const rtsIndex = headers.findIndex(h => 
       h.includes('ртс') || h.includes('тэц') || h.includes('источник')
