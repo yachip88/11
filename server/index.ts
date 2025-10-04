@@ -9,12 +9,30 @@ declare module 'http' {
     rawBody: unknown
   }
 }
-app.use(express.json({
+
+const jsonParser = express.json({
   verify: (req, _res, buf) => {
     req.rawBody = buf;
   }
-}));
-app.use(express.urlencoded({ extended: false }));
+});
+
+const urlencodedParser = express.urlencoded({ extended: false });
+
+app.use((req, res, next) => {
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('multipart/form-data')) {
+    return next();
+  }
+  jsonParser(req, res, next);
+});
+
+app.use((req, res, next) => {
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('multipart/form-data')) {
+    return next();
+  }
+  urlencodedParser(req, res, next);
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

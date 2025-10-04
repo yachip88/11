@@ -9,9 +9,9 @@ datasource db {
 
 model RTS {
   id        String   @id @default(uuid()) @db.VarChar(255)
-  name      String   @db.Text
+  name      String   @db.NVarChar(Max)
   code      String   @unique @db.VarChar(255)
-  location  String   @db.Text
+  location  String   @db.NVarChar(Max)
   createdAt DateTime @default(now()) @map("created_at")
 
   districts Districts[]
@@ -22,7 +22,7 @@ model RTS {
 
 model Districts {
   id        String   @id @default(uuid()) @db.VarChar(255)
-  name      String   @db.Text
+  name      String   @db.NVarChar(Max)
   rtsId     String?  @map("rts_id") @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -34,7 +34,7 @@ model Districts {
 
 model CTP {
   id           String   @id @default(uuid()) @db.VarChar(255)
-  name         String   @db.Text
+  name         String   @db.NVarChar(Max)
   code         String   @unique @db.VarChar(255)
   rtsId        String?  @map("rts_id") @db.VarChar(255)
   districtId   String?  @map("district_id") @db.VarChar(255)
@@ -91,9 +91,9 @@ model Recommendations {
   ctpId       String   @map("ctp_id") @db.VarChar(255)
   type        String   @db.NVarChar(100)
   priority    String   @db.NVarChar(50)
-  title       String   @db.Text
-  description String   @db.Text
-  actions     String?  @db.Text
+  title       String   @db.NVarChar(Max)
+  description String   @db.NVarChar(Max)
+  actions     String?  @db.NVarChar(Max)
   status      String   @default("open") @db.NVarChar(50)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
@@ -105,13 +105,13 @@ model Recommendations {
 
 model UploadedFiles {
   id               String   @id @default(uuid()) @db.VarChar(255)
-  filename         String   @db.Text
-  originalName     String   @map("original_name") @db.Text
+  filename         String   @db.NVarChar(Max)
+  originalName     String   @map("original_name") @db.NVarChar(Max)
   fileType         String   @map("file_type") @db.NVarChar(50)
   size             Int
   status           String   @default("processing") @db.NVarChar(50)
   recordsProcessed Int      @default(0) @map("records_processed")
-  errors           String?  @db.Text
+  errors           String?  @db.NVarChar(Max)
   uploadedAt       DateTime @default(now()) @map("uploaded_at")
 
   @@map("uploaded_files")
