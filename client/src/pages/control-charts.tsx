@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,16 +11,24 @@ import type { CTPWithDetails, ControlChartData } from "@shared/schema";
 export default function ControlCharts() {
   const [selectedRTS, setSelectedRTS] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [selectedCTP, setSelectedCTP] = useState<string>("ctp-125");
+  const [selectedCTP, setSelectedCTP] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { data: ctpList, isLoading: loadingCTP } = useQuery<CTPWithDetails[]>({
-    queryKey: ['/api/ctp', selectedRTS !== "all" ? selectedRTS : undefined],
+  // Load RTS list
+  const { data: rtsList } = useQuery<{ id: string; name: string; code: string }[]>({
+    queryKey: ['/api/rts'],
   });
 
-  const { data: controlData, isLoading: loadingChart } = useQuery<ControlChartData[]>({
-    queryKey: ['/api/ctp', selectedCTP, 'control-chart'],
-    enabled: !!selectedCTP,
+  const { data: ctpList, isLoading: loadingCTP } = useQuery<CTPWithDetails[]>({
+    queryKey: ['/api/ctp', selectedRTS],
+    queryFn: async () => {
+      const url = selectedRTS === "all" 
+        ? '/api/ctp'
+        : `/api/ctp?rtsId=${selectedRTS}`;
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error('Failed to fetch CTP list');
+      return res.json();
+    },
   });
 
   const filteredCTP = ctpList?.filter(ctp => {
@@ -32,6 +40,35 @@ export default function ControlCharts() {
     
     return matchesSearch && matchesStatus;
   });
+
+  // Check if selectedCTP is valid (exists in filtered list)
+  const isSelectedCTPValid = filteredCTP?.some(ctp => ctp.id === selectedCTP) ?? false;
+
+  const { data: controlData, isLoading: loadingChart } = useQuery<ControlChartData[]>({
+    queryKey: ['/api/ctp', selectedCTP, 'control-chart'],
+    queryFn: async () => {
+      if (!selectedCTP) return [];
+      const res = await fetch(`/api/ctp/${selectedCTP}/control-chart`, { credentials: "include" });
+      if (!res.ok) throw new Error('Failed to fetch control chart data');
+      return res.json();
+    },
+    enabled: !!selectedCTP && isSelectedCTPValid,
+  });
+
+  // Set first CTP as default when list loads or when selected CTP is not in filtered list
+  useEffect(() => {
+    if (!filteredCTP) return;
+    
+    if (filteredCTP.length === 0) {
+      // Clear selection when no CTPs match filters
+      setSelectedCTP("");
+    } else {
+      const isSelectedInList = filteredCTP.some(ctp => ctp.id === selectedCTP);
+      if (!selectedCTP || !isSelectedInList) {
+        setSelectedCTP(filteredCTP[0].id);
+      }
+    }
+  }, [filteredCTP, selectedCTP]);
 
   const selectedCTPData = ctpList?.find(ctp => ctp.id === selectedCTP);
 
@@ -58,11 +95,11 @@ export default function ControlCharts() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Все РТС</SelectItem>
-                <SelectItem value="rts-1">РТС-1 (ТЭЦ-5)</SelectItem>
-                <SelectItem value="rts-2">РТС-2 (ТЭЦ-3)</SelectItem>
-                <SelectItem value="rts-3">РТС-3 (ТЭЦ-2)</SelectItem>
-                <SelectItem value="rts-4">РТС-4 (ТЭЦ-4)</SelectItem>
-                <SelectItem value="rts-5">РТС-5 (КРК)</SelectItem>
+                {rtsList?.map((rts) => (
+                  <SelectItem key={rts.id} value={rts.id}>
+                    {rts.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
