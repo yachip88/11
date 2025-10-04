@@ -166,7 +166,7 @@ export default function Recommendations() {
                     'Проверить работоспособность приборов учета',
                     'Проверить параметры работы подпиточных насосов',
                     'При выявлении утечек - организовать устранение'
-                  ],
+                  ].join('\n'),
                   status: 'open',
                   createdAt: new Date(),
                   updatedAt: new Date(),
@@ -193,7 +193,7 @@ export default function Recommendations() {
                     'Провести поверку счетчиков',
                     'Проверить корректность передачи данных в АСКУЭ',
                     'При необходимости - восстановить работоспособность приборов учета'
-                  ],
+                  ].join('\n'),
                   status: 'open',
                   createdAt: new Date(),
                   updatedAt: new Date(),
@@ -227,7 +227,7 @@ export default function Recommendations() {
                     'Усилить мониторинг параметров работы ЦТП',
                     'Запланировать визуальную инспекцию на ближайшее время',
                     'Проверить состояние запорной арматуры'
-                  ],
+                  ].join('\n'),
                   status: 'open',
                   createdAt: new Date(),
                   updatedAt: new Date(),

@@ -300,8 +300,8 @@ export class MemStorage implements IStorage {
       ucl: ctp.ucl ?? null,
       cl: ctp.cl ?? null,
       lcl: ctp.lcl ?? null,
-      hasMeter: ctp.hasMeter ?? null,
-      meterStatus: ctp.meterStatus ?? null,
+      hasMeter: ctp.hasMeter ?? true,
+      meterStatus: ctp.meterStatus ?? 'working',
       createdAt: new Date() 
     };
     this.ctpData.set(id, newCTP);
@@ -334,7 +334,7 @@ export class MemStorage implements IStorage {
     const newMeasurement: Measurement = { 
       ...measurement, 
       id, 
-      undermix: measurement.undermix ?? null,
+      undermix: measurement.undermix ?? 0,
       flowG1: measurement.flowG1 ?? null,
       temperature: measurement.temperature ?? null,
       pressure: measurement.pressure ?? null,
@@ -426,7 +426,7 @@ export class MemStorage implements IStorage {
     const newRecommendation: Recommendation = { 
       ...recommendation, 
       id, 
-      status: recommendation.status ?? null,
+      status: recommendation.status ?? 'open',
       actions: recommendation.actions ?? null,
       createdAt: new Date(), 
       updatedAt: new Date() 
@@ -512,8 +512,8 @@ export class MemStorage implements IStorage {
     const newFile: UploadedFile = { 
       ...file, 
       id, 
-      status: file.status ?? null,
-      recordsProcessed: file.recordsProcessed ?? null,
+      status: file.status ?? 'processing',
+      recordsProcessed: file.recordsProcessed ?? 0,
       errors: file.errors ?? null,
       uploadedAt: new Date() 
     };
@@ -536,8 +536,8 @@ export class MemStorage implements IStorage {
       this.uploadedFilesData.set(id, { 
         ...file, 
         status, 
-        recordsProcessed: recordsProcessed || file.recordsProcessed,
-        errors: errors || file.errors 
+        recordsProcessed: recordsProcessed ?? file.recordsProcessed,
+        errors: errors ? (Array.isArray(errors) ? JSON.stringify(errors) : String(errors)) : file.errors
       });
     }
   }
