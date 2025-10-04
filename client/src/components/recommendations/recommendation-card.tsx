@@ -147,13 +147,22 @@ export function RecommendationCard({ recommendation, mockData }: RecommendationC
         <div className="text-sm mb-3">
           <strong>Рекомендации:</strong>
           <ul className="mt-2 ml-6 space-y-1 leading-relaxed">
-            {Array.isArray(recommendation.actions) ? 
-              recommendation.actions.map((action, index) => (
-                <li key={index} className="list-disc">{action}</li>
-              )) :
-              typeof recommendation.actions === 'string' ? 
-                <li className="list-disc">{recommendation.actions}</li> : null
-            }
+            {(() => {
+              if (!recommendation.actions) return null;
+              
+              try {
+                const parsedActions = JSON.parse(recommendation.actions);
+                if (Array.isArray(parsedActions)) {
+                  return parsedActions.map((action, index) => (
+                    <li key={index} className="list-disc">{action}</li>
+                  ));
+                }
+              } catch {
+                return <li className="list-disc">{recommendation.actions}</li>;
+              }
+              
+              return <li className="list-disc">{recommendation.actions}</li>;
+            })()}
           </ul>
         </div>
 

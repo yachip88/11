@@ -3,14 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RecommendationCard } from "@/components/recommendations/recommendation-card";
 import { TriangleAlert, Settings, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Recommendation } from "@shared/schema";
+import type { Recommendation, CTPWithDetails } from "@shared/schema";
 
 export default function Recommendations() {
   const { data: recommendations, isLoading } = useQuery<Recommendation[]>({
     queryKey: ['/api/recommendations'],
   });
 
-  if (isLoading) {
+  const { data: ctps, isLoading: ctpsLoading } = useQuery<CTPWithDetails[]>({
+    queryKey: ['/api/ctp'],
+  });
+
+  if (isLoading || ctpsLoading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -27,6 +31,9 @@ export default function Recommendations() {
       </div>
     );
   }
+
+  const ctpsWithBounds = ctps?.filter(c => c.ucl != null && c.lcl != null) || [];
+  const sampleCTPs = ctpsWithBounds.slice(0, 3);
 
   const criticalRecommendations = recommendations?.filter(r => r.priority === 'critical') || [];
   const warningRecommendations = recommendations?.filter(r => r.priority === 'warning') || [];
@@ -145,7 +152,7 @@ export default function Recommendations() {
       </div>
 
       {/* Mock Critical Recommendations when no data */}
-      {(!recommendations || recommendations.length === 0) && (
+      {(!recommendations || recommendations.length === 0) && sampleCTPs.length >= 3 && (
         <>
           <div>
             <h4 className="font-semibold mb-4 text-red-600 flex items-center">
@@ -156,25 +163,25 @@ export default function Recommendations() {
               <RecommendationCard 
                 recommendation={{
                   id: 'mock-1',
-                  ctpId: 'ctp-125',
+                  ctpId: sampleCTPs[0].id,
                   type: 'meter_check',
                   priority: 'critical',
-                  title: 'ЦТП-125 (РТС-1, Ленинский)',
+                  title: `${sampleCTPs[0].fullName || sampleCTPs[0].name} (${sampleCTPs[0].rts?.code || 'РТС'}, ${sampleCTPs[0].district?.name || 'район'})`,
                   description: 'Выход подпитки за верхнюю контрольную границу',
-                  actions: [
+                  actions: JSON.stringify([
                     'Провести инспекцию на предмет утечек теплоносителя',
                     'Проверить работоспособность приборов учета',
                     'Проверить параметры работы подпиточных насосов',
                     'При выявлении утечек - организовать устранение'
-                  ],
+                  ]),
                   status: 'open',
                   createdAt: new Date(),
                   updatedAt: new Date(),
                 }}
                 mockData={{
-                  currentMakeupWater: 40.3,
-                  ucl: 36.1,
-                  excess: 4.2,
+                  currentMakeupWater: sampleCTPs[0].ucl ? Number((sampleCTPs[0].ucl * 1.15).toFixed(1)) : 40.3,
+                  ucl: sampleCTPs[0].ucl || 36.1,
+                  excess: sampleCTPs[0].ucl ? Number((sampleCTPs[0].ucl * 0.15).toFixed(1)) : 4.2,
                   duration: '3 суток'
                 }}
                 data-testid="mock-critical-1"
@@ -183,25 +190,25 @@ export default function Recommendations() {
               <RecommendationCard 
                 recommendation={{
                   id: 'mock-2',
-                  ctpId: 'ctp-156',
+                  ctpId: sampleCTPs[1].id,
                   type: 'meter_check',
                   priority: 'critical',
-                  title: 'ЦТП-156 (РТС-4, Кировский)',
+                  title: `${sampleCTPs[1].fullName || sampleCTPs[1].name} (${sampleCTPs[1].rts?.code || 'РТС'}, ${sampleCTPs[1].district?.name || 'район'})`,
                   description: 'Превышение подпитки сопоставимое с расходом G1',
-                  actions: [
+                  actions: JSON.stringify([
                     'ПРИОРИТЕТ: Проверить приборы учета расхода теплоносителя',
                     'Провести поверку счетчиков',
                     'Проверить корректность передачи данных в АСКУЭ',
                     'При необходимости - восстановить работоспособность приборов учета'
-                  ],
+                  ]),
                   status: 'open',
                   createdAt: new Date(),
                   updatedAt: new Date(),
                 }}
                 mockData={{
-                  currentMakeupWater: 45.8,
-                  ucl: 42.5,
-                  flowG1: 48.2,
+                  currentMakeupWater: sampleCTPs[1].ucl ? Number((sampleCTPs[1].ucl * 1.10).toFixed(1)) : 45.8,
+                  ucl: sampleCTPs[1].ucl || 42.5,
+                  flowG1: sampleCTPs[1].ucl ? Number((sampleCTPs[1].ucl * 1.15).toFixed(1)) : 48.2,
                   duration: '5 суток'
                 }}
                 data-testid="mock-critical-2"
@@ -218,24 +225,24 @@ export default function Recommendations() {
               <RecommendationCard 
                 recommendation={{
                   id: 'mock-3',
-                  ctpId: 'ctp-317',
+                  ctpId: sampleCTPs[2].id,
                   type: 'inspection',
                   priority: 'warning',
-                  title: 'ЦТП-317 (РТС-3, Ленинский)',
+                  title: `${sampleCTPs[2].fullName || sampleCTPs[2].name} (${sampleCTPs[2].rts?.code || 'РТС'}, ${sampleCTPs[2].district?.name || 'район'})`,
                   description: 'Подпитка приближается к UCL',
-                  actions: [
+                  actions: JSON.stringify([
                     'Усилить мониторинг параметров работы ЦТП',
                     'Запланировать визуальную инспекцию на ближайшее время',
                     'Проверить состояние запорной арматуры'
-                  ],
+                  ]),
                   status: 'open',
                   createdAt: new Date(),
                   updatedAt: new Date(),
                 }}
                 mockData={{
-                  currentMakeupWater: 35.2,
-                  ucl: 33.8,
-                  distanceToLimit: 2.3,
+                  currentMakeupWater: sampleCTPs[2].ucl ? Number((sampleCTPs[2].ucl * 0.95).toFixed(1)) : 35.2,
+                  ucl: sampleCTPs[2].ucl || 33.8,
+                  distanceToLimit: sampleCTPs[2].ucl ? Number((sampleCTPs[2].ucl * 0.05).toFixed(1)) : 2.3,
                   trend: 'Растет'
                 }}
                 data-testid="mock-warning-1"
