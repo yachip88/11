@@ -141,8 +141,12 @@ export class ModelParser {
     const address = this.cleanString(row[columnMap['Адрес']]);
     const yearBuilt = this.parseNumber(row[columnMap['Год постройки']]);
     const vyvodName = this.cleanString(row[columnMap['Вывод']]);
-    const districtName = this.cleanString(row[columnMap['Микрорайон отчет']]);
-    const rtsCode = this.cleanString(row[columnMap['№ РТС']]);
+    
+    // Извлекаем номер РТС из столбца "Микрорайон отчет" (формат: "3-РТС" или "РТС-3")
+    const microraionRaw = this.cleanString(row[columnMap['Микрорайон отчет']]);
+    const rtsCode = this.extractRTSCode(microraionRaw);
+    const districtName = microraionRaw; // Сохраняем полное значение как название района
+    
     const status = this.cleanString(row[columnMap['Статус']]);
     const commentPTU = this.cleanString(row[columnMap['Комментарий ПТУ']]);
     const commentRTS = this.cleanString(row[columnMap['Комментарий РТС']]);
@@ -238,13 +242,13 @@ export class ModelParser {
       } else {
         const created = await db.rTS.create({
           data: {
-            name: rtsCode,
-            code: rtsCode,
+            name: `РТС-${rtsCode}`,  // Правильный формат названия: "РТС-3"
+            code: rtsCode,           // Только номер: "3"
             location: 'Новосибирск'
           }
         });
         rtsMap.set(rtsCode, created.id);
-        console.log(`✓ Создан РТС: ${rtsCode}`);
+        console.log(`✓ Создан РТС-${rtsCode}`);
       }
     }
 
@@ -428,6 +432,29 @@ export class ModelParser {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const excelEpoch = new Date(1899, 11, 30); // 30 декабря 1899
     return new Date(excelEpoch.getTime() + excelDate * millisecondsPerDay);
+  }
+
+  /**
+   * Извлекает номер РТС из строки "Микрорайон отчет"
+   * Примеры: "3-РТС" -> "3", "РТС-3" -> "3", "5 РТС" -> "5"
+   */
+  private extractRTSCode(microraionValue: string | null): string | null {
+    if (!microraionValue) return null;
+    
+    // Ищем паттерны: "число-РТС", "РТС-число", "число РТС"
+    const patterns = [
+      /(\d+)\s*-?\s*РТС/i,  // "3-РТС" или "3 РТС"
+      /РТС\s*-?\s*(\d+)/i   // "РТС-3" или "РТС 3"
+    ];
+    
+    for (const pattern of patterns) {
+      const match = microraionValue.match(pattern);
+      if (match && match[1]) {
+        return match[1]; // Возвращаем только номер (например, "3")
+      }
+    }
+    
+    return null;
   }
 
   /**
