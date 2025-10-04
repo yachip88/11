@@ -12,6 +12,7 @@ import type { UploadedFile } from "@shared/schema";
 
 export default function DataUpload() {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [selectedModelFile, setSelectedModelFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -47,6 +48,54 @@ export default function DataUpload() {
       });
     },
   });
+
+  const importModelMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await apiRequest('POST', '/api/import-model', formData);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Модель импортирована успешно",
+        description: `Импортировано: ${data.ctpCount} ЦТП, ${data.measurementCount} измерений, ${data.vyvodCount} выводов`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/ctp'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/rts'] });
+      setSelectedModelFile(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Ошибка импорта модели",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleModelFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      if (['xlsm'].includes(extension || '')) {
+        setSelectedModelFile(file);
+      } else {
+        toast({
+          title: "Неподдерживаемый файл",
+          description: "Для импорта модели поддерживается только файл Model_2.5.20.xlsm",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleImportModel = () => {
+    if (selectedModelFile) {
+      importModelMutation.mutate(selectedModelFile);
+    }
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -145,6 +194,74 @@ export default function DataUpload() {
           Импорт данных из Excel файлов (XLSM, XLSX, XLSB) с показаниями приборов учета
         </p>
       </div>
+
+      {/* Model Import Section */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <FileSpreadsheet className="w-5 h-5 mr-2 text-blue-600" />
+            Импорт аналитической модели Model_2.5.20.xlsm
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <Lightbulb className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm text-blue-900 dark:text-blue-100 font-medium">
+                    Импорт полной аналитической модели
+                  </p>
+                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                    Загрузите файл Model_2.5.20.xlsm для импорта полного справочника ЦТП с историческими данными, выводами, комментариями и расширенной статистикой.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Input
+                  id="modelFileInput"
+                  type="file"
+                  accept=".xlsm"
+                  onChange={handleModelFileSelect}
+                  data-testid="model-file-input"
+                  className="cursor-pointer"
+                />
+              </div>
+              <Button
+                onClick={handleImportModel}
+                disabled={!selectedModelFile || importModelMutation.isPending}
+                data-testid="button-import-model"
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {importModelMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    Импорт...
+                  </>
+                ) : (
+                  <>
+                    <CloudUpload className="w-4 h-4 mr-2" />
+                    Импортировать модель
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {selectedModelFile && (
+              <div className="flex items-center p-2 bg-muted rounded">
+                <FileSpreadsheet className="w-4 h-4 mr-2 text-blue-600" />
+                <span className="text-sm">{selectedModelFile.name}</span>
+                <span className="text-xs text-muted-foreground ml-2">
+                  ({(selectedModelFile.size / 1024 / 1024).toFixed(1)} MB)
+                </span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Upload Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

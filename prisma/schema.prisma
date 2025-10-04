@@ -32,21 +32,50 @@ model Districts {
   @@map("districts")
 }
 
+model Vyvod {
+  id        String   @id @default(uuid())
+  name      String   @db.Text
+  code      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ctps CTP[]
+
+  @@map("vyvod")
+}
+
 model CTP {
   id           String   @id @default(uuid())
   name         String   @db.Text
   code         String   @unique
+  fullName     String?  @map("full_name") @db.Text
+  city         String?  @db.Text
+  address      String?  @db.Text
+  yearBuilt    Int?     @map("year_built")
   rtsId        String?  @map("rts_id")
   districtId   String?  @map("district_id")
+  vyvodId      String?  @map("vyvod_id")
   ucl          Float?
   cl           Float?
   lcl          Float?
   hasMeter     Boolean  @default(true) @map("has_meter")
   meterStatus  String   @default("working") @map("meter_status")
+  status       String?  @db.Text
+  commentPTU   String?  @map("comment_ptu") @db.Text
+  commentRTS   String?  @map("comment_rts") @db.Text
+  commentSKIPiA String? @map("comment_skipia") @db.Text
+  av365G1      Float?   @map("av_365_g1")
+  av365G2      Float?   @map("av_365_g2")
+  min730       Float?   @map("min_730")
+  min365       Float?   @map("min_365")
+  min30        Float?   @map("min_30")
+  min7         Float?   @map("min_7")
+  percentFromG1 Float?  @map("percent_from_g1")
+  normativMinenergo Float? @map("normativ_minenergo")
   createdAt    DateTime @default(now()) @map("created_at")
 
   rts                 RTS?                  @relation(fields: [rtsId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   district            Districts?            @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  vyvod               Vyvod?                @relation(fields: [vyvodId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   measurements        Measurements[]
   statisticalParams   StatisticalParams[]
   recommendations     Recommendations[]

@@ -17,17 +17,41 @@ export type District = {
   createdAt: Date;
 };
 
+export type Vyvod = {
+  id: string;
+  name: string;
+  code: string;
+  createdAt: Date;
+};
+
 export type CTP = {
   id: string;
   name: string;
   code: string;
+  fullName: string | null;
+  city: string | null;
+  address: string | null;
+  yearBuilt: number | null;
   rtsId: string | null;
   districtId: string | null;
+  vyvodId: string | null;
   ucl: number | null;
   cl: number | null;
   lcl: number | null;
   hasMeter: boolean;
   meterStatus: string;
+  status: string | null;
+  commentPTU: string | null;
+  commentRTS: string | null;
+  commentSKIPiA: string | null;
+  av365G1: number | null;
+  av365G2: number | null;
+  min730: number | null;
+  min365: number | null;
+  min30: number | null;
+  min7: number | null;
+  percentFromG1: number | null;
+  normativMinenergo: number | null;
   createdAt: Date;
 };
 
@@ -92,16 +116,38 @@ export const insertDistrictSchema = z.object({
   rtsId: z.string().optional().nullable(),
 });
 
+export const insertVyvodSchema = z.object({
+  name: z.string(),
+  code: z.string(),
+});
+
 export const insertCtpSchema = z.object({
   name: z.string(),
   code: z.string(),
+  fullName: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  yearBuilt: z.number().optional().nullable(),
   rtsId: z.string().optional().nullable(),
   districtId: z.string().optional().nullable(),
+  vyvodId: z.string().optional().nullable(),
   ucl: z.number().optional().nullable(),
   cl: z.number().optional().nullable(),
   lcl: z.number().optional().nullable(),
   hasMeter: z.boolean().optional(),
   meterStatus: z.string().optional(),
+  status: z.string().optional().nullable(),
+  commentPTU: z.string().optional().nullable(),
+  commentRTS: z.string().optional().nullable(),
+  commentSKIPiA: z.string().optional().nullable(),
+  av365G1: z.number().optional().nullable(),
+  av365G2: z.number().optional().nullable(),
+  min730: z.number().optional().nullable(),
+  min365: z.number().optional().nullable(),
+  min30: z.number().optional().nullable(),
+  min7: z.number().optional().nullable(),
+  percentFromG1: z.number().optional().nullable(),
+  normativMinenergo: z.number().optional().nullable(),
 });
 
 export const insertMeasurementSchema = z.object({
@@ -147,6 +193,7 @@ export const insertUploadedFileSchema = z.object({
 // Insert types
 export type InsertRTS = z.infer<typeof insertRtsSchema>;
 export type InsertDistrict = z.infer<typeof insertDistrictSchema>;
+export type InsertVyvod = z.infer<typeof insertVyvodSchema>;
 export type InsertCTP = z.infer<typeof insertCtpSchema>;
 export type InsertMeasurement = z.infer<typeof insertMeasurementSchema>;
 export type InsertStatisticalParams = z.infer<typeof insertStatisticalParamsSchema>;
@@ -155,8 +202,9 @@ export type InsertUploadedFile = z.infer<typeof insertUploadedFileSchema>;
 
 // Extended types for API responses
 export type CTPWithDetails = CTP & {
-  rts: RTS;
-  district: District;
+  rts: RTS | null;
+  district: District | null;
+  vyvod: Vyvod | null;
   latestMeasurement?: Measurement;
   statisticalParams?: StatisticalParams;
   recommendations: Recommendation[];

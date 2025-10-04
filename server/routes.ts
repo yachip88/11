@@ -516,6 +516,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import Model_2.5.20.xlsm route
+  app.post("/api/import-model", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Файл не был загружен" });
+      }
+
+      console.log(`📥 Начало импорта модели из файла: ${req.file.originalname}`);
+
+      // Динамический импорт ModelParser
+      const { ModelParser } = await import('./model-parser.js');
+      const parser = new ModelParser(req.file.buffer);
+      
+      const result = await parser.parseAndImport();
+
+      console.log(`✅ Импорт модели завершен:`, result);
+
+      res.json({
+        message: 'Импорт модели успешно завершен',
+        ...result
+      });
+
+    } catch (error) {
+      console.error('❌ Ошибка импорта модели:', error);
+      res.status(500).json({ 
+        message: "Ошибка импорта модели", 
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Dashboard summary route
   app.get("/api/dashboard/summary", async (req, res) => {
     try {
