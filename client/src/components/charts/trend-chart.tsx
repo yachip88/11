@@ -5,15 +5,17 @@ import type { TrendData } from "@shared/schema";
 
 interface TrendChartProps {
   period: 'day' | 'week' | 'month' | 'year';
+  rtsId?: string;
   rtsFilter?: string;
   ctpId?: string;
 }
 
-export function TrendChart({ period, rtsFilter, ctpId }: TrendChartProps) {
+export function TrendChart({ period, rtsId, rtsFilter, ctpId }: TrendChartProps) {
   const { data: trendData, isLoading } = useQuery<TrendData[]>({
-    queryKey: ['/api/trends', period, rtsFilter, ctpId],
+    queryKey: ['/api/trends', period, rtsId, rtsFilter, ctpId],
     queryFn: async () => {
       const params = new URLSearchParams();
+      if (rtsId) params.set('rtsId', rtsId);
       if (rtsFilter) params.set('rtsFilter', rtsFilter);
       if (ctpId) params.set('ctpId', ctpId);
       

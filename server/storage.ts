@@ -37,7 +37,7 @@ export interface IStorage {
   updateRecommendationStatus(id: string, status: string): Promise<void>;
 
   // Trends and Analytics
-  getTrendData(period: 'day' | 'week' | 'month' | 'year', rtsId?: string, rtsFilter?: string): Promise<TrendData[]>;
+  getTrendData(period: 'day' | 'week' | 'month' | 'year', rtsId?: string, rtsFilter?: string, ctpId?: string): Promise<TrendData[]>;
   getControlChartData(ctpId: string, period: number): Promise<ControlChartData[]>;
 
   // File upload
@@ -442,7 +442,7 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async getTrendData(period: 'day' | 'week' | 'month' | 'year', rtsId?: string, rtsFilter?: string): Promise<TrendData[]> {
+  async getTrendData(period: 'day' | 'week' | 'month' | 'year', rtsId?: string, rtsFilter?: string, ctpId?: string): Promise<TrendData[]> {
     // Generate trend data based on period
     const now = new Date();
     const data: TrendData[] = [];

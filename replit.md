@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language (Russian).
 
 # Recent Changes (October 2025)
 
+**Trend Chart Bank Filtering (October 4, 2025)**
+- Extended TrendChart component to support bank-based RTS filtering for trend visualization
+- Added custom queryFn to properly construct URLs with `rtsFilter` query parameters (`?rtsFilter=right` or `?rtsFilter=left`)
+- Updated server-side `/api/trends/:period` endpoint to accept and process `rtsFilter` parameter
+- Extended `getTrendData` method in storage layer to filter RTS by location field:
+  - `rtsFilter: 'right'` → queries РТС with location = "Правый берег" (РТС-1, РТС-3, РТС-5)
+  - `rtsFilter: 'left'` → queries РТС with location = "Левый берег" (РТС-2, РТС-4)
+- Updated RTS location data in database: set correct "Правый берег" and "Левый берег" values for proper filtering
+- Dashboard bank filter now correctly filters both statistics cards AND trend charts (previously only filtered statistics)
+- E2e tests passing: Bank filtering verified for all three modes (All/Right/Left), trend data updates correctly
+
 **Recommendations Page Fix (October 4, 2025)**
 - Fixed recommendations page to use real CTP data instead of hardcoded mock data
 - Changed CTP query type from `CTP[]` to `CTPWithDetails[]` to include related RTS and district information

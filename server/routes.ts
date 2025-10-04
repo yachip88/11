@@ -211,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/trends/:period", async (req, res) => {
     try {
       const { period } = req.params;
-      const { rtsId, rtsFilter } = req.query;
+      const { rtsId, rtsFilter, ctpId } = req.query;
       
       if (!['day', 'week', 'month', 'year'].includes(period)) {
         return res.status(400).json({ message: "Неверный период" });
@@ -220,7 +220,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const trends = await storage.getTrendData(
         period as any, 
         rtsId as string, 
-        rtsFilter as string
+        rtsFilter as string,
+        ctpId as string
       );
       res.json(trends);
     } catch (error) {

@@ -280,7 +280,7 @@ export class DbStorage implements IStorage {
   }
 
   // Trends and Analytics
-  async getTrendData(period: 'day' | 'week' | 'month' | 'year', rtsId?: string, rtsFilter?: string): Promise<TrendData[]> {
+  async getTrendData(period: 'day' | 'week' | 'month' | 'year', rtsId?: string, rtsFilter?: string, ctpId?: string): Promise<TrendData[]> {
     const now = new Date();
     let startDate = new Date();
     
@@ -301,7 +301,9 @@ export class DbStorage implements IStorage {
 
     let ctpIds: string[] | undefined;
     
-    if (rtsFilter) {
+    if (ctpId) {
+      ctpIds = [ctpId];
+    } else if (rtsFilter) {
       const locationMap: Record<string, string> = {
         'right': 'Правый берег',
         'left': 'Левый берег'
