@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendChart } from "@/components/charts/trend-chart";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -28,6 +29,14 @@ export default function Dashboard() {
   const { data: weeklyChange } = useQuery<{ change: number }>({
     queryKey: ['/api/trends/overall-change/week'],
   });
+
+  const [trendPeriod, setTrendPeriod] = useState<'day' | 'week' | 'month' | 'year'>('week');
+  const periodOptions: { value: 'day' | 'week' | 'month' | 'year'; label: string }[] = [
+    { value: 'day', label: 'День' },
+    { value: 'week', label: 'Неделя' },
+    { value: 'month', label: 'Месяц' },
+    { value: 'year', label: 'Год' },
+  ];
 
   if (isLoading) {
     return (
@@ -133,16 +142,22 @@ export default function Dashboard() {
               <CardDescription>Текущий период</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">День</Button>
-              <Button variant="default" size="sm">Неделя</Button>
-              <Button variant="outline" size="sm">Месяц</Button>
-              <Button variant="outline" size="sm">Год</Button>
+              {periodOptions.map(({ value, label }) => (
+                <Button
+                  key={value}
+                  variant={trendPeriod === value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setTrendPeriod(value)}
+                >
+                  {label}
+                </Button>
+              ))}
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="h-[400px]">
-            <TrendChart period="week" />
+            <TrendChart period={trendPeriod} />
           </div>
         </CardContent>
       </Card>
@@ -155,7 +170,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-[350px]">
-              <TrendChart period="week" rtsFilter="right" />
+              <TrendChart period={trendPeriod} rtsFilter="right" />
             </div>
           </CardContent>
         </Card>
@@ -165,7 +180,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-[350px]">
-              <TrendChart period="week" rtsFilter="left" />
+              <TrendChart period={trendPeriod} rtsFilter="left" />
             </div>
           </CardContent>
         </Card>

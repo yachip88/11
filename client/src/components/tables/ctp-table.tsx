@@ -81,8 +81,8 @@ export function CTPTable({ data, onRowClick }: CTPTableProps) {
                 data-testid={`ctp-row-${ctp.id}`}
               >
                 <td className="font-semibold">{ctp.name}</td>
-                <td>{ctp.rts.code}</td>
-                <td>{ctp.district.name}</td>
+                <td>{ctp.rts?.code || '—'}</td>
+                <td>{ctp.district?.name || '—'}</td>
                 <td className={cn(
                   "font-mono",
                   statusInfo.status === 'critical' && "font-bold text-red-600",

@@ -120,6 +120,7 @@ export class DbStorage implements IStorage {
       include: {
         rts: true,
         district: true,
+        vyvod: true,
         measurements: {
           orderBy: { date: 'desc' },
           take: 1
@@ -134,8 +135,9 @@ export class DbStorage implements IStorage {
 
     return ctpList.map((ctp: any) => ({
       ...ctp,
-      rts: ctp.rts!,
-      district: ctp.district!,
+      rts: ctp.rts ?? null,
+      district: ctp.district ?? null,
+      vyvod: ctp.vyvod ?? null,
       latestMeasurement: ctp.measurements[0],
       statisticalParams: ctp.statisticalParams[0],
       recommendations: ctp.recommendations
@@ -148,6 +150,7 @@ export class DbStorage implements IStorage {
       include: {
         rts: true,
         district: true,
+        vyvod: true,
         measurements: {
           orderBy: { date: 'desc' },
           take: 1
@@ -160,12 +163,13 @@ export class DbStorage implements IStorage {
       }
     });
 
-    if (!ctp || !ctp.rts || !ctp.district) return undefined;
+    if (!ctp) return undefined;
 
     return {
       ...ctp,
-      rts: ctp.rts,
-      district: ctp.district,
+      rts: ctp.rts ?? null,
+      district: ctp.district ?? null,
+      vyvod: ctp.vyvod ?? null,
       latestMeasurement: ctp.measurements[0],
       statisticalParams: ctp.statisticalParams[0],
       recommendations: ctp.recommendations

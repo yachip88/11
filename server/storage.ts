@@ -117,39 +117,90 @@ export class MemStorage implements IStorage {
         id: "ctp-125",
         name: "ЦТП-125",
         code: "125",
+        fullName: null,
+        city: null,
+        address: null,
+        yearBuilt: null,
         rtsId: "rts-1",
         districtId: "district-1",
+        vyvodId: null,
         ucl: 36.1,
         cl: 32.5,
         lcl: 28.2,
         hasMeter: true,
         meterStatus: "working",
+        status: null,
+        commentPTU: null,
+        commentRTS: null,
+        commentSKIPiA: null,
+        av365G1: null,
+        av365G2: null,
+        min730: null,
+        min365: null,
+        min30: null,
+        min7: null,
+        percentFromG1: null,
+        normativMinenergo: null,
         createdAt: new Date(),
       },
       {
         id: "ctp-156",
         name: "ЦТП-156",
         code: "156",
+        fullName: null,
+        city: null,
+        address: null,
+        yearBuilt: null,
         rtsId: "rts-4",
         districtId: "district-3",
+        vyvodId: null,
         ucl: 42.5,
         cl: 38.2,
         lcl: 33.5,
         hasMeter: true,
         meterStatus: "working",
+        status: null,
+        commentPTU: null,
+        commentRTS: null,
+        commentSKIPiA: null,
+        av365G1: null,
+        av365G2: null,
+        min730: null,
+        min365: null,
+        min30: null,
+        min7: null,
+        percentFromG1: null,
+        normativMinenergo: null,
         createdAt: new Date(),
       },
       {
         id: "ctp-234",
         name: "ЦТП-234",
         code: "234",
+        fullName: null,
+        city: null,
+        address: null,
+        yearBuilt: null,
         rtsId: "rts-2",
         districtId: "district-2",
+        vyvodId: null,
         ucl: 24.8,
         cl: 21.2,
         lcl: 17.9,
         hasMeter: true,
         meterStatus: "working",
+        status: null,
+        commentPTU: null,
+        commentRTS: null,
+        commentSKIPiA: null,
+        av365G1: null,
+        av365G2: null,
+        min730: null,
+        min365: null,
+        min30: null,
+        min7: null,
+        percentFromG1: null,
+        normativMinenergo: null,
         createdAt: new Date(),
       },
     ];
@@ -242,23 +293,22 @@ export class MemStorage implements IStorage {
     
     const result: CTPWithDetails[] = [];
     for (const ctp of ctpList) {
-      const rts = this.rtsData.get(ctp.rtsId!);
-      const district = this.districtsData.get(ctp.districtId!);
+      const rts = ctp.rtsId ? this.rtsData.get(ctp.rtsId) ?? null : null;
+      const district = ctp.districtId ? this.districtsData.get(ctp.districtId) ?? null : null;
       const latestMeasurement = latestMeasurements.get(ctp.id);
       const statisticalParams = this.statisticalParamsData.get(ctp.id);
       const recommendations = Array.from(this.recommendationsData.values())
         .filter(rec => rec.ctpId === ctp.id);
 
-      if (rts && district) {
-        result.push({
-          ...ctp,
-          rts,
-          district,
-          latestMeasurement,
-          statisticalParams,
-          recommendations,
-        });
-      }
+      result.push({
+        ...ctp,
+        rts,
+        district,
+        vyvod: null,
+        latestMeasurement,
+        statisticalParams,
+        recommendations,
+      });
     }
 
     return result;
@@ -268,41 +318,56 @@ export class MemStorage implements IStorage {
     const ctp = this.ctpData.get(id);
     if (!ctp) return undefined;
 
-    const rts = this.rtsData.get(ctp.rtsId!);
-    const district = this.districtsData.get(ctp.districtId!);
+    const rts = ctp.rtsId ? this.rtsData.get(ctp.rtsId) ?? null : null;
+    const district = ctp.districtId ? this.districtsData.get(ctp.districtId) ?? null : null;
     const latestMeasurements = await this.getLatestMeasurements();
     const latestMeasurement = latestMeasurements.get(ctp.id);
     const statisticalParams = this.statisticalParamsData.get(ctp.id);
     const recommendations = Array.from(this.recommendationsData.values())
       .filter(rec => rec.ctpId === ctp.id);
 
-    if (rts && district) {
-      return {
-        ...ctp,
-        rts,
-        district,
-        latestMeasurement,
-        statisticalParams,
-        recommendations,
-      };
-    }
-
-    return undefined;
+    return {
+      ...ctp,
+      rts,
+      district,
+      vyvod: null,
+      latestMeasurement,
+      statisticalParams,
+      recommendations,
+    };
   }
 
   async createCTP(ctp: InsertCTP): Promise<CTP> {
     const id = randomUUID();
-    const newCTP: CTP = { 
-      ...ctp, 
-      id, 
+    const newCTP: CTP = {
+      id,
+      name: ctp.name,
+      code: ctp.code,
+      fullName: ctp.fullName ?? null,
+      city: ctp.city ?? null,
+      address: ctp.address ?? null,
+      yearBuilt: ctp.yearBuilt ?? null,
       rtsId: ctp.rtsId ?? null,
       districtId: ctp.districtId ?? null,
+      vyvodId: ctp.vyvodId ?? null,
       ucl: ctp.ucl ?? null,
       cl: ctp.cl ?? null,
       lcl: ctp.lcl ?? null,
-      hasMeter: ctp.hasMeter ?? null,
-      meterStatus: ctp.meterStatus ?? null,
-      createdAt: new Date() 
+      hasMeter: ctp.hasMeter ?? true,
+      meterStatus: ctp.meterStatus ?? 'working',
+      status: ctp.status ?? null,
+      commentPTU: ctp.commentPTU ?? null,
+      commentRTS: ctp.commentRTS ?? null,
+      commentSKIPiA: ctp.commentSKIPiA ?? null,
+      av365G1: ctp.av365G1 ?? null,
+      av365G2: ctp.av365G2 ?? null,
+      min730: ctp.min730 ?? null,
+      min365: ctp.min365 ?? null,
+      min30: ctp.min30 ?? null,
+      min7: ctp.min7 ?? null,
+      percentFromG1: ctp.percentFromG1 ?? null,
+      normativMinenergo: ctp.normativMinenergo ?? null,
+      createdAt: new Date(),
     };
     this.ctpData.set(id, newCTP);
     return newCTP;
@@ -334,7 +399,7 @@ export class MemStorage implements IStorage {
     const newMeasurement: Measurement = { 
       ...measurement, 
       id, 
-      undermix: measurement.undermix ?? null,
+      undermix: measurement.undermix ?? 0,
       flowG1: measurement.flowG1 ?? null,
       temperature: measurement.temperature ?? null,
       pressure: measurement.pressure ?? null,
@@ -426,7 +491,7 @@ export class MemStorage implements IStorage {
     const newRecommendation: Recommendation = { 
       ...recommendation, 
       id, 
-      status: recommendation.status ?? null,
+      status: recommendation.status ?? 'open',
       actions: recommendation.actions ?? null,
       createdAt: new Date(), 
       updatedAt: new Date() 
@@ -509,13 +574,13 @@ export class MemStorage implements IStorage {
 
   async createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile> {
     const id = randomUUID();
-    const newFile: UploadedFile = { 
-      ...file, 
-      id, 
-      status: file.status ?? null,
-      recordsProcessed: file.recordsProcessed ?? null,
+    const newFile: UploadedFile = {
+      ...file,
+      id,
+      status: file.status ?? 'processing',
+      recordsProcessed: file.recordsProcessed ?? 0,
       errors: file.errors ?? null,
-      uploadedAt: new Date() 
+      uploadedAt: new Date(),
     };
     this.uploadedFilesData.set(id, newFile);
     return newFile;
@@ -536,8 +601,8 @@ export class MemStorage implements IStorage {
       this.uploadedFilesData.set(id, { 
         ...file, 
         status, 
-        recordsProcessed: recordsProcessed || file.recordsProcessed,
-        errors: errors || file.errors 
+        recordsProcessed: recordsProcessed ?? file.recordsProcessed ?? 0,
+        errors: errors ? JSON.stringify(errors) : file.errors 
       });
     }
   }
