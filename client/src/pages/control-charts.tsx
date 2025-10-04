@@ -15,7 +15,7 @@ export default function ControlCharts() {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { data: ctpList, isLoading: loadingCTP } = useQuery<CTPWithDetails[]>({
-    queryKey: ['/api/ctp', selectedRTS !== "all" ? selectedRTS : undefined],
+    queryKey: ['/api/ctp', { rtsId: selectedRTS !== "all" ? selectedRTS : undefined }],
   });
 
   const { data: controlData, isLoading: loadingChart } = useQuery<ControlChartData[]>({
