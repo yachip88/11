@@ -3,15 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model RTS {
-  id        String   @id @default(uuid()) @db.VarChar(255)
-  name      String   @db.NVarChar(Max)
-  code      String   @unique @db.VarChar(255)
-  location  String   @db.NVarChar(Max)
+  id        String   @id @default(uuid())
+  name      String   @db.Text
+  code      String   @unique
+  location  String   @db.Text
   createdAt DateTime @default(now()) @map("created_at")
 
   districts Districts[]
@@ -21,9 +21,9 @@ model RTS {
 }
 
 model Districts {
-  id        String   @id @default(uuid()) @db.VarChar(255)
-  name      String   @db.NVarChar(Max)
-  rtsId     String?  @map("rts_id") @db.VarChar(255)
+  id        String   @id @default(uuid())
+  name      String   @db.Text
+  rtsId     String?  @map("rts_id")
   createdAt DateTime @default(now()) @map("created_at")
 
   rts  RTS?  @relation(fields: [rtsId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -33,16 +33,16 @@ model Districts {
 }
 
 model CTP {
-  id           String   @id @default(uuid()) @db.VarChar(255)
-  name         String   @db.NVarChar(Max)
-  code         String   @unique @db.VarChar(255)
-  rtsId        String?  @map("rts_id") @db.VarChar(255)
-  districtId   String?  @map("district_id") @db.VarChar(255)
-  ucl          Float?   @db.Real
-  cl           Float?   @db.Real
-  lcl          Float?   @db.Real
+  id           String   @id @default(uuid())
+  name         String   @db.Text
+  code         String   @unique
+  rtsId        String?  @map("rts_id")
+  districtId   String?  @map("district_id")
+  ucl          Float?
+  cl           Float?
+  lcl          Float?
   hasMeter     Boolean  @default(true) @map("has_meter")
-  meterStatus  String   @default("working") @map("meter_status") @db.NVarChar(100)
+  meterStatus  String   @default("working") @map("meter_status")
   createdAt    DateTime @default(now()) @map("created_at")
 
   rts                 RTS?                  @relation(fields: [rtsId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -55,14 +55,14 @@ model CTP {
 }
 
 model Measurements {
-  id          String   @id @default(uuid()) @db.VarChar(255)
-  ctpId       String   @map("ctp_id") @db.VarChar(255)
+  id          String   @id @default(uuid())
+  ctpId       String   @map("ctp_id")
   date        DateTime
-  makeupWater Float    @map("makeup_water") @db.Real
-  undermix    Float    @default(0) @db.Real
-  flowG1      Float?   @map("flow_g1") @db.Real
-  temperature Float?   @db.Real
-  pressure    Float?   @db.Real
+  makeupWater Float    @map("makeup_water")
+  undermix    Float    @default(0)
+  flowG1      Float?   @map("flow_g1")
+  temperature Float?
+  pressure    Float?
   createdAt   DateTime @default(now()) @map("created_at")
 
   ctp CTP @relation(fields: [ctpId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -71,13 +71,13 @@ model Measurements {
 }
 
 model StatisticalParams {
-  id           String   @id @default(uuid()) @db.VarChar(255)
-  ctpId        String   @map("ctp_id") @db.VarChar(255)
-  mean         Float    @db.Real
-  stdDev       Float    @map("std_dev") @db.Real
-  ucl          Float    @db.Real
-  cl           Float    @db.Real
-  lcl          Float    @db.Real
+  id           String   @id @default(uuid())
+  ctpId        String   @map("ctp_id")
+  mean         Float
+  stdDev       Float    @map("std_dev")
+  ucl          Float
+  cl           Float
+  lcl          Float
   sampleSize   Int      @map("sample_size")
   calculatedAt DateTime @default(now()) @map("calculated_at")
 
@@ -87,14 +87,14 @@ model StatisticalParams {
 }
 
 model Recommendations {
-  id          String   @id @default(uuid()) @db.VarChar(255)
-  ctpId       String   @map("ctp_id") @db.VarChar(255)
-  type        String   @db.NVarChar(100)
-  priority    String   @db.NVarChar(50)
-  title       String   @db.NVarChar(Max)
-  description String   @db.NVarChar(Max)
-  actions     String?  @db.NVarChar(Max)
-  status      String   @default("open") @db.NVarChar(50)
+  id          String   @id @default(uuid())
+  ctpId       String   @map("ctp_id")
+  type        String
+  priority    String
+  title       String   @db.Text
+  description String   @db.Text
+  actions     String?  @db.Text
+  status      String   @default("open")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -104,14 +104,14 @@ model Recommendations {
 }
 
 model UploadedFiles {
-  id               String   @id @default(uuid()) @db.VarChar(255)
-  filename         String   @db.NVarChar(Max)
-  originalName     String   @map("original_name") @db.NVarChar(Max)
-  fileType         String   @map("file_type") @db.NVarChar(50)
+  id               String   @id @default(uuid())
+  filename         String   @db.Text
+  originalName     String   @map("original_name") @db.Text
+  fileType         String   @map("file_type")
   size             Int
-  status           String   @default("processing") @db.NVarChar(50)
+  status           String   @default("processing")
   recordsProcessed Int      @default(0) @map("records_processed")
-  errors           String?  @db.NVarChar(Max)
+  errors           String?  @db.Text
   uploadedAt       DateTime @default(now()) @map("uploaded_at")
 
   @@map("uploaded_files")
