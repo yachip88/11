@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language (Russian).
 
 # Recent Changes (October 2025)
 
+**Bug Fixes and UI Improvements (October 4, 2025)**
+- Fixed upload history bug: `/api/import-model` now creates records in `uploaded_files` table
+- Fixed nullable handling in CTP table:
+  - `ctp.rts?.code || '—'` for nullable RTS relations
+  - `ctp.district?.name || '—'` for nullable district relations
+  - `measurement ? measurement.makeupWater.toFixed(1) : '—'` for nullable measurements
+- Updated CTP table to display fullName (or name fallback) for all CTPs
+- All LSP diagnostics resolved
+- E2e tests passing: CTP table displays correctly, upload history working, 631+ CTPs in database
+- Created `design_guidelines.md` with Carbon Design System guidelines for industrial dashboard
+
 **Model_2.5.20.xlsm Parser and Import System (October 4, 2025)**
 - Added `Vyvod` (heat sources) table to database schema with one-to-many relationship to CTPs
 - Extended CTP model with comprehensive fields:
@@ -23,9 +34,11 @@ Preferred communication style: Simple, everyday language (Russian).
   - Imports historical measurements from date columns (Excel format dates 45200+)
   - Auto-creates unique Vyvod entities from "Вывод" column
   - Batch processing for performance (50 CTPs, 100 measurements per batch)
+  - Case-insensitive column mapping for Russian headers (toLowerCase() fix)
 - Added `/api/import-model` endpoint for uploading Model_2.5.20.xlsm
 - Updated Data Upload UI with dedicated Model Import section
 - Prisma schema migrated to support new fields and relationships
+- Successfully imported 307 CTPs with 183,026 measurements and 15 vyvods (heat sources)
 
 **Auto-creation of RTS and Districts from Excel Filename (October 4, 2025)**
 - Excel parser now extracts district name from filename format: "ЦТП name, address, code, 3-РТС, Кировский, ..."
