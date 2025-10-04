@@ -50,15 +50,25 @@ export class DbStorage implements IStorage {
 
       for (const ctp of ctpList) {
         const latestMeasurement = ctp.measurements[0];
+        const now = new Date();
+        const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
 
-        if (latestMeasurement) {
+        if (!latestMeasurement || latestMeasurement.date < threeDaysAgo) {
+          criticalCount++;
+        } else {
           totalMakeupWater += latestMeasurement.makeupWater;
           
           if (ctp.ucl != null && ctp.cl != null) {
-            if (latestMeasurement.makeupWater > ctp.ucl) {
-              criticalCount++;
-            } else if (latestMeasurement.makeupWater > ctp.cl) {
-              warningCount++;
+            if (ctp.ucl > 0) {
+              const excessMultiplier = latestMeasurement.makeupWater / ctp.ucl;
+              
+              if (excessMultiplier >= 5) {
+                criticalCount++;
+              } else if (latestMeasurement.makeupWater > ctp.ucl) {
+                warningCount++;
+              } else {
+                normalCount++;
+              }
             } else {
               normalCount++;
             }

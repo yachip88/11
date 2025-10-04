@@ -35,12 +35,31 @@ export default function CTPTable() {
     },
   });
 
-  const filteredCTP = ctpList?.filter(ctp => {
-    const matchesStatus = selectedStatus === "all" || 
-      (selectedStatus === "critical" && ctp.recommendations.some(r => r.priority === "critical")) ||
-      (selectedStatus === "warning" && ctp.recommendations.some(r => r.priority === "warning")) ||
-      (selectedStatus === "normal" && ctp.recommendations.every(r => r.priority === "normal"));
+  const getCtpStatus = (ctp: CTPWithDetails): string => {
+    const measurement = ctp.latestMeasurement;
+    const now = new Date();
+    const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
     
+    if (!measurement || new Date(measurement.date) < threeDaysAgo) {
+      return 'critical';
+    }
+
+    if (ctp.ucl != null && ctp.cl != null && ctp.ucl > 0) {
+      const excessMultiplier = measurement.makeupWater / ctp.ucl;
+      
+      if (excessMultiplier >= 5) {
+        return 'critical';
+      } else if (measurement.makeupWater > ctp.ucl) {
+        return 'warning';
+      }
+    }
+    
+    return 'normal';
+  };
+
+  const filteredCTP = ctpList?.filter(ctp => {
+    const ctpStatus = getCtpStatus(ctp);
+    const matchesStatus = selectedStatus === "all" || ctpStatus === selectedStatus;
     const matchesDistrict = selectedDistrict === "all" || ctp.districtId === selectedDistrict;
     
     return matchesStatus && matchesDistrict;
@@ -52,18 +71,26 @@ export default function CTPTable() {
 
   const getStatusInfo = (ctp: CTPWithDetails) => {
     const measurement = ctp.latestMeasurement;
-    if (!measurement) return { status: 'normal', label: 'Нет данных' };
-
-    const criticalRec = ctp.recommendations.find(r => r.priority === 'critical');
-    const warningRec = ctp.recommendations.find(r => r.priority === 'warning');
-
-    if (criticalRec) {
-      return { status: 'critical', label: 'Критично' };
-    } else if (warningRec) {
-      return { status: 'warning', label: 'Внимание' };
-    } else {
-      return { status: 'normal', label: 'Норма' };
+    const now = new Date();
+    const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
+    
+    if (!measurement || new Date(measurement.date) < threeDaysAgo) {
+      return { status: 'critical', label: 'Нет данных' };
     }
+
+    if (ctp.ucl != null && ctp.cl != null && ctp.ucl > 0) {
+      const excessMultiplier = measurement.makeupWater / ctp.ucl;
+      
+      if (excessMultiplier >= 5) {
+        return { status: 'critical', label: 'Критично' };
+      } else if (measurement.makeupWater > ctp.ucl) {
+        return { status: 'warning', label: 'Внимание' };
+      } else {
+        return { status: 'normal', label: 'Норма' };
+      }
+    }
+    
+    return { status: 'normal', label: 'Норма' };
   };
 
   const getDeviation = (ctp: CTPWithDetails) => {
