@@ -8,6 +8,7 @@ export interface ParsedExcelData {
     fileType: string;
     lastModified?: Date;
     source?: string;
+    rtsNumber?: string;
   };
 }
 
@@ -25,10 +26,16 @@ export interface CTEMeasurementData {
 }
 
 export class ExcelParser {
+  static extractRTSNumber(filename: string): string | undefined {
+    const match = filename.match(/(\d+)-РТС/i);
+    return match ? match[1] : undefined;
+  }
+
   static async parseFile(buffer: Buffer, filename: string): Promise<ParsedExcelData[]> {
     try {
       const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
       const parsedSheets: ParsedExcelData[] = [];
+      const rtsNumber = this.extractRTSNumber(filename);
 
       for (const sheetName of workbook.SheetNames) {
         const worksheet = workbook.Sheets[sheetName];
@@ -36,10 +43,33 @@ export class ExcelParser {
 
         if (jsonData.length === 0) continue;
 
-        const headers = (jsonData[0] as any[]).map(h => String(h || '').trim());
-        const rows = jsonData.slice(1).filter((row: any) => {
+        // Find the row with headers (look for row with "Дата" or multiple non-empty cells)
+        let headerRowIndex = -1;
+        for (let i = 0; i < Math.min(10, jsonData.length); i++) {
+          const row = jsonData[i] as any[];
+          const rowStr = row.map(cell => String(cell || '').toLowerCase()).join(' ');
+          
+          // Look for typical header keywords
+          if (rowStr.includes('дата') && (rowStr.includes('время') || rowStr.includes('подпит') || rowStr.includes('разность'))) {
+            headerRowIndex = i;
+            break;
+          }
+        }
+
+        if (headerRowIndex === -1) {
+          console.warn(`⚠️ Не найдена строка с заголовками в листе ${sheetName}`);
+          continue;
+        }
+
+        console.log(`✅ Найдена строка заголовков на позиции ${headerRowIndex + 1}`);
+
+        const headers = (jsonData[headerRowIndex] as any[]).map(h => String(h || '').trim());
+        const rows = jsonData.slice(headerRowIndex + 1).filter((row: any) => {
           return Array.isArray(row) && row.some(cell => cell !== null && cell !== '');
         }) as any[][];
+
+        console.log(`📋 Заголовки: ${headers.slice(0, 10).join(' | ')}`);
+        console.log(`📊 Найдено ${rows.length} строк данных`);
 
         parsedSheets.push({
           sheetName,
@@ -48,6 +78,7 @@ export class ExcelParser {
           metadata: {
             fileType: filename.split('.').pop() || 'unknown',
             source: filename,
+            rtsNumber: rtsNumber,
           }
         });
       }
@@ -62,8 +93,6 @@ export class ExcelParser {
     const measurements: CTEMeasurementData[] = [];
     
     const headers = data.headers.map(h => h.toLowerCase().trim());
-    
-    console.log('📋 Заголовки в Excel файле:', headers);
     
     // Try to find column indices with various possible names
     const ctpIndex = headers.findIndex(h => 
@@ -82,9 +111,18 @@ export class ExcelParser {
     const dateIndex = headers.findIndex(h => 
       h.includes('дата') || h.includes('date')
     );
+    const timeIndex = headers.findIndex(h => 
+      h.includes('время') || h.includes('time')
+    );
+    
+    // Подпитка или разность масс
     const makeupIndex = headers.findIndex(h => 
       h.includes('подпит') || h.includes('makeup') || h.includes('подачи')
     );
+    const massDiffIndex = headers.findIndex(h => 
+      h.includes('разность масс') || h.includes('масс')
+    );
+    
     const undermixIndex = headers.findIndex(h => 
       h.includes('подмес') || h.includes('недомес')
     );
@@ -98,25 +136,59 @@ export class ExcelParser {
       h.includes('давлен') || h.includes('p1') || h.includes('p-1')
     );
 
-    if (ctpIndex === -1 && ctpCodeIndex === -1) {
-      throw new Error('Не найдена колонка с названием или кодом ЦТП');
-    }
+    console.log(`🔍 Индексы колонок:`);
+    console.log(`   ЦТП: ${ctpIndex}, Дата: ${dateIndex}, Время: ${timeIndex}`);
+    console.log(`   Подпитка: ${makeupIndex}, Разность масс: ${massDiffIndex}`);
+
     if (dateIndex === -1) {
       throw new Error('Не найдена колонка с датой');
     }
-    if (makeupIndex === -1) {
-      throw new Error('Не найдена колонка с данными подпитки');
+    if (makeupIndex === -1 && massDiffIndex === -1) {
+      throw new Error('Не найдена колонка с данными подпитки или разности масс');
     }
+
+    // Извлекаем имя ЦТП из метаданных (из названия файла)
+    const fileCtpName = data.metadata?.source ? this.extractCTPFromFilename(data.metadata.source) : undefined;
+    const fileRtsNumber = data.metadata?.rtsNumber;
+
+    console.log(`📄 Из имени файла: ЦТП="${fileCtpName}", РТС="${fileRtsNumber}"`);
+
+    let processedCount = 0;
+    let skippedCount = 0;
 
     data.rows.forEach((row, index) => {
       try {
         const ctpName = ctpIndex !== -1 ? String(row[ctpIndex] || '').trim() : '';
         const ctpCode = ctpCodeIndex !== -1 ? String(row[ctpCodeIndex] || '').trim() : '';
         const dateValue = row[dateIndex];
-        const makeupValue = row[makeupIndex];
+        const timeValue = timeIndex !== -1 ? row[timeIndex] : null;
 
-        if ((!ctpName && !ctpCode) || !dateValue || makeupValue === null || makeupValue === '') {
-          return; // Skip empty rows
+        // Если в строке нет даты, пропускаем
+        if (!dateValue) {
+          skippedCount++;
+          return;
+        }
+
+        // Определяем значение подпитки
+        let makeupValue = null;
+        if (makeupIndex !== -1) {
+          const val = row[makeupIndex];
+          // Если в столбце подпитки стоит "-", берем из разности масс
+          if (val === '-' || val === '—' || val === null || val === '') {
+            if (massDiffIndex !== -1) {
+              makeupValue = row[massDiffIndex];
+              console.log(`  Строка ${index + 2}: Подпитка="-", взято из "Разность масс": ${makeupValue}`);
+            }
+          } else {
+            makeupValue = val;
+          }
+        } else if (massDiffIndex !== -1) {
+          makeupValue = row[massDiffIndex];
+        }
+
+        if (makeupValue === null || makeupValue === '' || makeupValue === '-' || makeupValue === '—') {
+          skippedCount++;
+          return;
         }
 
         let parsedDate: Date;
@@ -125,21 +197,39 @@ export class ExcelParser {
         } else {
           parsedDate = new Date(dateValue);
           if (isNaN(parsedDate.getTime())) {
-            console.warn(`Строка ${index + 2}: некорректная дата "${dateValue}"`);
+            console.warn(`⚠️ Строка ${index + 2}: некорректная дата "${dateValue}"`);
+            skippedCount++;
             return;
+          }
+        }
+
+        // Если есть время, добавляем его к дате
+        if (timeValue) {
+          if (timeValue instanceof Date) {
+            parsedDate.setHours(timeValue.getHours(), timeValue.getMinutes(), timeValue.getSeconds());
+          } else if (typeof timeValue === 'number') {
+            // Excel time format (fraction of day)
+            const hours = Math.floor(timeValue * 24);
+            const minutes = Math.floor((timeValue * 24 * 60) % 60);
+            parsedDate.setHours(hours, minutes, 0);
           }
         }
 
         const makeupWater = parseFloat(String(makeupValue).replace(',', '.'));
         if (isNaN(makeupWater)) {
-          console.warn(`Строка ${index + 2}: некорректное значение подпитки "${makeupValue}"`);
+          console.warn(`⚠️ Строка ${index + 2}: некорректное значение подпитки "${makeupValue}"`);
+          skippedCount++;
           return;
         }
 
+        // Используем имя ЦТП из файла, если не найдено в таблице
+        const finalCtpName = ctpName || fileCtpName || `ЦТП-${ctpCode || 'Unknown'}`;
+        const finalRtsName = fileRtsNumber ? `РТС-${fileRtsNumber}` : (rtsIndex !== -1 ? String(row[rtsIndex] || '').trim() : undefined);
+
         const measurement: CTEMeasurementData = {
-          ctpName: ctpName || `ЦТП-${ctpCode}`,
+          ctpName: finalCtpName,
           ctpCode: ctpCode || undefined,
-          rtsName: rtsIndex !== -1 ? String(row[rtsIndex] || '').trim() : undefined,
+          rtsName: finalRtsName,
           districtName: districtIndex !== -1 ? String(row[districtIndex] || '').trim() : undefined,
           date: parsedDate,
           makeupWater: Math.abs(makeupWater),
@@ -150,18 +240,28 @@ export class ExcelParser {
         };
 
         measurements.push(measurement);
+        processedCount++;
       } catch (error) {
-        console.warn(`Ошибка обработки строки ${index + 2}:`, error);
+        console.warn(`⚠️ Ошибка обработки строки ${index + 2}:`, error);
+        skippedCount++;
       }
     });
 
+    console.log(`✅ Обработано ${processedCount} измерений, пропущено ${skippedCount} строк`);
+
     return measurements;
+  }
+
+  static extractCTPFromFilename(filename: string): string | undefined {
+    // Ищем паттерн типа "ЦТП К04" или "ЦТП-104"
+    const match = filename.match(/ЦТП[\s-]?([КкAa]?\d+)/i);
+    return match ? `ЦТП ${match[1]}` : undefined;
   }
 
   static detectFileType(filename: string): 'measurements' | 'summary' | 'model' | 'unknown' {
     const name = filename.toLowerCase();
     
-    if (name.includes('одпу') || name.includes('показания')) {
+    if (name.includes('одпу') || name.includes('показания') || name.includes('архив')) {
       return 'measurements';
     } else if (name.includes('свод') || name.includes('ведомость')) {
       return 'summary';
@@ -190,7 +290,7 @@ export class ExcelParser {
         return;
       }
       
-      if (measurement.makeupWater > 200) {
+      if (measurement.makeupWater > 1000) {
         errors.push(`Строка ${index + 1}: подозрительно высокое значение подпитки (${measurement.makeupWater} т/ч)`);
       }
       
