@@ -10,11 +10,19 @@ Preferred communication style: Simple, everyday language (Russian).
 
 # Recent Changes (October 2025)
 
-**Migration to MSSQL with Prisma ORM**
+**Migration to Prisma ORM with PostgreSQL (October 4, 2025)**
+- Migrated from MSSQL to PostgreSQL for development and testing
+- Created virtual PostgreSQL database in Replit environment
+- Updated Prisma schema for PostgreSQL compatibility
+- Fixed Russian character encoding (TEXT fields support UTF-8 in PostgreSQL)
+- Fixed file upload functionality (middleware updated to skip multipart/form-data)
+- Successfully tested with seed data (2 RTS, 10 CTPs, 310 measurements)
+
+**Previous Migration to MSSQL with Prisma ORM**
 - Migrated from Drizzle ORM + PostgreSQL to Prisma ORM + MSSQL
 - All database code updated to work with Microsoft SQL Server
 - Prisma schema created in `prisma/schema.prisma`
-- Database connection configured for `sqlserver://` protocol
+- Database connection configured for both `sqlserver://` and `postgresql://` protocols
 - Storage layer (`server/db-storage.ts`) rewritten for Prisma Client API
 - Type definitions updated in `shared/schema.ts` for Prisma compatibility
 
@@ -40,7 +48,7 @@ Preferred communication style: Simple, everyday language (Russian).
 
 **Framework**: Express.js server with TypeScript
 
-**Database ORM**: Prisma ORM configured for Microsoft SQL Server
+**Database ORM**: Prisma ORM configured for PostgreSQL (development) and Microsoft SQL Server (production)
 
 **File Storage**: Multer for handling Excel file uploads (.xlsx, .xlsm, .xlsb formats)
 
@@ -49,13 +57,14 @@ Preferred communication style: Simple, everyday language (Russian).
 **Key Design Decisions**:
 - Database storage implementation (`DbStorage`) implementing `IStorage` interface
 - Separation of concerns with `IStorage` interface defining all data operations
-- Middleware for request logging and JSON parsing with raw body capture
+- Middleware for request logging and JSON parsing with conditional multipart/form-data support
 - Vite integration for development server with HMR support
 - Prisma Client singleton pattern in `server/db.ts` for connection management
+- Content-Type based middleware routing (multipart/form-data bypasses JSON parsing)
 
 ## Database Schema
 
-**Database**: Microsoft SQL Server (MSSQL)
+**Database**: PostgreSQL (development), Microsoft SQL Server (production)
 
 **Core Tables**:
 - `rts` - Regional Thermal Stations with location and identification
