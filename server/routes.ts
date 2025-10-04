@@ -602,13 +602,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalMakeupWater = rtsList.reduce((sum, rts) => sum + rts.totalMakeupWater, 0);
       const totalCTP = rtsList.reduce((sum, rts) => sum + rts.ctpCount, 0);
       const totalCritical = rtsList.reduce((sum, rts) => sum + rts.criticalCount, 0);
+      const totalWarning = rtsList.reduce((sum, rts) => sum + rts.warningCount, 0);
       const totalNormal = rtsList.reduce((sum, rts) => sum + rts.normalCount, 0);
       
       const summary = {
         currentMakeupWater: Math.round(totalMakeupWater),
-        ctpRequiringAttention: totalCritical + recommendations.filter(r => r.priority === 'warning').length,
+        ctpRequiringAttention: totalCritical + totalWarning,
         ctpInNormal: Math.round((totalNormal / totalCTP) * 100),
-        outOfControlCount: criticalRecommendations.length,
+        ctpInNormalCount: totalNormal,
+        outOfControlCount: totalCritical,
         rtsStats: rtsList,
       };
 

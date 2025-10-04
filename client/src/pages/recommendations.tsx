@@ -14,6 +14,16 @@ export default function Recommendations() {
     queryKey: ['/api/ctp'],
   });
 
+  const { data: summary } = useQuery<{
+    currentMakeupWater: number;
+    ctpRequiringAttention: number;
+    ctpInNormal: number;
+    ctpInNormalCount: number;
+    outOfControlCount: number;
+  }>({
+    queryKey: ['/api/dashboard/summary'],
+  });
+
   if (isLoading || ctpsLoading) {
     return (
       <div className="space-y-6">
@@ -39,16 +49,9 @@ export default function Recommendations() {
   const warningRecommendations = recommendations?.filter(r => r.priority === 'warning') || [];
   const normalRecommendations = recommendations?.filter(r => r.priority === 'normal') || [];
 
-  const hasRealRecommendations = recommendations && recommendations.length > 0;
-  const inspectionCount = hasRealRecommendations 
-    ? recommendations.filter(r => r.type === 'inspection').length 
-    : 1;
-  const meterCheckCount = hasRealRecommendations 
-    ? recommendations.filter(r => r.type === 'meter_check').length 
-    : 2;
-  const monitoringCount = hasRealRecommendations 
-    ? recommendations.filter(r => r.type === 'monitoring').length 
-    : 0;
+  const criticalCount = summary?.outOfControlCount || 0;
+  const warningCount = (summary?.ctpRequiringAttention || 0) - criticalCount;
+  const normalCount = summary?.ctpInNormalCount || 0;
 
   return (
     <div className="space-y-6">
@@ -67,10 +70,10 @@ export default function Recommendations() {
             <div className="text-5xl mb-4">
               <TriangleAlert className="w-12 h-12 mx-auto text-red-500" />
             </div>
-            <div className="metric-value text-red-600 text-4xl" data-testid="count-inspections">
-              {inspectionCount}
+            <div className="metric-value text-red-600 text-4xl" data-testid="count-critical">
+              {criticalCount}
             </div>
-            <div className="metric-label">Инспекция утечек</div>
+            <div className="metric-label">Критичные ЦТП</div>
           </CardContent>
         </Card>
 
@@ -79,10 +82,10 @@ export default function Recommendations() {
             <div className="text-5xl mb-4">
               <Settings className="w-12 h-12 mx-auto text-yellow-500" />
             </div>
-            <div className="metric-value text-yellow-600 text-4xl" data-testid="count-meter-checks">
-              {meterCheckCount}
+            <div className="metric-value text-yellow-600 text-4xl" data-testid="count-warning">
+              {warningCount}
             </div>
-            <div className="metric-label">Проверка приборов учета</div>
+            <div className="metric-label">Требуют внимания</div>
           </CardContent>
         </Card>
 
@@ -91,10 +94,10 @@ export default function Recommendations() {
             <div className="text-5xl mb-4">
               <Eye className="w-12 h-12 mx-auto text-blue-500" />
             </div>
-            <div className="metric-value text-blue-600 text-4xl" data-testid="count-monitoring">
-              {monitoringCount}
+            <div className="metric-value text-blue-600 text-4xl" data-testid="count-normal">
+              {normalCount}
             </div>
-            <div className="metric-label">Усиленный мониторинг</div>
+            <div className="metric-label">В норме</div>
           </CardContent>
         </Card>
       </div>
@@ -147,7 +150,9 @@ export default function Recommendations() {
           <CardContent className="p-4">
             <div className="flex justify-between items-center">
               <div>
-                <h5 className="font-semibold mb-1">300 ЦТП работают стабильно</h5>
+                <h5 className="font-semibold mb-1" data-testid="text-normal-count">
+                  {summary?.ctpInNormalCount || 0} ЦТП работают стабильно
+                </h5>
                 <p className="text-sm text-muted-foreground">
                   Параметры подпитки находятся в контрольных границах
                 </p>

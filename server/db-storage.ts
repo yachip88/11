@@ -54,10 +54,14 @@ export class DbStorage implements IStorage {
         if (latestMeasurement) {
           totalMakeupWater += latestMeasurement.makeupWater;
           
-          if (latestMeasurement.makeupWater > (ctp.ucl || 0)) {
-            criticalCount++;
-          } else if (latestMeasurement.makeupWater > (ctp.cl || 0)) {
-            warningCount++;
+          if (ctp.ucl != null && ctp.cl != null) {
+            if (latestMeasurement.makeupWater > ctp.ucl) {
+              criticalCount++;
+            } else if (latestMeasurement.makeupWater > ctp.cl) {
+              warningCount++;
+            } else {
+              normalCount++;
+            }
           } else {
             normalCount++;
           }
