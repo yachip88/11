@@ -13,6 +13,9 @@ const trendsCalculator = new TrendsCalculator(storage);
 const upload = multer({ 
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
+    // Fix filename encoding issue (Latin-1 to UTF-8)
+    file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    
     const allowedTypes = [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
       'application/vnd.ms-excel.sheet.macroEnabled.12', // .xlsm
@@ -412,7 +415,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`✅ Обработано ${measurementBatch.length} записей из листа ${sheet.sheetName}`);
 
           // Update control boundaries only for affected CTPs
-          for (const ctpId of affectedCtpIds) {
+          for (const ctpId of Array.from(affectedCtpIds)) {
             const measurements = await storage.getMeasurements(ctpId);
             if (measurements.length >= 10) {
               const boundaries = await storage.calculateControlBoundaries(ctpId);
