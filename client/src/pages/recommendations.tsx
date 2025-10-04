@@ -39,9 +39,16 @@ export default function Recommendations() {
   const warningRecommendations = recommendations?.filter(r => r.priority === 'warning') || [];
   const normalRecommendations = recommendations?.filter(r => r.priority === 'normal') || [];
 
-  const inspectionCount = recommendations?.filter(r => r.type === 'inspection').length || 12;
-  const meterCheckCount = recommendations?.filter(r => r.type === 'meter_check').length || 8;
-  const monitoringCount = recommendations?.filter(r => r.type === 'monitoring').length || 27;
+  const hasRealRecommendations = recommendations && recommendations.length > 0;
+  const inspectionCount = hasRealRecommendations 
+    ? recommendations.filter(r => r.type === 'inspection').length 
+    : 1;
+  const meterCheckCount = hasRealRecommendations 
+    ? recommendations.filter(r => r.type === 'meter_check').length 
+    : 2;
+  const monitoringCount = hasRealRecommendations 
+    ? recommendations.filter(r => r.type === 'monitoring').length 
+    : 0;
 
   return (
     <div className="space-y-6">
