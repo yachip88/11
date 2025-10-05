@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from "@prisma/client";
 
 // Re-export Prisma types for convenience
 export type RTS = {
@@ -196,7 +196,9 @@ export type InsertDistrict = z.infer<typeof insertDistrictSchema>;
 export type InsertVyvod = z.infer<typeof insertVyvodSchema>;
 export type InsertCTP = z.infer<typeof insertCtpSchema>;
 export type InsertMeasurement = z.infer<typeof insertMeasurementSchema>;
-export type InsertStatisticalParams = z.infer<typeof insertStatisticalParamsSchema>;
+export type InsertStatisticalParams = z.infer<
+  typeof insertStatisticalParamsSchema
+>;
 export type InsertRecommendation = z.infer<typeof insertRecommendationSchema>;
 export type InsertUploadedFile = z.infer<typeof insertUploadedFileSchema>;
 
@@ -232,5 +234,5 @@ export type ControlChartData = {
   cl: number;
   lcl: number;
   isOutOfControl: boolean;
-  controlType: 'normal' | 'upper' | 'lower';
+  controlType: "normal" | "upper" | "lower";
 };

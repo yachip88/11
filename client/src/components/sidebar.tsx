@@ -1,14 +1,14 @@
 import { Link, useLocation } from "wouter";
-import { 
-  BarChart3, 
-  Activity, 
-  Table, 
-  TrendingUp, 
-  GitBranch, 
-  FileText, 
-  Brain, 
+import {
+  BarChart3,
+  Activity,
+  Table,
+  TrendingUp,
+  GitBranch,
+  FileText,
+  Brain,
   Upload,
-  Flame
+  Flame,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +33,9 @@ export function Sidebar() {
           <Flame className="w-6 h-6 text-sidebar-primary" />
           <div>
             <h1 className="text-lg font-bold leading-tight">НТСК Аналитика</h1>
-            <p className="text-xs text-sidebar-foreground/70">Система подпитки</p>
+            <p className="text-xs text-sidebar-foreground/70">
+              Система подпитки
+            </p>
           </div>
         </div>
       </div>
@@ -42,7 +44,7 @@ export function Sidebar() {
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const isActive = location === item.path;
-          
+
           return (
             <Link key={item.path} href={item.path}>
               <div className={cn("nav-item", isActive && "active")}>
@@ -59,12 +61,12 @@ export function Sidebar() {
           <div className="flex justify-between mb-2">
             <span>Последнее обновление:</span>
             <span className="font-semibold">
-              {new Date().toLocaleDateString('ru-RU', {
-                day: '2-digit',
-                month: '2-digit',
-                year: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
+              {new Date().toLocaleDateString("ru-RU", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
               })}
             </span>
           </div>

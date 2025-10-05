@@ -1,6 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { TrendChart } from "@/components/charts/trend-chart";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
@@ -19,23 +25,28 @@ interface DashboardSummary {
 
 export default function Dashboard() {
   const { data: summary, isLoading } = useQuery<DashboardSummary>({
-    queryKey: ['/api/dashboard/summary'],
+    queryKey: ["/api/dashboard/summary"],
   });
 
   const { data: yearlyChange } = useQuery<{ change: number }>({
-    queryKey: ['/api/trends/overall-change/year'],
+    queryKey: ["/api/trends/overall-change/year"],
   });
 
   const { data: weeklyChange } = useQuery<{ change: number }>({
-    queryKey: ['/api/trends/overall-change/week'],
+    queryKey: ["/api/trends/overall-change/week"],
   });
 
-  const [trendPeriod, setTrendPeriod] = useState<'day' | 'week' | 'month' | 'year'>('week');
-  const periodOptions: { value: 'day' | 'week' | 'month' | 'year'; label: string }[] = [
-    { value: 'day', label: 'День' },
-    { value: 'week', label: 'Неделя' },
-    { value: 'month', label: 'Месяц' },
-    { value: 'year', label: 'Год' },
+  const [trendPeriod, setTrendPeriod] = useState<
+    "day" | "week" | "month" | "year"
+  >("week");
+  const periodOptions: {
+    value: "day" | "week" | "month" | "year";
+    label: string;
+  }[] = [
+    { value: "day", label: "День" },
+    { value: "week", label: "Неделя" },
+    { value: "month", label: "Месяц" },
+    { value: "year", label: "Год" },
   ];
 
   if (isLoading) {
@@ -70,17 +81,30 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardContent className="p-6">
-            <div className="metric-value text-primary" data-testid="metric-makeup-water">
+            <div
+              className="metric-value text-primary"
+              data-testid="metric-makeup-water"
+            >
               {summary.currentMakeupWater.toLocaleString()}
             </div>
             <div className="metric-label">Подпитка т/ч (текущая)</div>
             {yearlyChange && (
-              <div className={cn(
-                "metric-change",
-                yearlyChange.change < 0 ? "positive" : yearlyChange.change > 0 ? "negative" : ""
-              )}>
-                {yearlyChange.change < 0 && <ArrowDown className="w-3 h-3 mr-1" />}
-                {yearlyChange.change > 0 && <ArrowUp className="w-3 h-3 mr-1" />}
+              <div
+                className={cn(
+                  "metric-change",
+                  yearlyChange.change < 0
+                    ? "positive"
+                    : yearlyChange.change > 0
+                      ? "negative"
+                      : "",
+                )}
+              >
+                {yearlyChange.change < 0 && (
+                  <ArrowDown className="w-3 h-3 mr-1" />
+                )}
+                {yearlyChange.change > 0 && (
+                  <ArrowUp className="w-3 h-3 mr-1" />
+                )}
                 {yearlyChange.change.toFixed(1)} т/ч к прошлому году
               </div>
             )}
@@ -89,7 +113,10 @@ export default function Dashboard() {
 
         <Card>
           <CardContent className="p-6">
-            <div className="metric-value text-yellow-600" data-testid="metric-attention">
+            <div
+              className="metric-value text-yellow-600"
+              data-testid="metric-attention"
+            >
               {summary.ctpRequiringAttention}
             </div>
             <div className="metric-label">ЦТП требующих внимания</div>
@@ -102,17 +129,30 @@ export default function Dashboard() {
 
         <Card>
           <CardContent className="p-6">
-            <div className="metric-value text-green-600" data-testid="metric-normal">
+            <div
+              className="metric-value text-green-600"
+              data-testid="metric-normal"
+            >
               {summary.ctpInNormal}%
             </div>
             <div className="metric-label">ЦТП в норме</div>
             {weeklyChange && (
-              <div className={cn(
-                "metric-change",
-                weeklyChange.change < 0 ? "positive" : weeklyChange.change > 0 ? "negative" : ""
-              )}>
-                {weeklyChange.change < 0 && <ArrowDown className="w-3 h-3 mr-1" />}
-                {weeklyChange.change > 0 && <ArrowUp className="w-3 h-3 mr-1" />}
+              <div
+                className={cn(
+                  "metric-change",
+                  weeklyChange.change < 0
+                    ? "positive"
+                    : weeklyChange.change > 0
+                      ? "negative"
+                      : "",
+                )}
+              >
+                {weeklyChange.change < 0 && (
+                  <ArrowDown className="w-3 h-3 mr-1" />
+                )}
+                {weeklyChange.change > 0 && (
+                  <ArrowUp className="w-3 h-3 mr-1" />
+                )}
                 {Math.abs(weeklyChange.change).toFixed(1)} т/ч за неделю
               </div>
             )}
@@ -121,7 +161,10 @@ export default function Dashboard() {
 
         <Card>
           <CardContent className="p-6">
-            <div className="metric-value text-red-600" data-testid="metric-out-of-control">
+            <div
+              className="metric-value text-red-600"
+              data-testid="metric-out-of-control"
+            >
               {summary.outOfControlCount}
             </div>
             <div className="metric-label">Выходы за границы</div>
@@ -208,22 +251,26 @@ export default function Dashboard() {
               <tbody>
                 {(() => {
                   const totalAbsolute = summary.rtsStats.reduce(
-                    (sum, rts) => sum + Math.abs(rts.totalMakeupWater), 
-                    0
+                    (sum, rts) => sum + Math.abs(rts.totalMakeupWater),
+                    0,
                   );
-                  
+
                   return summary.rtsStats.map((rts) => {
-                    const percentage = totalAbsolute > 0 
-                      ? ((Math.abs(rts.totalMakeupWater) / totalAbsolute) * 100).toFixed(1)
-                      : '0.0';
-                    const status = rts.criticalCount > 0 ? 'warning' : 'normal';
-                    
+                    const percentage =
+                      totalAbsolute > 0
+                        ? (
+                            (Math.abs(rts.totalMakeupWater) / totalAbsolute) *
+                            100
+                          ).toFixed(1)
+                        : "0.0";
+                    const status = rts.criticalCount > 0 ? "warning" : "normal";
+
                     return (
-                      <RTSRow 
-                        key={rts.id} 
-                        rts={rts} 
-                        percentage={percentage} 
-                        status={status} 
+                      <RTSRow
+                        key={rts.id}
+                        rts={rts}
+                        percentage={percentage}
+                        status={status}
                       />
                     );
                   });
@@ -237,10 +284,14 @@ export default function Dashboard() {
   );
 }
 
-function RTSRow({ rts, percentage, status }: { 
-  rts: RTSWithStats; 
-  percentage: string; 
-  status: 'normal' | 'warning' | 'critical'; 
+function RTSRow({
+  rts,
+  percentage,
+  status,
+}: {
+  rts: RTSWithStats;
+  percentage: string;
+  status: "normal" | "warning" | "critical";
 }) {
   const { data: weeklyChangeData } = useQuery<{ change: number }>({
     queryKey: [`/api/rts/${rts.id}/weekly-change`],
@@ -250,11 +301,19 @@ function RTSRow({ rts, percentage, status }: {
 
   return (
     <tr data-testid={`row-rts-${rts.id}`}>
-      <td className="font-semibold">{rts.code} ({rts.name})</td>
+      <td className="font-semibold">
+        {rts.code} ({rts.name})
+      </td>
       <td className="font-mono">{rts.totalMakeupWater.toFixed(1)}</td>
-      <td className={cn(
-        weeklyChange < 0 ? "text-green-600" : weeklyChange > 0 ? "text-red-600" : "text-muted-foreground"
-      )}>
+      <td
+        className={cn(
+          weeklyChange < 0
+            ? "text-green-600"
+            : weeklyChange > 0
+              ? "text-red-600"
+              : "text-muted-foreground",
+        )}
+      >
         {weeklyChange < 0 && <ArrowDown className="w-4 h-4 inline mr-1" />}
         {weeklyChange > 0 && <ArrowUp className="w-4 h-4 inline mr-1" />}
         {weeklyChange.toFixed(1)}
@@ -263,11 +322,15 @@ function RTSRow({ rts, percentage, status }: {
       <td>{percentage}%</td>
       <td>
         <StatusBadge status={status}>
-          {status === 'warning' ? 'Внимание' : 'Норма'}
+          {status === "warning" ? "Внимание" : "Норма"}
         </StatusBadge>
       </td>
       <td>
-        <Button variant="outline" size="sm" data-testid={`button-details-${rts.id}`}>
+        <Button
+          variant="outline"
+          size="sm"
+          data-testid={`button-details-${rts.id}`}
+        >
           <Eye className="w-4 h-4 mr-1" />
           Детали
         </Button>

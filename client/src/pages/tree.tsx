@@ -5,8 +5,7 @@ import { TreeNode } from "@/components/tree/tree-node";
 import { cn } from "@/lib/utils";
 import type { RTSWithStats, CTPWithDetails } from "@shared/schema";
 
-
-type Severity = 'normal' | 'warning' | 'critical';
+type Severity = "normal" | "warning" | "critical";
 
 const severityRank: Record<Severity, number> = {
   normal: 0,
@@ -19,55 +18,61 @@ const mergeSeverity = (current: Severity, next: Severity): Severity =>
 
 const computeMeasurementSeverity = (ctp: CTPWithDetails): Severity => {
   const measurement = ctp.latestMeasurement;
-  if (!measurement) return 'normal';
+  if (!measurement) return "normal";
 
   const value = measurement.makeupWater;
 
   if (ctp.ucl != null && value > ctp.ucl) {
-    return 'critical';
+    return "critical";
   }
 
   if (ctp.lcl != null && value < ctp.lcl) {
-    return 'warning';
+    return "warning";
   }
 
   if (ctp.cl != null && value > ctp.cl) {
-    return 'warning';
+    return "warning";
   }
 
-  return 'normal';
+  return "normal";
 };
 
 const computeBaseSeverity = (ctp: CTPWithDetails): Severity => {
   let severity = computeMeasurementSeverity(ctp);
 
-  if (severity !== 'critical' && ctp.recommendations.some((r) => r.priority === 'critical')) {
-    severity = 'critical';
-  } else if (severity === 'normal' && ctp.recommendations.some((r) => r.priority === 'warning')) {
-    severity = 'warning';
+  if (
+    severity !== "critical" &&
+    ctp.recommendations.some((r) => r.priority === "critical")
+  ) {
+    severity = "critical";
+  } else if (
+    severity === "normal" &&
+    ctp.recommendations.some((r) => r.priority === "warning")
+  ) {
+    severity = "warning";
   }
 
   return severity;
 };
 
 const treeTabs = [
-  { key: 'short', label: 'Горизонт: Сутки - Неделя' },
-  { key: 'long', label: 'Горизонт: Неделя - Год' },
+  { key: "short", label: "Горизонт: Сутки - Неделя" },
+  { key: "long", label: "Горизонт: Неделя - Год" },
 ];
 
 export default function Tree() {
-  const [activeTab, setActiveTab] = useState<string>('short');
+  const [activeTab, setActiveTab] = useState<string>("short");
 
   const { data: rtsStats, isLoading: loadingRTS } = useQuery<RTSWithStats[]>({
-    queryKey: ['/api/rts/stats'],
+    queryKey: ["/api/rts/stats"],
   });
 
   const { data: ctpList, isLoading: loadingCTP } = useQuery<CTPWithDetails[]>({
-    queryKey: ['/api/ctp'],
+    queryKey: ["/api/ctp"],
   });
 
   const { data: weeklyChange } = useQuery<{ change: number }>({
-    queryKey: ['/api/trends/overall-change/week'],
+    queryKey: ["/api/trends/overall-change/week"],
   });
 
   if (loadingRTS || loadingCTP) {
@@ -82,48 +87,64 @@ export default function Tree() {
   if (!rtsStats || !ctpList) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Ошибка загрузки данных дерева подпитки</p>
+        <p className="text-muted-foreground">
+          Ошибка загрузки данных дерева подпитки
+        </p>
       </div>
     );
   }
 
-  const totalMakeupWater = rtsStats.reduce((sum, rts) => sum + rts.totalMakeupWater, 0);
+  const totalMakeupWater = rtsStats.reduce(
+    (sum, rts) => sum + rts.totalMakeupWater,
+    0,
+  );
   const totalWeeklyChange = weeklyChange?.change || 0;
 
-  const overallStatus = ctpList.reduce<Severity>((acc, ctp) => mergeSeverity(acc, computeBaseSeverity(ctp)), 'normal');
+  const overallStatus = ctpList.reduce<Severity>(
+    (acc, ctp) => mergeSeverity(acc, computeBaseSeverity(ctp)),
+    "normal",
+  );
 
   // Group CTP by RTS
-  const ctpByRTS = ctpList.reduce((acc, ctp) => {
-    if (!ctp.rtsId) {
+  const ctpByRTS = ctpList.reduce(
+    (acc, ctp) => {
+      if (!ctp.rtsId) {
+        return acc;
+      }
+      if (!acc[ctp.rtsId]) {
+        acc[ctp.rtsId] = [];
+      }
+      acc[ctp.rtsId].push(ctp);
       return acc;
-    }
-    if (!acc[ctp.rtsId]) {
-      acc[ctp.rtsId] = [];
-    }
-    acc[ctp.rtsId].push(ctp);
-    return acc;
-  }, {} as Record<string, CTPWithDetails[]>);
+    },
+    {} as Record<string, CTPWithDetails[]>,
+  );
 
   // Group CTP by district within each RTS
   const ctpByDistrict = (rtsId: string) => {
     const rtsCTPs = ctpByRTS[rtsId] || [];
-    return rtsCTPs.reduce((acc, ctp) => {
-      if (!ctp.districtId) {
+    return rtsCTPs.reduce(
+      (acc, ctp) => {
+        if (!ctp.districtId) {
+          return acc;
+        }
+        if (!acc[ctp.districtId]) {
+          acc[ctp.districtId] = [];
+        }
+        acc[ctp.districtId].push(ctp);
         return acc;
-      }
-      if (!acc[ctp.districtId]) {
-        acc[ctp.districtId] = [];
-      }
-      acc[ctp.districtId].push(ctp);
-      return acc;
-    }, {} as Record<string, CTPWithDetails[]>);
+      },
+      {} as Record<string, CTPWithDetails[]>,
+    );
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Дерево подпитки ЦТП с рекомендациями</h3>
+        <h3 className="text-xl font-semibold mb-2">
+          Дерево подпитки ЦТП с рекомендациями
+        </h3>
         <p className="text-muted-foreground text-sm">
           Иерархическая структура подпитки по РТС, микрорайонам и ЦТП
         </p>
@@ -162,7 +183,7 @@ export default function Tree() {
               const rtsCTPs = ctpByRTS[rts.id] || [];
               const rtsStatus = rtsCTPs.reduce<Severity>(
                 (acc, ctp) => mergeSeverity(acc, computeBaseSeverity(ctp)),
-                'normal'
+                "normal",
               );
               const districts = ctpByDistrict(rts.id);
 
@@ -183,15 +204,15 @@ export default function Tree() {
   );
 }
 
-function RTSTreeNode({ 
-  rts, 
-  rtsCTPs, 
-  rtsStatus, 
-  districts 
-}: { 
-  rts: RTSWithStats; 
-  rtsCTPs: CTPWithDetails[]; 
-  rtsStatus: 'normal' | 'warning' | 'critical'; 
+function RTSTreeNode({
+  rts,
+  rtsCTPs,
+  rtsStatus,
+  districts,
+}: {
+  rts: RTSWithStats;
+  rtsCTPs: CTPWithDetails[];
+  rtsStatus: "normal" | "warning" | "critical";
   districts: Record<string, CTPWithDetails[]>;
 }) {
   const { data: rtsChange } = useQuery<{ change: number }>({
@@ -211,16 +232,16 @@ function RTSTreeNode({
       {/* District Level */}
       {Object.entries(districts).map(([districtId, districtCTPs]) => {
         if (districtCTPs.length === 0) return null;
-        
+
         const districtInfo = districtCTPs[0].district;
-        const districtName = districtInfo?.name ?? 'Без района';
+        const districtName = districtInfo?.name ?? "Без района";
         const districtMakeupWater = districtCTPs.reduce(
           (sum, ctp) => sum + (ctp.latestMeasurement?.makeupWater || 0),
-          0
+          0,
         );
         const districtSeverity = districtCTPs.reduce<Severity>(
           (acc, ctp) => mergeSeverity(acc, computeBaseSeverity(ctp)),
-          'normal'
+          "normal",
         );
 
         return (
@@ -250,42 +271,65 @@ function CTPTreeNode({ ctp }: { ctp: CTPWithDetails }) {
   });
 
   const measurement = ctp.latestMeasurement;
-  
+
   const baseSeverity = computeBaseSeverity(ctp);
   let status: Severity = baseSeverity;
   let actionType: string | undefined;
 
   const measurementValue = measurement?.makeupWater ?? null;
-  const aboveUpperLimit = measurementValue !== null && ctp.ucl !== null && ctp.ucl !== undefined && measurementValue > ctp.ucl;
-  const belowLowerLimit = measurementValue !== null && ctp.lcl !== null && ctp.lcl !== undefined && measurementValue < ctp.lcl;
-  const aboveCenterLine = measurementValue !== null && ctp.cl !== null && ctp.cl !== undefined && measurementValue > ctp.cl;
+  const aboveUpperLimit =
+    measurementValue !== null &&
+    ctp.ucl !== null &&
+    ctp.ucl !== undefined &&
+    measurementValue > ctp.ucl;
+  const belowLowerLimit =
+    measurementValue !== null &&
+    ctp.lcl !== null &&
+    ctp.lcl !== undefined &&
+    measurementValue < ctp.lcl;
+  const aboveCenterLine =
+    measurementValue !== null &&
+    ctp.cl !== null &&
+    ctp.cl !== undefined &&
+    measurementValue > ctp.cl;
 
   if (aboveUpperLimit) {
-    status = 'critical';
-    actionType = 'Превышен верхний предел UCL';
+    status = "critical";
+    actionType = "Превышен верхний предел UCL";
   } else if (belowLowerLimit) {
-    status = status === 'critical' ? status : 'warning';
-    actionType = 'Ниже нижней границы LCL';
+    status = status === "critical" ? status : "warning";
+    actionType = "Ниже нижней границы LCL";
   } else if (aboveCenterLine) {
-    if (status !== 'critical') {
-      status = 'warning';
+    if (status !== "critical") {
+      status = "warning";
     }
-    actionType = 'Превышена контрольная линия CL';
+    actionType = "Превышена контрольная линия CL";
   }
 
   if (!actionType) {
-    if (status === 'critical' && ctp.recommendations.some((r) => r.priority === 'critical')) {
-      actionType = 'Критическая рекомендация';
-    } else if (status === 'warning' && ctp.recommendations.some((r) => r.priority === 'warning')) {
-      actionType = 'Есть предупреждающая рекомендация';
+    if (
+      status === "critical" &&
+      ctp.recommendations.some((r) => r.priority === "critical")
+    ) {
+      actionType = "Критическая рекомендация";
+    } else if (
+      status === "warning" &&
+      ctp.recommendations.some((r) => r.priority === "warning")
+    ) {
+      actionType = "Есть предупреждающая рекомендация";
     }
   }
 
   const trendChange = ctpChange?.change ?? null;
-  if (status !== 'critical' && trendChange !== null && trendChange > 0 && measurementValue !== null) {
-    status = 'warning';
+  if (
+    status !== "critical" &&
+    trendChange !== null &&
+    trendChange > 0 &&
+    measurementValue !== null
+  ) {
+    status = "warning";
     if (!actionType) {
-      actionType = 'Подпитка растет';
+      actionType = "Подпитка растет";
     }
   }
 

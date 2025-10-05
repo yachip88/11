@@ -4,39 +4,46 @@ import multer from "multer";
 import { DbStorage } from "./db-storage";
 import { ExcelParser } from "./excel-parser";
 import { TrendsCalculator } from "./trends-calculator";
-import { insertMeasurementSchema, insertRecommendationSchema, insertUploadedFileSchema } from "@shared/schema";
+import {
+  insertMeasurementSchema,
+  insertRecommendationSchema,
+  insertUploadedFileSchema,
+} from "@shared/schema";
 import { z } from "zod";
 import { db } from "./db";
 
 const storage = new DbStorage();
 const trendsCalculator = new TrendsCalculator(storage);
 
-const upload = multer({ 
+const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
     // Fix filename encoding issue (Latin-1 to UTF-8)
-    file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
-    
+    file.originalname = Buffer.from(file.originalname, "latin1").toString(
+      "utf8",
+    );
+
     const allowedTypes = [
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-      'application/vnd.ms-excel.sheet.macroEnabled.12', // .xlsm
-      'application/vnd.ms-excel.sheet.binary.macroEnabled.12', // .xlsb
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+      "application/vnd.ms-excel.sheet.macroEnabled.12", // .xlsm
+      "application/vnd.ms-excel.sheet.binary.macroEnabled.12", // .xlsb
     ];
-    
-    if (allowedTypes.includes(file.mimetype) || 
-        file.originalname.match(/\.(xlsx|xlsm|xlsb)$/i)) {
+
+    if (
+      allowedTypes.includes(file.mimetype) ||
+      file.originalname.match(/\.(xlsx|xlsm|xlsb)$/i)
+    ) {
       cb(null, true);
     } else {
-      cb(new Error('Поддерживаются только файлы Excel (XLSX, XLSM, XLSB)'));
+      cb(new Error("Поддерживаются только файлы Excel (XLSX, XLSM, XLSB)"));
     }
   },
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB limit
-  }
+  },
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  
   // RTS routes
   app.get("/api/rts", async (req, res) => {
     try {
@@ -52,7 +59,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await storage.getRTSWithStats();
       res.json(stats);
     } catch (error) {
-      res.status(500).json({ message: "Ошибка получения статистики РТС", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка получения статистики РТС", error });
     }
   });
 
@@ -72,7 +81,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/districts", async (req, res) => {
     try {
       const { rtsId } = req.query;
-      if (rtsId && typeof rtsId === 'string') {
+      if (rtsId && typeof rtsId === "string") {
         const districts = await storage.getDistrictsByRTS(rtsId);
         res.json(districts);
       } else {
@@ -88,11 +97,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { rtsId, districtId, status } = req.query;
       const filters: any = {};
-      
-      if (rtsId && typeof rtsId === 'string') filters.rtsId = rtsId;
-      if (districtId && typeof districtId === 'string') filters.districtId = districtId;
-      if (status && typeof status === 'string') filters.status = status;
-      
+
+      if (rtsId && typeof rtsId === "string") filters.rtsId = rtsId;
+      if (districtId && typeof districtId === "string")
+        filters.districtId = districtId;
+      if (status && typeof status === "string") filters.status = status;
+
       const ctpList = await storage.getCTPList(filters);
       res.json(ctpList);
     } catch (error) {
@@ -117,8 +127,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { startDate, endDate } = req.query;
       const start = startDate ? new Date(startDate as string) : undefined;
       const end = endDate ? new Date(endDate as string) : undefined;
-      
-      const measurements = await storage.getMeasurements(req.params.id, start, end);
+
+      const measurements = await storage.getMeasurements(
+        req.params.id,
+        start,
+        end,
+      );
       res.json(measurements);
     } catch (error) {
       res.status(500).json({ message: "Ошибка получения измерений", error });
@@ -129,11 +143,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { period = "60" } = req.query;
       const periodDays = parseInt(period as string, 10);
-      
+
       const data = await storage.getControlChartData(req.params.id, periodDays);
       res.json(data);
     } catch (error) {
-      res.status(500).json({ message: "Ошибка получения данных контрольной карты", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка получения данных контрольной карты", error });
     }
   });
 
@@ -145,7 +161,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(measurement);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Неверные данные", errors: error.errors });
+        return res
+          .status(400)
+          .json({ message: "Неверные данные", errors: error.errors });
       }
       res.status(500).json({ message: "Ошибка создания измерения", error });
     }
@@ -154,11 +172,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Statistical parameters routes
   app.post("/api/ctp/:id/calculate-boundaries", async (req, res) => {
     try {
-      const boundaries = await storage.calculateControlBoundaries(req.params.id);
+      const boundaries = await storage.calculateControlBoundaries(
+        req.params.id,
+      );
       await storage.updateCTPBoundaries(req.params.id, boundaries);
       res.json(boundaries);
     } catch (error) {
-      res.status(500).json({ message: "Ошибка расчета контрольных границ", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка расчета контрольных границ", error });
     }
   });
 
@@ -167,12 +189,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { ctpId, type, priority, status } = req.query;
       const filters: any = {};
-      
-      if (ctpId && typeof ctpId === 'string') filters.ctpId = ctpId;
-      if (type && typeof type === 'string') filters.type = type;
-      if (priority && typeof priority === 'string') filters.priority = priority;
-      if (status && typeof status === 'string') filters.status = status;
-      
+
+      if (ctpId && typeof ctpId === "string") filters.ctpId = ctpId;
+      if (type && typeof type === "string") filters.type = type;
+      if (priority && typeof priority === "string") filters.priority = priority;
+      if (status && typeof status === "string") filters.status = status;
+
       const recommendations = await storage.getRecommendations(filters);
       res.json(recommendations);
     } catch (error) {
@@ -187,7 +209,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(recommendation);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Неверные данные", errors: error.errors });
+        return res
+          .status(400)
+          .json({ message: "Неверные данные", errors: error.errors });
       }
       res.status(500).json({ message: "Ошибка создания рекомендации", error });
     }
@@ -196,14 +220,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/recommendations/:id/status", async (req, res) => {
     try {
       const { status } = req.body;
-      if (!status || typeof status !== 'string') {
+      if (!status || typeof status !== "string") {
         return res.status(400).json({ message: "Требуется параметр status" });
       }
-      
+
       await storage.updateRecommendationStatus(req.params.id, status);
       res.json({ message: "Статус рекомендации обновлен" });
     } catch (error) {
-      res.status(500).json({ message: "Ошибка обновления статуса рекомендации", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка обновления статуса рекомендации", error });
     }
   });
 
@@ -212,16 +238,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { period } = req.params;
       const { rtsId, rtsFilter, ctpId } = req.query;
-      
-      if (!['day', 'week', 'month', 'year'].includes(period)) {
+
+      if (!["day", "week", "month", "year"].includes(period)) {
         return res.status(400).json({ message: "Неверный период" });
       }
-      
+
       const trends = await storage.getTrendData(
-        period as any, 
-        rtsId as string, 
+        period as any,
+        rtsId as string,
         rtsFilter as string,
-        ctpId as string
+        ctpId as string,
       );
       res.json(trends);
     } catch (error) {
@@ -232,107 +258,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/trends/:period/changes", async (req, res) => {
     try {
       const { period } = req.params;
-      
-      if (!['week', 'month', 'year'].includes(period)) {
+
+      if (!["week", "month", "year"].includes(period)) {
         return res.status(400).json({ message: "Неверный период" });
       }
-      
+
       const changes = await trendsCalculator.getTopChanges(period as any);
       res.json(changes);
     } catch (error) {
-      res.status(500).json({ message: "Ошибка получения изменений трендов", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка получения изменений трендов", error });
     }
   });
 
   app.get("/api/trends/:period/rts-stats", async (req, res) => {
     try {
       const { period } = req.params;
-      
-      if (!['week', 'month', 'year'].includes(period)) {
+
+      if (!["week", "month", "year"].includes(period)) {
         return res.status(400).json({ message: "Неверный период" });
       }
-      
+
       const stats = await trendsCalculator.getRTSStats(period as any);
       res.json(stats);
     } catch (error) {
-      res.status(500).json({ message: "Ошибка получения статистики РТС", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка получения статистики РТС", error });
     }
   });
 
   app.get("/api/ctp/:id/weekly-change", async (req, res) => {
     try {
-      const change = await trendsCalculator.calculateCTPWeeklyChange(req.params.id);
+      const change = await trendsCalculator.calculateCTPWeeklyChange(
+        req.params.id,
+      );
       res.json({ change });
     } catch (error) {
-      res.status(500).json({ message: "Ошибка расчета недельного изменения", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка расчета недельного изменения", error });
     }
   });
 
   app.get("/api/rts/:id/weekly-change", async (req, res) => {
     try {
-      const change = await trendsCalculator.calculateRTSWeeklyChange(req.params.id);
+      const change = await trendsCalculator.calculateRTSWeeklyChange(
+        req.params.id,
+      );
       res.json({ change });
     } catch (error) {
-      res.status(500).json({ message: "Ошибка расчета недельного изменения РТС", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка расчета недельного изменения РТС", error });
     }
   });
 
   app.get("/api/trends/overall-change/:period", async (req, res) => {
     try {
       const { period } = req.params;
-      
-      if (!['week', 'month', 'year'].includes(period)) {
+
+      if (!["week", "month", "year"].includes(period)) {
         return res.status(400).json({ message: "Неверный период" });
       }
-      
-      const change = await trendsCalculator.calculateOverallChange(period as any);
+
+      const change = await trendsCalculator.calculateOverallChange(
+        period as any,
+      );
       res.json({ change });
     } catch (error) {
-      res.status(500).json({ message: "Ошибка расчета общего изменения", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка расчета общего изменения", error });
     }
   });
 
   // File upload routes
-  app.post("/api/upload", upload.array('files'), async (req, res) => {
+  app.post("/api/upload", upload.array("files"), async (req, res) => {
     try {
       if (!req.files || !Array.isArray(req.files)) {
         return res.status(400).json({ message: "Файлы не были загружены" });
       }
 
       const uploadResults = [];
-      
+
       for (const file of req.files) {
         const fileData = insertUploadedFileSchema.parse({
           filename: file.filename || file.originalname,
           originalName: file.originalname,
-          fileType: file.originalname.split('.').pop()?.toLowerCase() || 'unknown',
+          fileType:
+            file.originalname.split(".").pop()?.toLowerCase() || "unknown",
           size: file.size,
-          status: 'processing',
+          status: "processing",
         });
 
         const uploadedFile = await storage.createUploadedFile(fileData);
         uploadResults.push(uploadedFile);
 
         // Process Excel file asynchronously
-        processExcelFile(file.buffer, file.originalname, uploadedFile.id).catch(error => {
-          console.error('Error processing file:', error);
-          storage.updateFileStatus(uploadedFile.id, 'error', 0, [String(error)]);
-        });
+        processExcelFile(file.buffer, file.originalname, uploadedFile.id).catch(
+          (error) => {
+            console.error("Error processing file:", error);
+            storage.updateFileStatus(uploadedFile.id, "error", 0, [
+              String(error),
+            ]);
+          },
+        );
       }
 
-      res.json({ 
+      res.json({
         message: `Загружено ${uploadResults.length} файлов`,
-        files: uploadResults 
+        files: uploadResults,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Неверные данные файла", errors: error.errors });
+        return res
+          .status(400)
+          .json({ message: "Неверные данные файла", errors: error.errors });
       }
       res.status(500).json({ message: "Ошибка загрузки файла", error });
     }
   });
 
-  async function processExcelFile(buffer: Buffer, filename: string, uploadId: string) {
+  async function processExcelFile(
+    buffer: Buffer,
+    filename: string,
+    uploadId: string,
+  ) {
     try {
       const parsedSheets = await ExcelParser.parseFile(buffer, filename);
       let totalRecords = 0;
@@ -341,8 +394,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Pre-load reference data once
       let ctpList = await storage.getCTPList();
       let rtsList = await storage.getRTSList();
-      const ctpCache = new Map(ctpList.map(c => [c.name, c]));
-      const rtsCache = new Map(rtsList.map(r => [r.name, r]));
+      const ctpCache = new Map(ctpList.map((c) => [c.name, c]));
+      const rtsCache = new Map(rtsList.map((r) => [r.name, r]));
       const districtCache = new Map<string, any>();
 
       // Load all districts into cache
@@ -352,43 +405,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
           districtCache.set(`${rts.id}:${district.name}`, district);
         }
       }
-      
+
       // Extract RTS and District from file metadata
       const fileRtsNumber = parsedSheets[0]?.metadata?.rtsNumber;
       const fileDistrictName = parsedSheets[0]?.metadata?.districtName;
-      
-      console.log(`📦 Метаданные файла: РТС="${fileRtsNumber}", Район="${fileDistrictName}"`);
-      
+
+      console.log(
+        `📦 Метаданные файла: РТС="${fileRtsNumber}", Район="${fileDistrictName}"`,
+      );
+
       // Auto-create RTS if not found
       let targetRTS = rtsList[0] || null; // Default fallback
       if (fileRtsNumber) {
         const rtsName = `РТС-${fileRtsNumber}`;
-        let foundRTS = rtsCache.get(rtsName) || rtsList.find(r => r.name === rtsName);
-        
+        let foundRTS =
+          rtsCache.get(rtsName) || rtsList.find((r) => r.name === rtsName);
+
         if (!foundRTS) {
           console.log(`🆕 Создание нового РТС: ${rtsName}`);
           foundRTS = await storage.createRTS({
             name: rtsName,
             code: `RTS-${fileRtsNumber}`,
-            location: 'Новосибирск'
+            location: "Новосибирск",
           });
           rtsCache.set(rtsName, foundRTS);
           rtsList.push(foundRTS);
         }
         targetRTS = foundRTS;
       }
-      
+
       // Auto-create District if not found
       let targetDistrict: any;
       if (fileDistrictName && targetRTS) {
         const districtKey = `${targetRTS.id}:${fileDistrictName}`;
         targetDistrict = districtCache.get(districtKey);
-        
+
         if (!targetDistrict) {
-          console.log(`🆕 Создание нового района: ${fileDistrictName} для ${targetRTS.name}`);
+          console.log(
+            `🆕 Создание нового района: ${fileDistrictName} для ${targetRTS.name}`,
+          );
           targetDistrict = await storage.createDistrict({
             name: fileDistrictName,
-            rtsId: targetRTS.id
+            rtsId: targetRTS.id,
           });
           districtCache.set(districtKey, targetDistrict);
         }
@@ -397,18 +455,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const districts = await storage.getDistrictsByRTS(targetRTS.id);
         targetDistrict = districts[0];
       }
-      
+
       if (!targetRTS || !targetDistrict) {
-        throw new Error('Не удалось определить РТС или район для загрузки данных');
+        throw new Error(
+          "Не удалось определить РТС или район для загрузки данных",
+        );
       }
-      
-      console.log(`✅ Используется РТС: ${targetRTS.name}, Район: ${targetDistrict.name}`);
+
+      console.log(
+        `✅ Используется РТС: ${targetRTS.name}, Район: ${targetDistrict.name}`,
+      );
 
       for (const sheet of parsedSheets) {
         try {
           const measurements = ExcelParser.parseMeasurements(sheet);
-          const { valid, errors: validationErrors } = ExcelParser.validateMeasurementData(measurements);
-          
+          const { valid, errors: validationErrors } =
+            ExcelParser.validateMeasurementData(measurements);
+
           errors.push(...validationErrors);
 
           // Batch process measurements
@@ -423,7 +486,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (!ctp) {
                 // Extract code from name if possible (e.g., "ЦТП-125" -> "125")
                 const codeMatch = measurement.ctpName.match(/\d+/);
-                const code = measurement.ctpCode || codeMatch?.[0] || measurement.ctpName;
+                const code =
+                  measurement.ctpCode || codeMatch?.[0] || measurement.ctpName;
 
                 const newCtp = await storage.createCTP({
                   name: measurement.ctpName,
@@ -431,9 +495,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   rtsId: targetRTS.id,
                   districtId: targetDistrict.id,
                   hasMeter: true,
-                  meterStatus: 'working',
+                  meterStatus: "working",
                 });
-                
+
                 // Get full CTP with relations
                 ctp = await storage.getCTPById(newCtp.id);
                 if (ctp) {
@@ -442,7 +506,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
 
               if (!ctp) {
-                throw new Error(`Не удалось создать или найти ЦТП ${measurement.ctpName}`);
+                throw new Error(
+                  `Не удалось создать или найти ЦТП ${measurement.ctpName}`,
+                );
               }
 
               measurementBatch.push({
@@ -457,7 +523,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               affectedCtpIds.add(ctp.id);
             } catch (error) {
-              errors.push(`Ошибка подготовки данных для ${measurement.ctpName}: ${error}`);
+              errors.push(
+                `Ошибка подготовки данных для ${measurement.ctpName}: ${error}`,
+              );
             }
           }
 
@@ -469,20 +537,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
               await storage.createMeasurement(meas);
               totalRecords++;
             }
-            
+
             // Log progress every batch
             if (i % 500 === 0 && i > 0) {
-              console.log(`📊 Обработано ${i} из ${measurementBatch.length} записей...`);
+              console.log(
+                `📊 Обработано ${i} из ${measurementBatch.length} записей...`,
+              );
             }
           }
 
-          console.log(`✅ Обработано ${measurementBatch.length} записей из листа ${sheet.sheetName}`);
+          console.log(
+            `✅ Обработано ${measurementBatch.length} записей из листа ${sheet.sheetName}`,
+          );
 
           // Update control boundaries only for affected CTPs
           for (const ctpId of Array.from(affectedCtpIds)) {
             const measurements = await storage.getMeasurements(ctpId);
             if (measurements.length >= 10) {
-              const boundaries = await storage.calculateControlBoundaries(ctpId);
+              const boundaries =
+                await storage.calculateControlBoundaries(ctpId);
               await storage.updateCTPBoundaries(ctpId, boundaries);
               await storage.updateStatisticalParams({
                 ctpId: ctpId,
@@ -502,14 +575,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update file status
       if (errors.length > 0 && totalRecords === 0) {
-        await storage.updateFileStatus(uploadId, 'error', totalRecords, errors);
+        await storage.updateFileStatus(uploadId, "error", totalRecords, errors);
       } else {
-        await storage.updateFileStatus(uploadId, 'completed', totalRecords, errors.length > 0 ? errors : undefined);
+        await storage.updateFileStatus(
+          uploadId,
+          "completed",
+          totalRecords,
+          errors.length > 0 ? errors : undefined,
+        );
       }
 
       console.log(`🎉 Загрузка завершена! Обработано ${totalRecords} записей`);
     } catch (error) {
-      await storage.updateFileStatus(uploadId, 'error', 0, [String(error)]);
+      await storage.updateFileStatus(uploadId, "error", 0, [String(error)]);
     }
   }
 
@@ -518,20 +596,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const history = await storage.getUploadHistory();
       res.json(history);
     } catch (error) {
-      res.status(500).json({ message: "Ошибка получения истории загрузок", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка получения истории загрузок", error });
     }
   });
 
   // Import Model_2.5.20.xlsm route
-  app.post("/api/import-model", upload.single('file'), async (req, res) => {
+  app.post("/api/import-model", upload.single("file"), async (req, res) => {
     let uploadId: string | null = null;
-    
+
     try {
       if (!req.file) {
         return res.status(400).json({ message: "Файл не был загружен" });
       }
 
-      console.log(`📥 Начало импорта модели из файла: ${req.file.originalname}`);
+      console.log(
+        `📥 Начало импорта модели из файла: ${req.file.originalname}`,
+      );
 
       // Создаем запись в истории загрузок
       const uploadedFile = await storage.createUploadedFile({
@@ -539,14 +621,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         originalName: req.file.originalname,
         fileType: req.file.mimetype,
         size: req.file.size,
-        status: 'processing'
+        status: "processing",
       });
       uploadId = uploadedFile.id;
 
       // Динамический импорт ModelParser
-      const { ModelParser } = await import('./model-parser.js');
+      const { ModelParser } = await import("./model-parser.js");
       const parser = new ModelParser(req.file.buffer);
-      
+
       const result = await parser.parseAndImport();
 
       console.log(`✅ Импорт модели завершен:`, result);
@@ -555,39 +637,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const actualCTPCount = await db.cTP.count();
       const actualMeasurementCount = await db.measurements.count();
       const actualVyvodCount = await db.vyvod.count();
-      const totalRecords = actualCTPCount + actualMeasurementCount + actualVyvodCount;
+      const totalRecords =
+        actualCTPCount + actualMeasurementCount + actualVyvodCount;
 
-      console.log(`📊 Реально создано записей: ${actualCTPCount} ЦТП + ${actualMeasurementCount} измерений + ${actualVyvodCount} выводов = ${totalRecords}`);
+      console.log(
+        `📊 Реально создано записей: ${actualCTPCount} ЦТП + ${actualMeasurementCount} измерений + ${actualVyvodCount} выводов = ${totalRecords}`,
+      );
 
       // Обновляем статус загрузки
       await storage.updateFileStatus(
-        uploadId, 
-        'completed', 
+        uploadId,
+        "completed",
         totalRecords,
-        result.errors.length > 0 ? result.errors : undefined
+        result.errors.length > 0 ? result.errors : undefined,
       );
 
       res.json({
-        message: 'Импорт модели успешно завершен',
-        ...result
+        message: "Импорт модели успешно завершен",
+        ...result,
       });
-
     } catch (error) {
-      console.error('❌ Ошибка импорта модели:', error);
-      
+      console.error("❌ Ошибка импорта модели:", error);
+
       // Обновляем статус загрузки как ошибку
       if (uploadId) {
-        await storage.updateFileStatus(
-          uploadId, 
-          'error', 
-          0, 
-          [error instanceof Error ? error.message : String(error)]
-        );
+        await storage.updateFileStatus(uploadId, "error", 0, [
+          error instanceof Error ? error.message : String(error),
+        ]);
       }
-      
-      res.status(500).json({ 
-        message: "Ошибка импорта модели", 
-        error: error instanceof Error ? error.message : String(error)
+
+      res.status(500).json({
+        message: "Ошибка импорта модели",
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   });
@@ -596,15 +677,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/dashboard/summary", async (req, res) => {
     try {
       const rtsList = await storage.getRTSWithStats();
-      const recommendations = await storage.getRecommendations({ status: 'open' });
-      const criticalRecommendations = recommendations.filter(r => r.priority === 'critical');
-      
-      const totalMakeupWater = rtsList.reduce((sum, rts) => sum + rts.totalMakeupWater, 0);
+      const recommendations = await storage.getRecommendations({
+        status: "open",
+      });
+      const criticalRecommendations = recommendations.filter(
+        (r) => r.priority === "critical",
+      );
+
+      const totalMakeupWater = rtsList.reduce(
+        (sum, rts) => sum + rts.totalMakeupWater,
+        0,
+      );
       const totalCTP = rtsList.reduce((sum, rts) => sum + rts.ctpCount, 0);
-      const totalCritical = rtsList.reduce((sum, rts) => sum + rts.criticalCount, 0);
-      const totalWarning = rtsList.reduce((sum, rts) => sum + rts.warningCount, 0);
-      const totalNormal = rtsList.reduce((sum, rts) => sum + rts.normalCount, 0);
-      
+      const totalCritical = rtsList.reduce(
+        (sum, rts) => sum + rts.criticalCount,
+        0,
+      );
+      const totalWarning = rtsList.reduce(
+        (sum, rts) => sum + rts.warningCount,
+        0,
+      );
+      const totalNormal = rtsList.reduce(
+        (sum, rts) => sum + rts.normalCount,
+        0,
+      );
+
       const summary = {
         currentMakeupWater: Math.round(totalMakeupWater),
         ctpRequiringAttention: totalCritical + totalWarning,
@@ -616,15 +713,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(summary);
     } catch (error) {
-      res.status(500).json({ message: "Ошибка получения сводки дашборда", error });
+      res
+        .status(500)
+        .json({ message: "Ошибка получения сводки дашборда", error });
     }
   });
 
   // Clear database
   app.post("/api/clear-database", async (req, res) => {
     try {
-      console.log('🗑️  Начало очистки базы данных...');
-      
+      console.log("🗑️  Начало очистки базы данных...");
+
       // Удаляем в правильном порядке (с учетом внешних ключей)
       await db.measurements.deleteMany({});
       await db.statisticalParams.deleteMany({});
@@ -634,11 +733,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db.vyvod.deleteMany({});
       await db.districts.deleteMany({});
       await db.rTS.deleteMany({});
-      
-      console.log('✅ База данных полностью очищена');
-      
-      res.json({ 
-        message: 'База данных успешно очищена',
+
+      console.log("✅ База данных полностью очищена");
+
+      res.json({
+        message: "База данных успешно очищена",
         cleared: {
           measurements: true,
           statisticalParams: true,
@@ -647,42 +746,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ctp: true,
           vyvod: true,
           districts: true,
-          rts: true
-        }
+          rts: true,
+        },
       });
     } catch (error) {
-      console.error('Clear database error:', error);
-      res.status(500).json({ message: "Ошибка очистки базы данных", error: String(error) });
+      console.error("Clear database error:", error);
+      res
+        .status(500)
+        .json({ message: "Ошибка очистки базы данных", error: String(error) });
     }
   });
 
   // Seed database with test data
   app.post("/api/seed", async (req, res) => {
     try {
-      const crypto = await import('crypto');
-      
+      const crypto = await import("crypto");
+
       // Create RTS
       const rts1 = await storage.createRTS({
         name: "РТС-1 Центральная",
         code: "RTS-1",
-        location: "ул. Ленина, 50"
+        location: "ул. Ленина, 50",
       });
-      
+
       const rts2 = await storage.createRTS({
         name: "РТС-2 Северная",
         code: "RTS-2",
-        location: "пр. Карла Маркса, 20"
+        location: "пр. Карла Маркса, 20",
       });
 
       // Create Districts
       const district1 = await storage.createDistrict({
         rtsId: rts1.id,
-        name: "Центральный район"
+        name: "Центральный район",
       });
 
       const district2 = await storage.createDistrict({
         rtsId: rts2.id,
-        name: "Северный район"
+        name: "Северный район",
       });
 
       // Create CTPs
@@ -690,14 +791,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (let i = 1; i <= 10; i++) {
         const rts = i <= 5 ? rts1 : rts2;
         const district = i <= 5 ? district1 : district2;
-        
+
         const ctp = await storage.createCTP({
           name: `ЦТП-${100 + i}`,
           code: `${100 + i}`,
           rtsId: rts.id,
           districtId: district.id,
           hasMeter: true,
-          meterStatus: i % 3 === 0 ? 'not_working' : 'working'
+          meterStatus: i % 3 === 0 ? "not_working" : "working",
         });
         ctps.push(ctp);
       }
@@ -708,10 +809,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (let day = 30; day >= 0; day--) {
           const date = new Date(now);
           date.setDate(date.getDate() - day);
-          
+
           const baseValue = 50 + Math.random() * 30;
           const variation = (Math.random() - 0.5) * 10;
-          
+
           await storage.createMeasurement({
             ctpId: ctp.id,
             date: date,
@@ -719,7 +820,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             undermix: Math.random() * 5,
             flowG1: 100 + Math.random() * 50,
             temperature: 70 + Math.random() * 20,
-            pressure: 4 + Math.random() * 2
+            pressure: 4 + Math.random() * 2,
           });
         }
       }
@@ -728,7 +829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const ctp of ctps) {
         const boundaries = await storage.calculateControlBoundaries(ctp.id);
         await storage.updateCTPBoundaries(ctp.id, boundaries);
-        
+
         const measurements = await storage.getMeasurements(ctp.id);
         await storage.updateStatisticalParams({
           ctpId: ctp.id,
@@ -744,37 +845,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create some recommendations
       await storage.createRecommendation({
         ctpId: ctps[0].id,
-        type: 'high_consumption',
-        priority: 'critical',
-        title: 'Высокий расход подпиточной воды',
-        description: 'Обнаружен повышенный расход воды, превышающий верхнюю контрольную границу',
-        actions: 'Проверить систему на утечки, провести диагностику оборудования',
-        status: 'open'
+        type: "high_consumption",
+        priority: "critical",
+        title: "Высокий расход подпиточной воды",
+        description:
+          "Обнаружен повышенный расход воды, превышающий верхнюю контрольную границу",
+        actions:
+          "Проверить систему на утечки, провести диагностику оборудования",
+        status: "open",
       });
 
       await storage.createRecommendation({
         ctpId: ctps[1].id,
-        type: 'meter_failure',
-        priority: 'warning',
-        title: 'Неисправность прибора учета',
-        description: 'Прибор учета не передает данные более 24 часов',
-        actions: 'Проверить связь с прибором учета, при необходимости заменить',
-        status: 'open'
+        type: "meter_failure",
+        priority: "warning",
+        title: "Неисправность прибора учета",
+        description: "Прибор учета не передает данные более 24 часов",
+        actions: "Проверить связь с прибором учета, при необходимости заменить",
+        status: "open",
       });
 
-      res.json({ 
-        message: 'База данных успешно заполнена тестовыми данными',
+      res.json({
+        message: "База данных успешно заполнена тестовыми данными",
         created: {
           rts: 2,
           districts: 2,
           ctps: ctps.length,
           measurements: ctps.length * 31,
-          recommendations: 2
-        }
+          recommendations: 2,
+        },
       });
     } catch (error) {
-      console.error('Seed error:', error);
-      res.status(500).json({ message: "Ошибка заполнения базы данных", error: String(error) });
+      console.error("Seed error:", error);
+      res
+        .status(500)
+        .json({
+          message: "Ошибка заполнения базы данных",
+          error: String(error),
+        });
     }
   });
 

@@ -1,13 +1,25 @@
-import { db } from './db';
-import { 
-  type RTS, type InsertRTS, type District, type InsertDistrict, 
-  type CTP, type InsertCTP, type Measurement, type InsertMeasurement,
-  type StatisticalParams, type InsertStatisticalParams,
-  type Recommendation, type InsertRecommendation, 
-  type UploadedFile, type InsertUploadedFile,
-  type CTPWithDetails, type RTSWithStats, type TrendData, type ControlChartData
-} from '@shared/schema';
-import { type IStorage } from './storage';
+import { db } from "./db";
+import {
+  type RTS,
+  type InsertRTS,
+  type District,
+  type InsertDistrict,
+  type CTP,
+  type InsertCTP,
+  type Measurement,
+  type InsertMeasurement,
+  type StatisticalParams,
+  type InsertStatisticalParams,
+  type Recommendation,
+  type InsertRecommendation,
+  type UploadedFile,
+  type InsertUploadedFile,
+  type CTPWithDetails,
+  type RTSWithStats,
+  type TrendData,
+  type ControlChartData,
+} from "@shared/schema";
+import { type IStorage } from "./storage";
 
 export class DbStorage implements IStorage {
   // RTS methods
@@ -17,14 +29,14 @@ export class DbStorage implements IStorage {
 
   async getRTSById(id: string): Promise<RTS | undefined> {
     const result = await db.rTS.findUnique({
-      where: { id }
+      where: { id },
     });
     return result || undefined;
   }
 
   async createRTS(data: InsertRTS): Promise<RTS> {
     return await db.rTS.create({
-      data
+      data,
     });
   }
 
@@ -37,12 +49,12 @@ export class DbStorage implements IStorage {
         where: { rtsId: rts.id },
         include: {
           measurements: {
-            orderBy: { date: 'desc' },
-            take: 1
-          }
-        }
+            orderBy: { date: "desc" },
+            take: 1,
+          },
+        },
       });
-      
+
       let totalMakeupWater = 0;
       let criticalCount = 0;
       let warningCount = 0;
@@ -51,17 +63,17 @@ export class DbStorage implements IStorage {
       for (const ctp of ctpList) {
         const latestMeasurement = ctp.measurements[0];
         const now = new Date();
-        const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
+        const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
 
         if (!latestMeasurement || latestMeasurement.date < threeDaysAgo) {
           criticalCount++;
         } else {
           totalMakeupWater += latestMeasurement.makeupWater;
-          
+
           if (ctp.ucl != null && ctp.cl != null) {
             if (ctp.ucl > 0) {
               const excessMultiplier = latestMeasurement.makeupWater / ctp.ucl;
-              
+
               if (excessMultiplier >= 5) {
                 criticalCount++;
               } else if (latestMeasurement.makeupWater > ctp.ucl) {
@@ -94,20 +106,24 @@ export class DbStorage implements IStorage {
   // District methods
   async getDistrictsByRTS(rtsId: string): Promise<District[]> {
     return await db.districts.findMany({
-      where: { rtsId }
+      where: { rtsId },
     });
   }
 
   async createDistrict(data: InsertDistrict): Promise<District> {
     return await db.districts.create({
-      data
+      data,
     });
   }
 
   // CTP methods
-  async getCTPList(filters?: { rtsId?: string; districtId?: string; status?: string }): Promise<CTPWithDetails[]> {
+  async getCTPList(filters?: {
+    rtsId?: string;
+    districtId?: string;
+    status?: string;
+  }): Promise<CTPWithDetails[]> {
     const where: any = {};
-    
+
     if (filters?.rtsId) {
       where.rtsId = filters.rtsId;
     }
@@ -122,15 +138,15 @@ export class DbStorage implements IStorage {
         district: true,
         vyvod: true,
         measurements: {
-          orderBy: { date: 'desc' },
-          take: 1
+          orderBy: { date: "desc" },
+          take: 1,
         },
         statisticalParams: {
-          orderBy: { calculatedAt: 'desc' },
-          take: 1
+          orderBy: { calculatedAt: "desc" },
+          take: 1,
         },
-        recommendations: true
-      }
+        recommendations: true,
+      },
     });
 
     return ctpList.map((ctp: any) => ({
@@ -140,7 +156,7 @@ export class DbStorage implements IStorage {
       vyvod: ctp.vyvod ?? null,
       latestMeasurement: ctp.measurements[0],
       statisticalParams: ctp.statisticalParams[0],
-      recommendations: ctp.recommendations
+      recommendations: ctp.recommendations,
     }));
   }
 
@@ -152,15 +168,15 @@ export class DbStorage implements IStorage {
         district: true,
         vyvod: true,
         measurements: {
-          orderBy: { date: 'desc' },
-          take: 1
+          orderBy: { date: "desc" },
+          take: 1,
         },
         statisticalParams: {
-          orderBy: { calculatedAt: 'desc' },
-          take: 1
+          orderBy: { calculatedAt: "desc" },
+          take: 1,
         },
-        recommendations: true
-      }
+        recommendations: true,
+      },
     });
 
     if (!ctp) return undefined;
@@ -172,27 +188,34 @@ export class DbStorage implements IStorage {
       vyvod: ctp.vyvod ?? null,
       latestMeasurement: ctp.measurements[0],
       statisticalParams: ctp.statisticalParams[0],
-      recommendations: ctp.recommendations
+      recommendations: ctp.recommendations,
     };
   }
 
   async createCTP(data: InsertCTP): Promise<CTP> {
     return await db.cTP.create({
-      data
+      data,
     });
   }
 
-  async updateCTPBoundaries(ctpId: string, boundaries: { ucl: number; cl: number; lcl: number }): Promise<void> {
+  async updateCTPBoundaries(
+    ctpId: string,
+    boundaries: { ucl: number; cl: number; lcl: number },
+  ): Promise<void> {
     await db.cTP.update({
       where: { id: ctpId },
-      data: boundaries
+      data: boundaries,
     });
   }
 
   // Measurements methods
-  async getMeasurements(ctpId: string, startDate?: Date, endDate?: Date): Promise<Measurement[]> {
+  async getMeasurements(
+    ctpId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<Measurement[]> {
     const where: any = { ctpId };
-    
+
     if (startDate || endDate) {
       where.date = {};
       if (startDate) where.date.gte = startDate;
@@ -201,28 +224,28 @@ export class DbStorage implements IStorage {
 
     return await db.measurements.findMany({
       where,
-      orderBy: { date: 'asc' }
+      orderBy: { date: "asc" },
     });
   }
 
   async createMeasurement(data: InsertMeasurement): Promise<Measurement> {
     return await db.measurements.create({
-      data
+      data,
     });
   }
 
   async getLatestMeasurements(): Promise<Map<string, Measurement>> {
     const latest = new Map<string, Measurement>();
-    
+
     const ctpList = await db.cTP.findMany({
       include: {
         measurements: {
-          orderBy: { date: 'desc' },
-          take: 1
-        }
-      }
+          orderBy: { date: "desc" },
+          take: 1,
+        },
+      },
     });
-    
+
     for (const ctp of ctpList) {
       if (ctp.measurements[0]) {
         latest.set(ctp.id, ctp.measurements[0]);
@@ -233,46 +256,57 @@ export class DbStorage implements IStorage {
   }
 
   // Statistical methods
-  async getStatisticalParams(ctpId: string): Promise<StatisticalParams | undefined> {
+  async getStatisticalParams(
+    ctpId: string,
+  ): Promise<StatisticalParams | undefined> {
     const result = await db.statisticalParams.findFirst({
       where: { ctpId },
-      orderBy: { calculatedAt: 'desc' }
+      orderBy: { calculatedAt: "desc" },
     });
-    
+
     return result || undefined;
   }
 
-  async updateStatisticalParams(data: InsertStatisticalParams): Promise<StatisticalParams> {
+  async updateStatisticalParams(
+    data: InsertStatisticalParams,
+  ): Promise<StatisticalParams> {
     return await db.statisticalParams.create({
-      data
+      data,
     });
   }
 
-  async calculateControlBoundaries(ctpId: string): Promise<{ ucl: number; cl: number; lcl: number }> {
+  async calculateControlBoundaries(
+    ctpId: string,
+  ): Promise<{ ucl: number; cl: number; lcl: number }> {
     const measurements = await this.getMeasurements(ctpId);
-    
+
     if (measurements.length === 0) {
       return { ucl: 0, cl: 0, lcl: 0 };
     }
 
-    const values = measurements.map(m => m.makeupWater);
+    const values = measurements.map((m) => m.makeupWater);
     const sum = values.reduce((a, b) => a + b, 0);
     const mean = sum / values.length;
 
-    const squaredDiffs = values.map(v => Math.pow(v - mean, 2));
+    const squaredDiffs = values.map((v) => Math.pow(v - mean, 2));
     const variance = squaredDiffs.reduce((a, b) => a + b, 0) / values.length;
     const stdDev = Math.sqrt(variance);
 
-    const ucl = mean + (3 * stdDev);
-    const lcl = Math.max(0, mean - (3 * stdDev));
+    const ucl = mean + 3 * stdDev;
+    const lcl = Math.max(0, mean - 3 * stdDev);
 
     return { ucl, cl: mean, lcl };
   }
 
   // Recommendations methods
-  async getRecommendations(filters?: { ctpId?: string; type?: string; priority?: string; status?: string }): Promise<Recommendation[]> {
+  async getRecommendations(filters?: {
+    ctpId?: string;
+    type?: string;
+    priority?: string;
+    status?: string;
+  }): Promise<Recommendation[]> {
     const where: any = {};
-    
+
     if (filters?.ctpId) where.ctpId = filters.ctpId;
     if (filters?.type) where.type = filters.type;
     if (filters?.priority) where.priority = filters.priority;
@@ -280,67 +314,74 @@ export class DbStorage implements IStorage {
 
     return await db.recommendations.findMany({
       where,
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
   }
 
-  async createRecommendation(data: InsertRecommendation): Promise<Recommendation> {
+  async createRecommendation(
+    data: InsertRecommendation,
+  ): Promise<Recommendation> {
     return await db.recommendations.create({
-      data
+      data,
     });
   }
 
   async updateRecommendationStatus(id: string, status: string): Promise<void> {
     await db.recommendations.update({
       where: { id },
-      data: { status, updatedAt: new Date() }
+      data: { status, updatedAt: new Date() },
     });
   }
 
   // Trends and Analytics
-  async getTrendData(period: 'day' | 'week' | 'month' | 'year', rtsId?: string, rtsFilter?: string, ctpId?: string): Promise<TrendData[]> {
+  async getTrendData(
+    period: "day" | "week" | "month" | "year",
+    rtsId?: string,
+    rtsFilter?: string,
+    ctpId?: string,
+  ): Promise<TrendData[]> {
     const now = new Date();
     let startDate = new Date();
-    
+
     switch (period) {
-      case 'day':
+      case "day":
         startDate.setDate(now.getDate() - 1);
         break;
-      case 'week':
+      case "week":
         startDate.setDate(now.getDate() - 7);
         break;
-      case 'month':
+      case "month":
         startDate.setMonth(now.getMonth() - 1);
         break;
-      case 'year':
+      case "year":
         startDate.setFullYear(now.getFullYear() - 1);
         break;
     }
 
     let ctpIds: string[] | undefined;
-    
+
     if (ctpId) {
       ctpIds = [ctpId];
     } else if (rtsFilter) {
       const locationMap: Record<string, string> = {
-        'right': 'Правый берег',
-        'left': 'Левый берег'
+        right: "Правый берег",
+        left: "Левый берег",
       };
-      
+
       const location = locationMap[rtsFilter];
-      
+
       if (location) {
         const rtsList = await db.rTS.findMany({
           where: { location },
-          select: { id: true }
+          select: { id: true },
         });
-        
+
         const rtsIds = rtsList.map((r: { id: string }) => r.id);
-        
+
         if (rtsIds.length > 0) {
           const ctps = await db.cTP.findMany({
             where: { rtsId: { in: rtsIds } },
-            select: { id: true }
+            select: { id: true },
           });
           ctpIds = ctps.map((c: { id: string }) => c.id);
         }
@@ -348,29 +389,29 @@ export class DbStorage implements IStorage {
     } else if (rtsId) {
       const ctps = await db.cTP.findMany({
         where: { rtsId },
-        select: { id: true }
+        select: { id: true },
       });
       ctpIds = ctps.map((c: { id: string }) => c.id);
     }
 
     const where: any = {
-      date: { gte: startDate }
+      date: { gte: startDate },
     };
-    
+
     if (ctpIds && ctpIds.length > 0) {
       where.ctpId = { in: ctpIds };
     }
 
     const measurements = await db.measurements.findMany({
       where,
-      orderBy: { date: 'asc' }
+      orderBy: { date: "asc" },
     });
 
     // Group by date and sum makeup water
     const grouped = new Map<string, number>();
-    
+
     for (const m of measurements) {
-      const dateKey = m.date.toISOString().split('T')[0];
+      const dateKey = m.date.toISOString().split("T")[0];
       const current = grouped.get(dateKey) || 0;
       grouped.set(dateKey, current + m.makeupWater);
     }
@@ -382,30 +423,37 @@ export class DbStorage implements IStorage {
     }));
   }
 
-  async getControlChartData(ctpId: string, period: number = 30): Promise<ControlChartData[]> {
+  async getControlChartData(
+    ctpId: string,
+    period: number = 30,
+  ): Promise<ControlChartData[]> {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - period);
 
     const measurements = await this.getMeasurements(ctpId, startDate, endDate);
     const ctp = await db.cTP.findUnique({
-      where: { id: ctpId }
+      where: { id: ctpId },
     });
-    
+
     if (!ctp) return [];
 
-    return measurements.map(m => {
+    return measurements.map((m) => {
       const isAboveUCL = ctp.ucl !== null && m.makeupWater > ctp.ucl;
       const isBelowLCL = ctp.lcl !== null && m.makeupWater < ctp.lcl;
-      
+
       return {
-        date: m.date.toISOString().split('T')[0],
+        date: m.date.toISOString().split("T")[0],
         value: m.makeupWater,
         ucl: ctp.ucl || 0,
         cl: ctp.cl || 0,
         lcl: ctp.lcl || 0,
         isOutOfControl: !!(isAboveUCL || isBelowLCL),
-        controlType: isAboveUCL ? 'upper' as const : isBelowLCL ? 'lower' as const : 'normal' as const,
+        controlType: isAboveUCL
+          ? ("upper" as const)
+          : isBelowLCL
+            ? ("lower" as const)
+            : ("normal" as const),
       };
     });
   }
@@ -413,24 +461,29 @@ export class DbStorage implements IStorage {
   // File upload
   async createUploadedFile(data: InsertUploadedFile): Promise<UploadedFile> {
     return await db.uploadedFiles.create({
-      data
+      data,
     });
   }
 
   async getUploadHistory(): Promise<UploadedFile[]> {
     return await db.uploadedFiles.findMany({
-      orderBy: { uploadedAt: 'desc' }
+      orderBy: { uploadedAt: "desc" },
     });
   }
 
-  async updateFileStatus(id: string, status: string, recordsProcessed?: number, errors?: any[]): Promise<void> {
+  async updateFileStatus(
+    id: string,
+    status: string,
+    recordsProcessed?: number,
+    errors?: any[],
+  ): Promise<void> {
     await db.uploadedFiles.update({
       where: { id },
-      data: { 
-        status, 
+      data: {
+        status,
         recordsProcessed: recordsProcessed ?? undefined,
-        errors: errors ? JSON.stringify(errors) : undefined 
-      }
+        errors: errors ? JSON.stringify(errors) : undefined,
+      },
     });
   }
 }

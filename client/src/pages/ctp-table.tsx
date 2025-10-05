@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -13,24 +19,25 @@ export default function CTPTable() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
+    new Date().toISOString().split("T")[0],
   );
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
   // Load RTS list
-  const { data: rtsList } = useQuery<{ id: string; name: string; code: string }[]>({
-    queryKey: ['/api/rts'],
+  const { data: rtsList } = useQuery<
+    { id: string; name: string; code: string }[]
+  >({
+    queryKey: ["/api/rts"],
   });
 
   const { data: ctpList, isLoading } = useQuery<CTPWithDetails[]>({
-    queryKey: ['/api/ctp', selectedRTS],
+    queryKey: ["/api/ctp", selectedRTS],
     queryFn: async () => {
-      const url = selectedRTS === "all" 
-        ? '/api/ctp'
-        : `/api/ctp?rtsId=${selectedRTS}`;
+      const url =
+        selectedRTS === "all" ? "/api/ctp" : `/api/ctp?rtsId=${selectedRTS}`;
       const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error('Failed to fetch CTP list');
+      if (!res.ok) throw new Error("Failed to fetch CTP list");
       return res.json();
     },
   });
@@ -38,32 +45,35 @@ export default function CTPTable() {
   const getCtpStatus = (ctp: CTPWithDetails): string => {
     const measurement = ctp.latestMeasurement;
     const now = new Date();
-    const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
-    
+    const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+
     if (!measurement || new Date(measurement.date) < threeDaysAgo) {
-      return 'critical';
+      return "critical";
     }
 
     if (ctp.ucl != null && ctp.cl != null && ctp.ucl > 0) {
       const excessMultiplier = measurement.makeupWater / ctp.ucl;
-      
+
       if (excessMultiplier >= 5) {
-        return 'critical';
+        return "critical";
       } else if (measurement.makeupWater > ctp.ucl) {
-        return 'warning';
+        return "warning";
       }
     }
-    
-    return 'normal';
+
+    return "normal";
   };
 
-  const filteredCTP = ctpList?.filter(ctp => {
-    const ctpStatus = getCtpStatus(ctp);
-    const matchesStatus = selectedStatus === "all" || ctpStatus === selectedStatus;
-    const matchesDistrict = selectedDistrict === "all" || ctp.districtId === selectedDistrict;
-    
-    return matchesStatus && matchesDistrict;
-  }) || [];
+  const filteredCTP =
+    ctpList?.filter((ctp) => {
+      const ctpStatus = getCtpStatus(ctp);
+      const matchesStatus =
+        selectedStatus === "all" || ctpStatus === selectedStatus;
+      const matchesDistrict =
+        selectedDistrict === "all" || ctp.districtId === selectedDistrict;
+
+      return matchesStatus && matchesDistrict;
+    }) || [];
 
   const totalPages = Math.ceil(filteredCTP.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -72,47 +82,48 @@ export default function CTPTable() {
   const getStatusInfo = (ctp: CTPWithDetails) => {
     const measurement = ctp.latestMeasurement;
     const now = new Date();
-    const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
-    
+    const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+
     if (!measurement || new Date(measurement.date) < threeDaysAgo) {
-      return { status: 'critical', label: 'Нет данных' };
+      return { status: "critical", label: "Нет данных" };
     }
 
     if (ctp.ucl != null && ctp.cl != null && ctp.ucl > 0) {
       const excessMultiplier = measurement.makeupWater / ctp.ucl;
-      
+
       if (excessMultiplier >= 5) {
-        return { status: 'critical', label: 'Критично' };
+        return { status: "critical", label: "Критично" };
       } else if (measurement.makeupWater > ctp.ucl) {
-        return { status: 'warning', label: 'Внимание' };
+        return { status: "warning", label: "Внимание" };
       } else {
-        return { status: 'normal', label: 'Норма' };
+        return { status: "normal", label: "Норма" };
       }
     }
-    
-    return { status: 'normal', label: 'Норма' };
+
+    return { status: "normal", label: "Норма" };
   };
 
   const getDeviation = (ctp: CTPWithDetails) => {
     const measurement = ctp.latestMeasurement;
-    if (!measurement || !ctp.cl) return '—';
+    if (!measurement || !ctp.cl) return "—";
 
     const deviation = measurement.makeupWater - ctp.cl;
-    const sign = deviation > 0 ? '+' : '';
+    const sign = deviation > 0 ? "+" : "";
     return `${sign}${deviation.toFixed(1)}`;
   };
 
   const getRowBackgroundClass = (ctp: CTPWithDetails) => {
     const measurement = ctp.latestMeasurement;
-    if (!measurement) return '';
+    if (!measurement) return "";
 
     const isAboveUCL = ctp.ucl && measurement.makeupWater > ctp.ucl;
     const isBelowLCL = ctp.lcl && measurement.makeupWater < ctp.lcl;
-    const hasUndermix = measurement.undermix !== null && measurement.undermix < -2;
+    const hasUndermix =
+      measurement.undermix !== null && measurement.undermix < -2;
 
-    if (isAboveUCL) return 'bg-red-50 dark:bg-red-950/20';
-    if (isBelowLCL || hasUndermix) return 'bg-blue-50 dark:bg-blue-950/20';
-    return '';
+    if (isAboveUCL) return "bg-red-50 dark:bg-red-950/20";
+    if (isBelowLCL || hasUndermix) return "bg-blue-50 dark:bg-blue-950/20";
+    return "";
   };
 
   if (isLoading) {
@@ -131,9 +142,12 @@ export default function CTPTable() {
         <CardContent className="p-6">
           <div className="flex gap-4 flex-wrap items-center">
             <label className="font-semibold text-sm">Фильтры:</label>
-            
+
             <Select value={selectedRTS} onValueChange={setSelectedRTS}>
-              <SelectTrigger className="w-[200px]" data-testid="select-rts-filter">
+              <SelectTrigger
+                className="w-[200px]"
+                data-testid="select-rts-filter"
+              >
                 <SelectValue placeholder="Все РТС" />
               </SelectTrigger>
               <SelectContent>
@@ -147,7 +161,10 @@ export default function CTPTable() {
             </Select>
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-[150px]" data-testid="select-status-filter">
+              <SelectTrigger
+                className="w-[150px]"
+                data-testid="select-status-filter"
+              >
                 <SelectValue placeholder="Все статусы" />
               </SelectTrigger>
               <SelectContent>
@@ -158,8 +175,14 @@ export default function CTPTable() {
               </SelectContent>
             </Select>
 
-            <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
-              <SelectTrigger className="w-[150px]" data-testid="select-district-filter">
+            <Select
+              value={selectedDistrict}
+              onValueChange={setSelectedDistrict}
+            >
+              <SelectTrigger
+                className="w-[150px]"
+                data-testid="select-district-filter"
+              >
                 <SelectValue placeholder="Все микрорайоны" />
               </SelectTrigger>
               <SelectContent>
@@ -188,7 +211,8 @@ export default function CTPTable() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>
-              Посуточные параметры ЦТП - {new Date(selectedDate).toLocaleDateString('ru-RU')}
+              Посуточные параметры ЦТП -{" "}
+              {new Date(selectedDate).toLocaleDateString("ru-RU")}
             </CardTitle>
             <div className="flex gap-4 text-xs">
               <div className="flex items-center gap-2">
@@ -228,49 +252,85 @@ export default function CTPTable() {
                   const rowClass = getRowBackgroundClass(ctp);
 
                   return (
-                    <tr key={ctp.id} className={rowClass} data-testid={`row-ctp-${ctp.id}`}>
-                      <td className="font-semibold">{ctp.fullName || ctp.name}</td>
-                      <td>{ctp.rts?.code || '—'}</td>
-                      <td>{ctp.district?.name || '—'}</td>
-                      <td className={`font-mono ${
-                        statusInfo.status === 'critical' ? 'font-bold text-red-600' :
-                        statusInfo.status === 'warning' ? 'font-semibold text-yellow-600' : ''
-                      }`}>
-                        {measurement ? measurement.makeupWater.toFixed(1) : '—'}
+                    <tr
+                      key={ctp.id}
+                      className={rowClass}
+                      data-testid={`row-ctp-${ctp.id}`}
+                    >
+                      <td className="font-semibold">
+                        {ctp.fullName || ctp.name}
                       </td>
-                      <td className={`font-mono ${
-                        measurement && measurement.undermix !== null && measurement.undermix < -2 ? 'font-bold text-blue-600' : ''
-                      }`}>
-                        {measurement?.undermix?.toFixed(1) || '—'}
+                      <td>{ctp.rts?.code || "—"}</td>
+                      <td>{ctp.district?.name || "—"}</td>
+                      <td
+                        className={`font-mono ${
+                          statusInfo.status === "critical"
+                            ? "font-bold text-red-600"
+                            : statusInfo.status === "warning"
+                              ? "font-semibold text-yellow-600"
+                              : ""
+                        }`}
+                      >
+                        {measurement ? measurement.makeupWater.toFixed(1) : "—"}
                       </td>
-                      <td className="font-mono">{ctp.ucl?.toFixed(1) || '—'}</td>
-                      <td className="font-mono">{ctp.cl?.toFixed(1) || '—'}</td>
-                      <td className="font-mono">{ctp.lcl?.toFixed(1) || '—'}</td>
-                      <td className={`font-semibold ${
-                        statusInfo.status === 'critical' ? 'text-red-600' :
-                        statusInfo.status === 'warning' ? 'text-yellow-600' : 'text-green-600'
-                      }`}>
+                      <td
+                        className={`font-mono ${
+                          measurement &&
+                          measurement.undermix !== null &&
+                          measurement.undermix < -2
+                            ? "font-bold text-blue-600"
+                            : ""
+                        }`}
+                      >
+                        {measurement?.undermix?.toFixed(1) || "—"}
+                      </td>
+                      <td className="font-mono">
+                        {ctp.ucl?.toFixed(1) || "—"}
+                      </td>
+                      <td className="font-mono">{ctp.cl?.toFixed(1) || "—"}</td>
+                      <td className="font-mono">
+                        {ctp.lcl?.toFixed(1) || "—"}
+                      </td>
+                      <td
+                        className={`font-semibold ${
+                          statusInfo.status === "critical"
+                            ? "text-red-600"
+                            : statusInfo.status === "warning"
+                              ? "text-yellow-600"
+                              : "text-green-600"
+                        }`}
+                      >
                         {deviation}
                       </td>
                       <td>
-                        <StatusBadge 
-                          status={statusInfo.status as 'normal' | 'warning' | 'critical'}
+                        <StatusBadge
+                          status={
+                            statusInfo.status as
+                              | "normal"
+                              | "warning"
+                              | "critical"
+                          }
                         >
                           {statusInfo.label}
                         </StatusBadge>
                       </td>
                       <td>
                         {ctp.recommendations.length > 0 ? (
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             data-testid={`button-recommendation-${ctp.id}`}
                           >
                             <Eye className="w-3 h-3 mr-1" />
-                            {ctp.recommendations[0].type === 'inspection' ? 'Инспекция' :
-                             ctp.recommendations[0].type === 'meter_check' ? 'Проверка' : 'Мониторинг'}
+                            {ctp.recommendations[0].type === "inspection"
+                              ? "Инспекция"
+                              : ctp.recommendations[0].type === "meter_check"
+                                ? "Проверка"
+                                : "Мониторинг"}
                           </Button>
-                        ) : '—'}
+                        ) : (
+                          "—"
+                        )}
                       </td>
                     </tr>
                   );
@@ -278,11 +338,13 @@ export default function CTPTable() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination */}
           <div className="px-6 py-4 border-t border-border flex justify-between items-center">
             <div className="text-sm text-muted-foreground">
-              Показано {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredCTP.length)} из {filteredCTP.length} ЦТП
+              Показано {startIndex + 1}-
+              {Math.min(startIndex + itemsPerPage, filteredCTP.length)} из{" "}
+              {filteredCTP.length} ЦТП
             </div>
             <div className="flex gap-2">
               <Button
@@ -295,7 +357,7 @@ export default function CTPTable() {
                 <ChevronLeft className="w-4 h-4" />
                 Назад
               </Button>
-              
+
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum = i + 1;
                 if (totalPages > 5) {
@@ -306,7 +368,7 @@ export default function CTPTable() {
                     pageNum = totalPages - 4 + i;
                   }
                 }
-                
+
                 return (
                   <Button
                     key={pageNum}
@@ -319,11 +381,13 @@ export default function CTPTable() {
                   </Button>
                 );
               })}
-              
+
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
+                }
                 disabled={currentPage === totalPages}
                 data-testid="button-next-page"
               >

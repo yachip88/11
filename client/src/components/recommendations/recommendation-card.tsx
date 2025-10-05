@@ -22,7 +22,10 @@ interface RecommendationCardProps {
   };
 }
 
-export function RecommendationCard({ recommendation, mockData }: RecommendationCardProps) {
+export function RecommendationCard({
+  recommendation,
+  mockData,
+}: RecommendationCardProps) {
   const [isAccepted, setIsAccepted] = useState(false);
   const { toast } = useToast();
 
@@ -50,17 +53,23 @@ export function RecommendationCard({ recommendation, mockData }: RecommendationC
 
   const getCardClass = () => {
     switch (recommendation.priority) {
-      case 'critical': return 'recommendation-card meter-check border-l-red-500';
-      case 'warning': return 'recommendation-card inspection border-l-yellow-500';
-      default: return 'recommendation-card normal border-l-green-500';
+      case "critical":
+        return "recommendation-card meter-check border-l-red-500";
+      case "warning":
+        return "recommendation-card inspection border-l-yellow-500";
+      default:
+        return "recommendation-card normal border-l-green-500";
     }
   };
 
   const getStatusInfo = () => {
     switch (recommendation.priority) {
-      case 'critical': return { status: 'critical' as const, label: 'Критично' };
-      case 'warning': return { status: 'warning' as const, label: 'Внимание' };
-      default: return { status: 'normal' as const, label: 'Норма' };
+      case "critical":
+        return { status: "critical" as const, label: "Критично" };
+      case "warning":
+        return { status: "warning" as const, label: "Внимание" };
+      default:
+        return { status: "normal" as const, label: "Норма" };
     }
   };
 
@@ -72,7 +81,9 @@ export function RecommendationCard({ recommendation, mockData }: RecommendationC
         <div className="flex justify-between items-start mb-3">
           <div>
             <h5 className="font-semibold mb-1">{recommendation.title}</h5>
-            <div className="text-sm text-muted-foreground">{recommendation.description}</div>
+            <div className="text-sm text-muted-foreground">
+              {recommendation.description}
+            </div>
           </div>
           <StatusBadge status={statusInfo.status}>
             {statusInfo.label}
@@ -86,53 +97,67 @@ export function RecommendationCard({ recommendation, mockData }: RecommendationC
               {mockData.currentMakeupWater && (
                 <div>
                   <div className="text-muted-foreground">Текущая подпитка</div>
-                  <div className={cn(
-                    "font-semibold font-mono",
-                    recommendation.priority === 'critical' ? 'text-red-600' : 
-                    recommendation.priority === 'warning' ? 'text-yellow-600' : 'text-foreground'
-                  )}>
+                  <div
+                    className={cn(
+                      "font-semibold font-mono",
+                      recommendation.priority === "critical"
+                        ? "text-red-600"
+                        : recommendation.priority === "warning"
+                          ? "text-yellow-600"
+                          : "text-foreground",
+                    )}
+                  >
                     {mockData.currentMakeupWater} т/ч
                   </div>
                 </div>
               )}
-              
+
               {mockData.ucl && (
                 <div>
                   <div className="text-muted-foreground">UCL</div>
-                  <div className="font-semibold font-mono">{mockData.ucl} т/ч</div>
+                  <div className="font-semibold font-mono">
+                    {mockData.ucl} т/ч
+                  </div>
                 </div>
               )}
-              
+
               {mockData.excess && (
                 <div>
                   <div className="text-muted-foreground">Превышение</div>
                   <div className="font-semibold text-red-600">
-                    +{mockData.excess} т/ч ({((mockData.excess / mockData.ucl!) * 100).toFixed(1)}%)
+                    +{mockData.excess} т/ч (
+                    {((mockData.excess / mockData.ucl!) * 100).toFixed(1)}%)
                   </div>
                 </div>
               )}
-              
+
               {mockData.flowG1 && (
                 <div>
                   <div className="text-muted-foreground">Расход G1</div>
-                  <div className="font-semibold font-mono">{mockData.flowG1} т/ч</div>
+                  <div className="font-semibold font-mono">
+                    {mockData.flowG1} т/ч
+                  </div>
                 </div>
               )}
-              
+
               {mockData.distanceToLimit && (
                 <div>
                   <div className="text-muted-foreground">До границы</div>
-                  <div className="font-semibold text-yellow-600">+{mockData.distanceToLimit} т/ч</div>
+                  <div className="font-semibold text-yellow-600">
+                    +{mockData.distanceToLimit} т/ч
+                  </div>
                 </div>
               )}
-              
+
               {mockData.trend && (
                 <div>
                   <div className="text-muted-foreground">Тренд</div>
-                  <div className="font-semibold text-red-600">↑ {mockData.trend}</div>
+                  <div className="font-semibold text-red-600">
+                    ↑ {mockData.trend}
+                  </div>
                 </div>
               )}
-              
+
               {mockData.duration && (
                 <div>
                   <div className="text-muted-foreground">Длительность</div>
@@ -149,18 +174,20 @@ export function RecommendationCard({ recommendation, mockData }: RecommendationC
           <ul className="mt-2 ml-6 space-y-1 leading-relaxed">
             {(() => {
               if (!recommendation.actions) return null;
-              
+
               try {
                 const parsedActions = JSON.parse(recommendation.actions);
                 if (Array.isArray(parsedActions)) {
                   return parsedActions.map((action, index) => (
-                    <li key={index} className="list-disc">{action}</li>
+                    <li key={index} className="list-disc">
+                      {action}
+                    </li>
                   ));
                 }
               } catch {
                 return <li className="list-disc">{recommendation.actions}</li>;
               }
-              
+
               return <li className="list-disc">{recommendation.actions}</li>;
             })()}
           </ul>
@@ -168,13 +195,13 @@ export function RecommendationCard({ recommendation, mockData }: RecommendationC
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <Button 
+          <Button
             onClick={handleAccept}
             disabled={isAccepted}
             data-testid={`button-accept-${recommendation.id}`}
           >
             <ClipboardCheck className="w-4 h-4 mr-2" />
-            {isAccepted ? 'Принято в работу' : 'Принять в работу'}
+            {isAccepted ? "Принято в работу" : "Принять в работу"}
           </Button>
           <Button variant="outline" onClick={handleShowAnalytics}>
             <BarChart3 className="w-4 h-4 mr-2" />

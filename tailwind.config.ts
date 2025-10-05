@@ -90,10 +90,10 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       borderWidth: {
-        '3': '3px',
+        "3": "3px",
       },
       zIndex: {
-        '100': '100',
+        "100": "100",
       },
     },
   },

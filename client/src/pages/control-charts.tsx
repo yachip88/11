@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ControlChart } from "@/components/charts/control-chart";
@@ -15,41 +21,53 @@ export default function ControlCharts() {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Load RTS list
-  const { data: rtsList } = useQuery<{ id: string; name: string; code: string }[]>({
-    queryKey: ['/api/rts'],
+  const { data: rtsList } = useQuery<
+    { id: string; name: string; code: string }[]
+  >({
+    queryKey: ["/api/rts"],
   });
 
   const { data: ctpList, isLoading: loadingCTP } = useQuery<CTPWithDetails[]>({
-    queryKey: ['/api/ctp', selectedRTS],
+    queryKey: ["/api/ctp", selectedRTS],
     queryFn: async () => {
-      const url = selectedRTS === "all" 
-        ? '/api/ctp'
-        : `/api/ctp?rtsId=${selectedRTS}`;
+      const url =
+        selectedRTS === "all" ? "/api/ctp" : `/api/ctp?rtsId=${selectedRTS}`;
       const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error('Failed to fetch CTP list');
+      if (!res.ok) throw new Error("Failed to fetch CTP list");
       return res.json();
     },
   });
 
-  const filteredCTP = ctpList?.filter(ctp => {
-    const matchesSearch = ctp.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === "all" || 
-      (selectedStatus === "critical" && ctp.recommendations.some(r => r.priority === "critical")) ||
-      (selectedStatus === "warning" && ctp.recommendations.some(r => r.priority === "warning")) ||
-      (selectedStatus === "normal" && ctp.recommendations.every(r => r.priority === "normal"));
-    
+  const filteredCTP = ctpList?.filter((ctp) => {
+    const matchesSearch = ctp.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      selectedStatus === "all" ||
+      (selectedStatus === "critical" &&
+        ctp.recommendations.some((r) => r.priority === "critical")) ||
+      (selectedStatus === "warning" &&
+        ctp.recommendations.some((r) => r.priority === "warning")) ||
+      (selectedStatus === "normal" &&
+        ctp.recommendations.every((r) => r.priority === "normal"));
+
     return matchesSearch && matchesStatus;
   });
 
   // Check if selectedCTP is valid (exists in filtered list)
-  const isSelectedCTPValid = filteredCTP?.some(ctp => ctp.id === selectedCTP) ?? false;
+  const isSelectedCTPValid =
+    filteredCTP?.some((ctp) => ctp.id === selectedCTP) ?? false;
 
-  const { data: controlData, isLoading: loadingChart } = useQuery<ControlChartData[]>({
-    queryKey: ['/api/ctp', selectedCTP, 'control-chart'],
+  const { data: controlData, isLoading: loadingChart } = useQuery<
+    ControlChartData[]
+  >({
+    queryKey: ["/api/ctp", selectedCTP, "control-chart"],
     queryFn: async () => {
       if (!selectedCTP) return [];
-      const res = await fetch(`/api/ctp/${selectedCTP}/control-chart`, { credentials: "include" });
-      if (!res.ok) throw new Error('Failed to fetch control chart data');
+      const res = await fetch(`/api/ctp/${selectedCTP}/control-chart`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch control chart data");
       return res.json();
     },
     enabled: !!selectedCTP && isSelectedCTPValid,
@@ -58,19 +76,21 @@ export default function ControlCharts() {
   // Set first CTP as default when list loads or when selected CTP is not in filtered list
   useEffect(() => {
     if (!filteredCTP) return;
-    
+
     if (filteredCTP.length === 0) {
       // Clear selection when no CTPs match filters
       setSelectedCTP("");
     } else {
-      const isSelectedInList = filteredCTP.some(ctp => ctp.id === selectedCTP);
+      const isSelectedInList = filteredCTP.some(
+        (ctp) => ctp.id === selectedCTP,
+      );
       if (!selectedCTP || !isSelectedInList) {
         setSelectedCTP(filteredCTP[0].id);
       }
     }
   }, [filteredCTP, selectedCTP]);
 
-  const selectedCTPData = ctpList?.find(ctp => ctp.id === selectedCTP);
+  const selectedCTPData = ctpList?.find((ctp) => ctp.id === selectedCTP);
 
   if (loadingCTP) {
     return (
@@ -88,7 +108,7 @@ export default function ControlCharts() {
         <CardContent className="p-6">
           <div className="flex gap-4 flex-wrap items-center">
             <label className="font-semibold text-sm">Фильтры:</label>
-            
+
             <Select value={selectedRTS} onValueChange={setSelectedRTS}>
               <SelectTrigger className="w-[200px]" data-testid="select-rts">
                 <SelectValue placeholder="Все РТС" />
@@ -145,10 +165,11 @@ export default function ControlCharts() {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle>
-                Контрольная карта Шухарта - {selectedCTPData?.name || selectedCTP}
+                Контрольная карта Шухарта -{" "}
+                {selectedCTPData?.name || selectedCTP}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Период: 01.10.2023 - {new Date().toLocaleDateString('ru-RU')}
+                Период: 01.10.2023 - {new Date().toLocaleDateString("ru-RU")}
               </p>
             </div>
             <div className="flex gap-4 text-xs">
@@ -211,13 +232,15 @@ export default function ControlCharts() {
               <div>
                 <div className="text-muted-foreground">Выходов за UCL</div>
                 <div className="font-semibold text-red-600 text-lg">
-                  {controlData?.filter(d => d.controlType === 'upper').length || 8}
+                  {controlData?.filter((d) => d.controlType === "upper")
+                    .length || 8}
                 </div>
               </div>
               <div>
                 <div className="text-muted-foreground">Выходов за LCL</div>
                 <div className="font-semibold text-blue-600 text-lg">
-                  {controlData?.filter(d => d.controlType === 'lower').length || 3}
+                  {controlData?.filter((d) => d.controlType === "lower")
+                    .length || 3}
                 </div>
               </div>
             </div>
@@ -230,38 +253,64 @@ export default function ControlCharts() {
           </CardHeader>
           <CardContent>
             <div className="text-sm space-y-3">
-              {controlData?.filter(d => d.isOutOfControl).slice(-4).reverse().map((violation, index) => (
-                <div 
-                  key={index} 
-                  className="flex justify-between py-2 border-b border-border last:border-0"
-                  data-testid={`violation-${index}`}
-                >
-                  <span>{new Date(violation.date).toLocaleDateString('ru-RU')}</span>
-                  <span className={`font-semibold ${
-                    violation.controlType === 'upper' ? 'text-red-600' : 'text-blue-600'
-                  }`}>
-                    {violation.controlType === 'upper' ? '+' : '-'}
-                    {Math.abs(violation.value - (violation.controlType === 'upper' ? violation.ucl : violation.lcl)).toFixed(1)} т/ч 
-                    {violation.controlType === 'upper' ? ' над UCL' : ' под LCL'}
-                  </span>
-                </div>
-              )) || (
+              {controlData
+                ?.filter((d) => d.isOutOfControl)
+                .slice(-4)
+                .reverse()
+                .map((violation, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between py-2 border-b border-border last:border-0"
+                    data-testid={`violation-${index}`}
+                  >
+                    <span>
+                      {new Date(violation.date).toLocaleDateString("ru-RU")}
+                    </span>
+                    <span
+                      className={`font-semibold ${
+                        violation.controlType === "upper"
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {violation.controlType === "upper" ? "+" : "-"}
+                      {Math.abs(
+                        violation.value -
+                          (violation.controlType === "upper"
+                            ? violation.ucl
+                            : violation.lcl),
+                      ).toFixed(1)}{" "}
+                      т/ч
+                      {violation.controlType === "upper"
+                        ? " над UCL"
+                        : " под LCL"}
+                    </span>
+                  </div>
+                )) || (
                 <>
                   <div className="flex justify-between py-2 border-b border-border">
                     <span>27.01.2025</span>
-                    <span className="font-semibold text-red-600">+4.2 т/ч над UCL</span>
+                    <span className="font-semibold text-red-600">
+                      +4.2 т/ч над UCL
+                    </span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
                     <span>24.01.2025</span>
-                    <span className="font-semibold text-red-600">+2.8 т/ч над UCL</span>
+                    <span className="font-semibold text-red-600">
+                      +2.8 т/ч над UCL
+                    </span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-border">
                     <span>19.01.2025</span>
-                    <span className="font-semibold text-blue-600">-3.5 т/ч под LCL</span>
+                    <span className="font-semibold text-blue-600">
+                      -3.5 т/ч под LCL
+                    </span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span>15.01.2025</span>
-                    <span className="font-semibold text-red-600">+5.7 т/ч над UCL</span>
+                    <span className="font-semibold text-red-600">
+                      +5.7 т/ч над UCL
+                    </span>
                   </div>
                 </>
               )}

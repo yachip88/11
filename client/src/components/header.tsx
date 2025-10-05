@@ -5,7 +5,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Download, RefreshCw, FileSpreadsheet, FileText, File } from "lucide-react";
+import {
+  Download,
+  RefreshCw,
+  FileSpreadsheet,
+  FileText,
+  File,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
@@ -48,15 +54,15 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleExport('excel')}>
+              <DropdownMenuItem onClick={() => handleExport("excel")}>
                 <FileSpreadsheet className="w-4 h-4 mr-2" />
                 Экспорт в Excel
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport('pdf')}>
+              <DropdownMenuItem onClick={() => handleExport("pdf")}>
                 <FileText className="w-4 h-4 mr-2" />
                 Экспорт в PDF
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport('csv')}>
+              <DropdownMenuItem onClick={() => handleExport("csv")}>
                 <File className="w-4 h-4 mr-2" />
                 Экспорт в CSV
               </DropdownMenuItem>

@@ -13,11 +13,11 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const isFormData = data instanceof FormData;
-  
+
   const res = await fetch(url, {
     method,
     headers: data && !isFormData ? { "Content-Type": "application/json" } : {},
-    body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
+    body: isFormData ? data : data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
 

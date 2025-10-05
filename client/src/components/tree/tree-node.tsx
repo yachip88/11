@@ -1,25 +1,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { 
-  ChevronDown, 
-  ChevronRight, 
-  Building2, 
-  MapPin, 
-  Thermometer, 
+import {
+  ChevronDown,
+  ChevronRight,
+  Building2,
+  MapPin,
+  Thermometer,
   Search,
   Eye,
-  Settings
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TreeNodeProps {
   id: string;
-  icon: 'city' | 'building' | 'map' | 'thermometer';
+  icon: "city" | "building" | "map" | "thermometer";
   name: string;
   makeupWater: number;
   weeklyChange?: number;
-  status: 'normal' | 'warning' | 'critical';
+  status: "normal" | "warning" | "critical";
   actionType?: string;
   isRoot?: boolean;
   isLeaf?: boolean;
@@ -34,22 +34,22 @@ const iconMap = {
 };
 
 const statusColorMap = {
-  normal: 'text-green-600',
-  warning: 'text-yellow-600', 
-  critical: 'text-red-600',
+  normal: "text-green-600",
+  warning: "text-yellow-600",
+  critical: "text-red-600",
 };
 
-export function TreeNode({ 
-  id, 
-  icon, 
-  name, 
-  makeupWater, 
-  weeklyChange, 
-  status, 
+export function TreeNode({
+  id,
+  icon,
+  name,
+  makeupWater,
+  weeklyChange,
+  status,
   actionType,
   isRoot = false,
   isLeaf = false,
-  children 
+  children,
 }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(isRoot || !isLeaf);
 
@@ -58,17 +58,23 @@ export function TreeNode({
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'critical': return 'Критично';
-      case 'warning': return 'Внимание';
-      default: return 'Норма';
+      case "critical":
+        return "Критично";
+      case "warning":
+        return "Внимание";
+      default:
+        return "Норма";
     }
   };
 
   const getBackgroundClass = (status: string) => {
     switch (status) {
-      case 'critical': return 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800';
-      case 'warning': return 'bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-800';
-      default: return '';
+      case "critical":
+        return "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800";
+      case "warning":
+        return "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-800";
+      default:
+        return "";
     }
   };
 
@@ -80,11 +86,11 @@ export function TreeNode({
 
   return (
     <div className="space-y-1">
-      <div 
+      <div
         className={cn(
           "tree-node p-4 cursor-pointer transition-all",
           getBackgroundClass(status),
-          isExpanded && hasChildren && "expanded"
+          isExpanded && hasChildren && "expanded",
         )}
         onClick={toggleExpansion}
         data-testid={`tree-node-${id}`}
@@ -101,43 +107,50 @@ export function TreeNode({
               </>
             )}
             <Icon className={cn("w-5 h-5", statusColorMap[status])} />
-            <span className={cn("font-medium", status === 'critical' && "font-bold")}>
+            <span
+              className={cn(
+                "font-medium",
+                status === "critical" && "font-bold",
+              )}
+            >
               {name}
             </span>
           </div>
-          
+
           <div className="flex gap-4 text-sm items-center">
             <span className="text-muted-foreground">
-              Подпитка: 
-              <strong 
+              Подпитка:
+              <strong
                 className={cn(
                   "font-mono ml-1",
-                  status === 'critical' && "text-red-600 font-bold",
-                  status === 'warning' && "text-yellow-600 font-semibold"
+                  status === "critical" && "text-red-600 font-bold",
+                  status === "warning" && "text-yellow-600 font-semibold",
                 )}
               >
                 {makeupWater.toFixed(1)} т/ч
               </strong>
             </span>
-            
+
             {weeklyChange !== undefined && (
-              <span 
+              <span
                 className={cn(
                   "font-semibold",
-                  weeklyChange < 0 ? "text-green-600" : "text-red-600"
+                  weeklyChange < 0 ? "text-green-600" : "text-red-600",
                 )}
               >
-                Δ неделя: <strong>{weeklyChange > 0 ? '+' : ''}{weeklyChange.toFixed(1)} т/ч</strong>
+                Δ неделя:{" "}
+                <strong>
+                  {weeklyChange > 0 ? "+" : ""}
+                  {weeklyChange.toFixed(1)} т/ч
+                </strong>
               </span>
             )}
-            
-            <StatusBadge status={status}>
-              {getStatusLabel(status)}
-            </StatusBadge>
+
+            <StatusBadge status={status}>{getStatusLabel(status)}</StatusBadge>
 
             {actionType && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -145,9 +158,15 @@ export function TreeNode({
                 }}
                 data-testid={`action-${id}`}
               >
-                {actionType === 'Инспекция утечек' && <Search className="w-3 h-3 mr-1" />}
-                {actionType === 'Мониторинг' && <Eye className="w-3 h-3 mr-1" />}
-                {actionType === 'Проверка приборов' && <Settings className="w-3 h-3 mr-1" />}
+                {actionType === "Инспекция утечек" && (
+                  <Search className="w-3 h-3 mr-1" />
+                )}
+                {actionType === "Мониторинг" && (
+                  <Eye className="w-3 h-3 mr-1" />
+                )}
+                {actionType === "Проверка приборов" && (
+                  <Settings className="w-3 h-3 mr-1" />
+                )}
                 {actionType}
               </Button>
             )}

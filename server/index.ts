@@ -1,34 +1,37 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import healthRouter from "./health";
 
 const app = express();
 
-declare module 'http' {
+declare module "http" {
   interface IncomingMessage {
-    rawBody: unknown
+    rawBody: unknown;
   }
 }
 
 const jsonParser = express.json({
   verify: (req, _res, buf) => {
     req.rawBody = buf;
-  }
+  },
 });
 
 const urlencodedParser = express.urlencoded({ extended: false });
 
+app.use(healthRouter);
+
 app.use((req, res, next) => {
-  const contentType = req.headers['content-type'] || '';
-  if (contentType.includes('multipart/form-data')) {
+  const contentType = req.headers["content-type"] || "";
+  if (contentType.includes("multipart/form-data")) {
     return next();
   }
   jsonParser(req, res, next);
 });
 
 app.use((req, res, next) => {
-  const contentType = req.headers['content-type'] || '';
-  if (contentType.includes('multipart/form-data')) {
+  const contentType = req.headers["content-type"] || "";
+  if (contentType.includes("multipart/form-data")) {
     return next();
   }
   urlencodedParser(req, res, next);
@@ -88,19 +91,19 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  const isWindows = process.platform === 'win32';
-  
+  const port = parseInt(process.env.PORT || "5000", 10);
+  const isWindows = process.platform === "win32";
+
   // On Windows, reusePort is not supported, so we omit it
   const listenOptions: any = {
     port,
     host: "0.0.0.0",
   };
-  
+
   if (!isWindows) {
     listenOptions.reusePort = true;
   }
-  
+
   server.listen(listenOptions, () => {
     log(`serving on port ${port}`);
   });
