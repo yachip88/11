@@ -7,6 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String   @id @default(uuid()) @db.VarChar(255)
+  username      String   @unique @db.NVarChar(100)
+  passwordHash  String   @map("password_hash") @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  uploadedFiles UploadedFiles[]
+
+  @@map("users")
+}
+
 model RTS {
   id        String   @id @default(uuid()) @db.VarChar(255)
   name      String   @db.Text
@@ -23,10 +34,10 @@ model RTS {
 model Districts {
   id        String   @id @default(uuid()) @db.VarChar(255)
   name      String   @db.Text
-  rtsId     String?  @map("rts_id") @db.VarChar(255)
+  rtsId     String   @map("rts_id") @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
 
-  rts  RTS?  @relation(fields: [rtsId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rts  RTS   @relation(fields: [rtsId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   ctps CTP[]
 
   @@map("districts")
@@ -36,8 +47,8 @@ model CTP {
   id           String   @id @default(uuid()) @db.VarChar(255)
   name         String   @db.Text
   code         String   @unique @db.VarChar(255)
-  rtsId        String?  @map("rts_id") @db.VarChar(255)
-  districtId   String?  @map("district_id") @db.VarChar(255)
+  rtsId        String   @map("rts_id") @db.VarChar(255)
+  districtId   String   @map("district_id") @db.VarChar(255)
   ucl          Float?   @db.Real
   cl           Float?   @db.Real
   lcl          Float?   @db.Real
@@ -45,8 +56,8 @@ model CTP {
   meterStatus  String   @default("working") @map("meter_status") @db.NVarChar(100)
   createdAt    DateTime @default(now()) @map("created_at")
 
-  rts                 RTS?                  @relation(fields: [rtsId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  district            Districts?            @relation(fields: [districtId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rts                 RTS                   @relation(fields: [rtsId], references: [id], onDelete: NoAction, onUpdate: NoAction) // RTS deletion is handled by District
+  district            Districts             @relation(fields: [districtId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   measurements        Measurements[]
   statisticalParams   StatisticalParams[]
   recommendations     Recommendations[]
@@ -113,6 +124,9 @@ model UploadedFiles {
   recordsProcessed Int      @default(0) @map("records_processed")
   errors           String?  @db.Text
   uploadedAt       DateTime @default(now()) @map("uploaded_at")
+  userId           String?  @map("user_id") @db.VarChar(255)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@map("uploaded_files")
 }

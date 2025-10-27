@@ -23,7 +23,7 @@ const upload = multer({
         file.originalname.match(/\.(xlsx|xlsm|xlsb)$/i)) {
       cb(null, true);
     } else {
-      cb(new Error('Поддерживаются только файлы Excel (XLSX, XLSM, XLSB)'));
+      cb(new Error('\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u044e\u0442\u0441\u044f \u0442\u043e\u043b\u044c\u043a\u043e \u0444\u0430\u0439\u043b\u044b Excel (XLSX, XLSM, XLSB)'));
     }
   },
   limits: {
@@ -339,39 +339,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Save measurements to database
           for (const measurement of valid) {
             try {
-              // Find or create CTP by name or code
+              // Find CTP by name or code
               const ctpList = await storage.getCTPList();
-              let ctp = ctpList.find(c => 
+              const ctp = ctpList.find(c => 
                 c.name === measurement.ctpName || 
                 c.code === measurement.ctpCode
               );
 
               if (!ctp) {
-                // Extract code from name if possible (e.g., "ЦТП-125" -> "125")
-                const codeMatch = measurement.ctpName.match(/\d+/);
-                const code = measurement.ctpCode || codeMatch?.[0] || measurement.ctpName;
-                
-                // Use default RTS and district for now
-                const rtsList = await storage.getRTSList();
-                const defaultRTS = rtsList[0];
-                const districts = await storage.getDistrictsByRTS(defaultRTS.id);
-                const defaultDistrict = districts[0];
-
-                const newCtp = await storage.createCTP({
-                  name: measurement.ctpName,
-                  code: code,
-                  rtsId: defaultRTS.id,
-                  districtId: defaultDistrict.id,
-                  hasMeter: true,
-                  meterStatus: 'working',
-                });
-                
-                // Refetch with details
-                ctp = await storage.getCTPById(newCtp.id);
-              }
-
-              if (!ctp) {
-                throw new Error(`Не удалось создать или найти ЦТП ${measurement.ctpName}`);
+                errors.push(`\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043d\u0430\u0439\u0442\u0438 \u0426\u0422\u041f "${measurement.ctpName}" (\u043a\u043e\u0434: ${measurement.ctpCode}). \u0414\u0430\u043d\u043d\u044b\u0435 \u043d\u0435 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b.`);
+                continue; // Skip this measurement
               }
 
               // Save measurement
@@ -387,11 +364,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               totalRecords++;
             } catch (error) {
-              errors.push(`Ошибка сохранения данных для ${measurement.ctpName}: ${error}`);
+              errors.push(`\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u0434\u0430\u043d\u043d\u044b\u0445 \u0434\u043b\u044f ${measurement.ctpName}: ${error}`);
             }
           }
         } catch (error) {
-          errors.push(`Ошибка обработки листа ${sheet.sheetName}: ${error}`);
+          errors.push(`\u041e\u0448\u0438\u0431\u043a\u0430 \u043e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0438 \u043b\u0438\u0441\u0442\u0430 ${sheet.sheetName}: ${error}`);
         }
       }
 
